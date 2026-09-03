@@ -1,0 +1,15 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Build nəticələri
+bin/
+obj/
+
+# Test nəticələri
+[Tt]est[Rr]esult*/
+
+# NuGet
+packages/
+*.nupkg
