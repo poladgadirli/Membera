@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/Services/" />
+  <Folder Name="/src/Services/Auth/">
+    <Project Path="src/services/auth/Membera.Auth.Api/Membera.Auth.Api.csproj" />
+    <Project Path="src/services/auth/Membera.Auth.Application/Membera.Auth.Application.csproj" />
+    <Project Path="src/services/auth/Membera.Auth.Domain/Membera.Auth.Domain.csproj" />
+    <Project Path="src/services/auth/Membera.Auth.Infrastructure/Membera.Auth.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/test/" />
+</Solution>
