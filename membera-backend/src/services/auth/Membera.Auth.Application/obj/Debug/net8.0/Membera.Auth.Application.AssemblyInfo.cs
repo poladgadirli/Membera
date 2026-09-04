@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Membera.Auth.Application")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+03c54236315e31de422269808398302c47b051a5")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f113556c16d31e9f37ce3e93996230769dd11e7c")]
 [assembly: System.Reflection.AssemblyProductAttribute("Membera.Auth.Application")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Membera.Auth.Application")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
