@@ -10,4 +10,8 @@
     <ProjectReference Include="..\Membera.Auth.Domain\Membera.Auth.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="12.1.1" />
+  </ItemGroup>
+
 </Project>

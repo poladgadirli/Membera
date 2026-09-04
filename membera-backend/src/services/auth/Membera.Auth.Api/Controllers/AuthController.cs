@@ -34,10 +34,11 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> Register(RegisterUserCommand command)
+    public async Task<IActionResult> Register(RegisterRequest request)
     {
         try
         {
+            var command = new RegisterUserCommand(request.FirstName, request.LastName, request.Email, request.Password);
             var result = await _registerUserHandler.HandleAsync(command);
             return Ok(result);
         }
@@ -123,3 +124,5 @@ public class AuthController : ControllerBase
 }
 
 public record ChangePasswordRequest(string CurrentPassword, string NewPassword);
+
+public record RegisterRequest(string FirstName, string LastName, string Email, string Password, string ConfirmPassword);

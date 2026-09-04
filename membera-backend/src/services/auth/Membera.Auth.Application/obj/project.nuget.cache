@@ -1,8 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "4xiIXzT8Gak=",
+  "dgSpecHash": "B8PfXIcH/V8=",
   "success": true,
   "projectFilePath": "C:\\Users\\Polad\\Desktop\\Membera\\membera-backend\\src\\services\\auth\\Membera.Auth.Application\\Membera.Auth.Application.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\Polad\\.nuget\\packages\\fluentvalidation\\12.1.1\\fluentvalidation.12.1.1.nupkg.sha512"
+  ],
   "logs": []
 }
