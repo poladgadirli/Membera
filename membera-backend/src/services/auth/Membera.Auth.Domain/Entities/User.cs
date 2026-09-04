@@ -34,5 +34,10 @@ public class User
         LastName = lastName;
     }
 
+    public void ChangePassword(string newPasswordHash)
+    {
+        PasswordHash = newPasswordHash;
+    }
+
     public string FullName => $"{FirstName} {LastName}";
 }
