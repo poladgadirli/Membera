@@ -24,6 +24,6 @@ public class RegisterRequestValidator : AbstractValidator<RegisterRequest>
 
         RuleFor(x => x.ConfirmPassword)
             .Equal(x => x.Password)
-            .WithMessage("Şifrələr uyğun gəlmir.");
+            .WithMessage("Passwords do not match.");
     }
 }

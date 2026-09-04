@@ -23,11 +23,11 @@ public class RefreshAccessTokenHandler
         var existingToken = await _refreshTokenRepository.GetByTokenAsync(command.RefreshToken);
 
         if (existingToken is null || !existingToken.IsActive)
-            throw new InvalidOperationException("Refresh token etibarsızdır.");
+            throw new InvalidOperationException("Invalid refresh token.");
 
         var user = await _userRepository.GetByIdAsync(existingToken.UserId);
         if (user is null)
-            throw new InvalidOperationException("İstifadəçi tapılmadı.");
+            throw new InvalidOperationException("User not found.");
 
         existingToken.Revoke();
         await _refreshTokenRepository.UpdateAsync(existingToken);

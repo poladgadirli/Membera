@@ -22,11 +22,11 @@ public class ChangePasswordHandler
     {
         var user = await _userRepository.GetByIdAsync(command.UserId);
         if (user is null)
-            throw new InvalidOperationException("İstifadəçi tapılmadı.");
+            throw new InvalidOperationException("User not found.");
 
         var isCurrentPasswordValid = _passwordHasher.Verify(command.CurrentPassword, user.PasswordHash);
         if (!isCurrentPasswordValid)
-            throw new InvalidOperationException("Cari şifrə yanlışdır.");
+            throw new InvalidOperationException("Current password is incorrect.");
 
         var newPasswordHash = _passwordHasher.Hash(command.NewPassword);
         user.ChangePassword(newPasswordHash);

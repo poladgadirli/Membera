@@ -25,14 +25,14 @@ public class LoginHandler
     {
         var user = await _userRepository.GetByEmailAsync(command.Email);
         if (user is null)
-            throw new InvalidOperationException("Email və ya şifrə yanlışdır.");
+            throw new InvalidOperationException("Invalid email or password.");
 
         if (user.IsDeleted)
-            throw new InvalidOperationException("Email və ya şifrə yanlışdır.");
+            throw new InvalidOperationException("Invalid email or password.");
 
         var isPasswordValid = _passwordHasher.Verify(command.Password, user.PasswordHash);
         if (!isPasswordValid)
-            throw new InvalidOperationException("Email və ya şifrə yanlışdır.");
+            throw new InvalidOperationException("Invalid email or password.");
 
         var accessToken = _tokenService.GenerateAccessToken(user);
         var refreshToken = _tokenService.GenerateRefreshToken(user.Id);

@@ -37,7 +37,7 @@ public class ExceptionHandlingMiddleware
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = StatusCodes.Status500InternalServerError;
 
-            var response = JsonSerializer.Serialize(BaseResponse<object>.FailureResponse("Daxili server xətası baş verdi."));
+            var response = JsonSerializer.Serialize(BaseResponse<object>.FailureResponse("An internal server error occurred."));
             await context.Response.WriteAsync(response);
         }
     }

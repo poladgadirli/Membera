@@ -18,7 +18,7 @@ public class RegisterUserHandler
     {
         var existingUser = await _userRepository.GetByEmailAsync(command.Email);
         if (existingUser is not null)
-            throw new InvalidOperationException("Bu email artıq istifadə olunub.");
+            throw new InvalidOperationException("This email is already in use.");
 
         var passwordHash = _passwordHasher.Hash(command.Password);
 

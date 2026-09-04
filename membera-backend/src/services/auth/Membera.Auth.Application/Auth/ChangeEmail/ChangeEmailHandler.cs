@@ -17,11 +17,11 @@ public class ChangeEmailHandler
     {
         var user = await _userRepository.GetByIdAsync(command.UserId);
         if (user is null)
-            throw new InvalidOperationException("İstifadəçi tapılmadı.");
+            throw new InvalidOperationException("User not found.");
 
         var isCurrentPasswordValid = _passwordHasher.Verify(command.CurrentPassword, user.PasswordHash);
         if (!isCurrentPasswordValid)
-            throw new InvalidOperationException("Cari şifrə yanlışdır.");
+            throw new InvalidOperationException("Current password is incorrect.");
 
         var existingUser = await _userRepository.GetByEmailAsync(command.NewEmail);
         if (existingUser is not null)
@@ -29,7 +29,7 @@ public class ChangeEmailHandler
             if (existingUser.Id == user.Id)
                 return; // Yeni email cari email ilə eynidir, dəyişiklik lazım deyil.
 
-            throw new InvalidOperationException("Bu email artıq istifadə olunub.");
+            throw new InvalidOperationException("This email is already in use.");
         }
 
         user.ChangeEmail(command.NewEmail);

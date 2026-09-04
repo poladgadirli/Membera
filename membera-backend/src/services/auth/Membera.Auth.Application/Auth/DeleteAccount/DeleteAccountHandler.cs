@@ -22,14 +22,14 @@ public class DeleteAccountHandler
     {
         var user = await _userRepository.GetByIdAsync(command.UserId);
         if (user is null)
-            throw new InvalidOperationException("İstifadəçi tapılmadı.");
+            throw new InvalidOperationException("User not found.");
 
         if (user.IsDeleted)
-            throw new InvalidOperationException("Hesab artıq silinib.");
+            throw new InvalidOperationException("Account has already been deleted.");
 
         var isCurrentPasswordValid = _passwordHasher.Verify(command.CurrentPassword, user.PasswordHash);
         if (!isCurrentPasswordValid)
-            throw new InvalidOperationException("Cari şifrə yanlışdır.");
+            throw new InvalidOperationException("Current password is incorrect.");
 
         await _refreshTokenRepository.RevokeAllByUserIdAsync(user.Id);
 
