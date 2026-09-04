@@ -1,4 +1,5 @@
 ﻿using Membera.Auth.Application.Auth.Login;
+using Membera.Auth.Application.Auth.RefreshAccessToken;
 using Membera.Auth.Application.Auth.Register;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,11 +11,16 @@ public class AuthController : ControllerBase
 {
     private readonly RegisterUserHandler _registerUserHandler;
     private readonly LoginHandler _loginHandler;
+    private readonly RefreshAccessTokenHandler _refreshAccessTokenHandler;
 
-    public AuthController(RegisterUserHandler registerUserHandler, LoginHandler loginHandler)
+    public AuthController(
+        RegisterUserHandler registerUserHandler,
+        LoginHandler loginHandler,
+        RefreshAccessTokenHandler refreshAccessTokenHandler)
     {
         _registerUserHandler = registerUserHandler;
         _loginHandler = loginHandler;
+        _refreshAccessTokenHandler = refreshAccessTokenHandler;
     }
 
     [HttpPost("register")]
@@ -37,6 +43,20 @@ public class AuthController : ControllerBase
         try
         {
             var result = await _loginHandler.HandleAsync(command);
+            return Ok(result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Unauthorized(new { message = ex.Message });
+        }
+    }
+
+    [HttpPost("refresh")]
+    public async Task<IActionResult> Refresh(RefreshAccessTokenCommand command)
+    {
+        try
+        {
+            var result = await _refreshAccessTokenHandler.HandleAsync(command);
             return Ok(result);
         }
         catch (InvalidOperationException ex)

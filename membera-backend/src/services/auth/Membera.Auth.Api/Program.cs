@@ -20,6 +20,7 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<RegisterUserHandler>();
 builder.Services.AddScoped<Membera.Auth.Application.Auth.Login.LoginHandler>();
+builder.Services.AddScoped<Membera.Auth.Application.Auth.RefreshAccessToken.RefreshAccessTokenHandler>();
 
 // JWT Authentication
 var jwtSection = builder.Configuration.GetSection("Jwt");
