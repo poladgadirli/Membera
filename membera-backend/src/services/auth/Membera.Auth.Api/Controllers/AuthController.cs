@@ -1,7 +1,9 @@
 ﻿using Membera.Auth.Application.Auth.Login;
 using Membera.Auth.Application.Auth.RefreshAccessToken;
 using Membera.Auth.Application.Auth.Register;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Membera.Auth.Api.Controllers;
 
@@ -63,5 +65,25 @@ public class AuthController : ControllerBase
         {
             return Unauthorized(new { message = ex.Message });
         }
+    }
+
+    [Authorize]
+    [HttpGet("me")]
+    public IActionResult Me()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                     ?? User.FindFirstValue("sub");
+        var email = User.FindFirstValue(ClaimTypes.Email)
+                    ?? User.FindFirstValue("email");
+        var firstName = User.FindFirstValue("firstName");
+        var lastName = User.FindFirstValue("lastName");
+
+        return Ok(new
+        {
+            userId,
+            email,
+            firstName,
+            lastName
+        });
     }
 }
