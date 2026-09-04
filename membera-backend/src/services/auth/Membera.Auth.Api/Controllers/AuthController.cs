@@ -44,16 +44,9 @@ public class AuthController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterRequest request)
     {
-        try
-        {
-            var command = new RegisterUserCommand(request.FirstName, request.LastName, request.Email, request.Password);
-            var result = await _registerUserHandler.HandleAsync(command);
-            return Ok(result);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
+        var command = new RegisterUserCommand(request.FirstName, request.LastName, request.Email, request.Password);
+        var result = await _registerUserHandler.HandleAsync(command);
+        return Ok(result);
     }
 
     [HttpPost("login")]
@@ -118,16 +111,9 @@ public class AuthController : ControllerBase
         var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)
                                 ?? User.FindFirstValue("sub")!);
 
-        try
-        {
-            var command = new ChangePasswordCommand(userId, request.CurrentPassword, request.NewPassword);
-            await _changePasswordHandler.HandleAsync(command);
-            return NoContent();
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
+        var command = new ChangePasswordCommand(userId, request.CurrentPassword, request.NewPassword);
+        await _changePasswordHandler.HandleAsync(command);
+        return NoContent();
     }
 
     [Authorize]
@@ -137,16 +123,9 @@ public class AuthController : ControllerBase
         var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)
                                 ?? User.FindFirstValue("sub")!);
 
-        try
-        {
-            var command = new ChangeEmailCommand(userId, request.NewEmail, request.CurrentPassword);
-            await _changeEmailHandler.HandleAsync(command);
-            return NoContent();
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
+        var command = new ChangeEmailCommand(userId, request.NewEmail, request.CurrentPassword);
+        await _changeEmailHandler.HandleAsync(command);
+        return NoContent();
     }
 
     [Authorize]
@@ -156,16 +135,9 @@ public class AuthController : ControllerBase
         var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)
                                 ?? User.FindFirstValue("sub")!);
 
-        try
-        {
-            var command = new DeleteAccountCommand(userId, request.CurrentPassword);
-            await _deleteAccountHandler.HandleAsync(command);
-            return NoContent();
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
+        var command = new DeleteAccountCommand(userId, request.CurrentPassword);
+        await _deleteAccountHandler.HandleAsync(command);
+        return NoContent();
     }
 }
 

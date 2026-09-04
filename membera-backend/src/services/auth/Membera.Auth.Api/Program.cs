@@ -1,6 +1,7 @@
 using System.Text;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Membera.Auth.Api.Middleware;
 using Membera.Auth.Application.Abstractions;
 using Membera.Auth.Application.Auth.Register;
 using Membera.Auth.Infrastructure.Persistence;
@@ -95,6 +96,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseHttpsRedirection();
 
