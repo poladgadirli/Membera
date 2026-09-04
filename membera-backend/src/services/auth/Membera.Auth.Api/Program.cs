@@ -17,7 +17,9 @@ builder.Services.AddDbContext<AuthDbContext>(options =>
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<RegisterUserHandler>();
+builder.Services.AddScoped<Membera.Auth.Application.Auth.Login.LoginHandler>();
 
 // JWT Authentication
 var jwtSection = builder.Configuration.GetSection("Jwt");
