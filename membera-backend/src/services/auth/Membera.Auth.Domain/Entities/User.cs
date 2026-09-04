@@ -1,14 +1,14 @@
-﻿namespace Membera.Auth.Domain.Entities;
+﻿using Membera.Shared.Domain;
 
-public class User
+namespace Membera.Auth.Domain.Entities;
+
+public class User : BaseEntity
 {
-    public Guid Id { get; private set; }
     public string FirstName { get; private set; }
     public string LastName { get; private set; }
     public string Email { get; private set; }
     public string PasswordHash { get; private set; }
     public bool IsEmailVerified { get; private set; }
-    public DateTime CreatedAt { get; private set; }
     public bool IsDeleted { get; private set; }
     public DateTime? DeletedAt { get; private set; }
 
@@ -16,42 +16,45 @@ public class User
 
     public User(string firstName, string lastName, string email, string passwordHash)
     {
-        Id = Guid.NewGuid();
         FirstName = firstName;
         LastName = lastName;
         Email = email;
         PasswordHash = passwordHash;
         IsEmailVerified = false;
-        CreatedAt = DateTime.UtcNow;
         IsDeleted = false;
     }
 
     public void MarkEmailAsVerified()
     {
         IsEmailVerified = true;
+        MarkAsUpdated();
     }
 
     public void UpdateProfile(string firstName, string lastName)
     {
         FirstName = firstName;
         LastName = lastName;
+        MarkAsUpdated();
     }
 
     public void ChangePassword(string newPasswordHash)
     {
         PasswordHash = newPasswordHash;
+        MarkAsUpdated();
     }
 
     public void ChangeEmail(string newEmail)
     {
         Email = newEmail;
         IsEmailVerified = false;
+        MarkAsUpdated();
     }
 
     public void MarkAsDeleted()
     {
         IsDeleted = true;
         DeletedAt = DateTime.UtcNow;
+        MarkAsUpdated();
     }
 
     public string FullName => $"{FirstName} {LastName}";
