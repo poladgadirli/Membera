@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/src/" />
   <Folder Name="/src/BuildingBlocks/">
+    <Project Path="src/BuildingBlocks/Membera.Shared.Contracts/Membera.Shared.Contracts.csproj" Id="80c2ab37-fe00-4652-9352-4bce24a6b10d" />
     <Project Path="src/Membera.Shared.Domain/Membera.Shared.Domain.csproj" Id="a4529200-7221-48c9-bdd7-a4aed812ccff" />
   </Folder>
   <Folder Name="/src/Services/" />

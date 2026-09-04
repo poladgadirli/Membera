@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\BuildingBlocks\Membera.Shared.Contracts\Membera.Shared.Contracts.csproj" />
     <ProjectReference Include="..\Membera.Auth.Application\Membera.Auth.Application.csproj" />
     <ProjectReference Include="..\Membera.Auth.Infrastructure\Membera.Auth.Infrastructure.csproj" />
   </ItemGroup>
