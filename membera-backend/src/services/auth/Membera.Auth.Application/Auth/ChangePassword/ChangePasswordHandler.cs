@@ -31,6 +31,8 @@ public class ChangePasswordHandler
         var newPasswordHash = _passwordHasher.Hash(command.NewPassword);
         user.ChangePassword(newPasswordHash);
 
+        await _userRepository.UpdateAsync(user);
+
         await _refreshTokenRepository.RevokeAllByUserIdAsync(user.Id);
     }
 }
