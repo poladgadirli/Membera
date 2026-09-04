@@ -16,8 +16,4 @@
     <ProjectReference Include="..\Membera.Auth.Application\Membera.Auth.Application.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Persistence\Security\" />
-  </ItemGroup>
-
 </Project>
