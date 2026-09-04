@@ -6,6 +6,7 @@ using Membera.Auth.Application.Auth.Login;
 using Membera.Auth.Application.Auth.Logout;
 using Membera.Auth.Application.Auth.RefreshAccessToken;
 using Membera.Auth.Application.Auth.Register;
+using Membera.Shared.Contracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -46,7 +47,7 @@ public class AuthController : ControllerBase
     {
         var command = new RegisterUserCommand(request.FirstName, request.LastName, request.Email, request.Password);
         var result = await _registerUserHandler.HandleAsync(command);
-        return Ok(result);
+        return Ok(BaseResponse<RegisterUserResult>.SuccessResponse(result));
     }
 
     [HttpPost("login")]
@@ -55,11 +56,11 @@ public class AuthController : ControllerBase
         try
         {
             var result = await _loginHandler.HandleAsync(command);
-            return Ok(result);
+            return Ok(BaseResponse<LoginResult>.SuccessResponse(result));
         }
         catch (InvalidOperationException ex)
         {
-            return Unauthorized(new { message = ex.Message });
+            return Unauthorized(BaseResponse<object>.FailureResponse(ex.Message));
         }
     }
 
@@ -69,11 +70,11 @@ public class AuthController : ControllerBase
         try
         {
             var result = await _refreshAccessTokenHandler.HandleAsync(command);
-            return Ok(result);
+            return Ok(BaseResponse<RefreshAccessTokenResult>.SuccessResponse(result));
         }
         catch (InvalidOperationException ex)
         {
-            return Unauthorized(new { message = ex.Message });
+            return Unauthorized(BaseResponse<object>.FailureResponse(ex.Message));
         }
     }
 
@@ -95,13 +96,13 @@ public class AuthController : ControllerBase
         var firstName = User.FindFirstValue("firstName");
         var lastName = User.FindFirstValue("lastName");
 
-        return Ok(new
+        return Ok(BaseResponse<object>.SuccessResponse(new
         {
             userId,
             email,
             firstName,
             lastName
-        });
+        }));
     }
 
     [Authorize]

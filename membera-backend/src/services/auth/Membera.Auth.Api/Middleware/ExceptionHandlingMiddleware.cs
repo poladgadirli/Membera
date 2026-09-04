@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using Membera.Shared.Contracts;
 
 namespace Membera.Auth.Api.Middleware;
 
@@ -26,7 +27,7 @@ public class ExceptionHandlingMiddleware
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = StatusCodes.Status400BadRequest;
 
-            var response = JsonSerializer.Serialize(new { message = ex.Message });
+            var response = JsonSerializer.Serialize(BaseResponse<object>.FailureResponse(ex.Message));
             await context.Response.WriteAsync(response);
         }
         catch (Exception ex)
@@ -36,7 +37,7 @@ public class ExceptionHandlingMiddleware
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = StatusCodes.Status500InternalServerError;
 
-            var response = JsonSerializer.Serialize(new { message = "Daxili server xətası baş verdi." });
+            var response = JsonSerializer.Serialize(BaseResponse<object>.FailureResponse("Daxili server xətası baş verdi."));
             await context.Response.WriteAsync(response);
         }
     }
