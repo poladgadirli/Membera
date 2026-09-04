@@ -9,8 +9,10 @@ public class User
     public string PasswordHash { get; private set; }
     public bool IsEmailVerified { get; private set; }
     public DateTime CreatedAt { get; private set; }
+    public bool IsDeleted { get; private set; }
+    public DateTime? DeletedAt { get; private set; }
 
-    private User() { } 
+    private User() { }
 
     public User(string firstName, string lastName, string email, string passwordHash)
     {
@@ -21,6 +23,7 @@ public class User
         PasswordHash = passwordHash;
         IsEmailVerified = false;
         CreatedAt = DateTime.UtcNow;
+        IsDeleted = false;
     }
 
     public void MarkEmailAsVerified()
@@ -37,6 +40,18 @@ public class User
     public void ChangePassword(string newPasswordHash)
     {
         PasswordHash = newPasswordHash;
+    }
+
+    public void ChangeEmail(string newEmail)
+    {
+        Email = newEmail;
+        IsEmailVerified = false;
+    }
+
+    public void MarkAsDeleted()
+    {
+        IsDeleted = true;
+        DeletedAt = DateTime.UtcNow;
     }
 
     public string FullName => $"{FirstName} {LastName}";

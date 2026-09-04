@@ -1,5 +1,7 @@
 ﻿using System.Security.Claims;
+using Membera.Auth.Application.Auth.ChangeEmail;
 using Membera.Auth.Application.Auth.ChangePassword;
+using Membera.Auth.Application.Auth.DeleteAccount;
 using Membera.Auth.Application.Auth.Login;
 using Membera.Auth.Application.Auth.Logout;
 using Membera.Auth.Application.Auth.RefreshAccessToken;
@@ -18,19 +20,25 @@ public class AuthController : ControllerBase
     private readonly RefreshAccessTokenHandler _refreshAccessTokenHandler;
     private readonly LogoutHandler _logoutHandler;
     private readonly ChangePasswordHandler _changePasswordHandler;
+    private readonly ChangeEmailHandler _changeEmailHandler;
+    private readonly DeleteAccountHandler _deleteAccountHandler;
 
     public AuthController(
         RegisterUserHandler registerUserHandler,
         LoginHandler loginHandler,
         RefreshAccessTokenHandler refreshAccessTokenHandler,
         LogoutHandler logoutHandler,
-        ChangePasswordHandler changePasswordHandler)
+        ChangePasswordHandler changePasswordHandler,
+        ChangeEmailHandler changeEmailHandler,
+        DeleteAccountHandler deleteAccountHandler)
     {
         _registerUserHandler = registerUserHandler;
         _loginHandler = loginHandler;
         _refreshAccessTokenHandler = refreshAccessTokenHandler;
         _logoutHandler = logoutHandler;
         _changePasswordHandler = changePasswordHandler;
+        _changeEmailHandler = changeEmailHandler;
+        _deleteAccountHandler = deleteAccountHandler;
     }
 
     [HttpPost("register")]
@@ -121,8 +129,50 @@ public class AuthController : ControllerBase
             return BadRequest(new { message = ex.Message });
         }
     }
+
+    [Authorize]
+    [HttpPost("change-email")]
+    public async Task<IActionResult> ChangeEmail(ChangeEmailRequest request)
+    {
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)
+                                ?? User.FindFirstValue("sub")!);
+
+        try
+        {
+            var command = new ChangeEmailCommand(userId, request.NewEmail, request.CurrentPassword);
+            await _changeEmailHandler.HandleAsync(command);
+            return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    [Authorize]
+    [HttpDelete("delete-account")]
+    public async Task<IActionResult> DeleteAccount(DeleteAccountRequest request)
+    {
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)
+                                ?? User.FindFirstValue("sub")!);
+
+        try
+        {
+            var command = new DeleteAccountCommand(userId, request.CurrentPassword);
+            await _deleteAccountHandler.HandleAsync(command);
+            return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
 }
 
 public record ChangePasswordRequest(string CurrentPassword, string NewPassword);
+
+public record ChangeEmailRequest(string NewEmail, string CurrentPassword);
+
+public record DeleteAccountRequest(string CurrentPassword);
 
 public record RegisterRequest(string FirstName, string LastName, string Email, string Password, string ConfirmPassword);

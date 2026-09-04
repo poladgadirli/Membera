@@ -27,6 +27,9 @@ public class LoginHandler
         if (user is null)
             throw new InvalidOperationException("Email və ya şifrə yanlışdır.");
 
+        if (user.IsDeleted)
+            throw new InvalidOperationException("Email və ya şifrə yanlışdır.");
+
         var isPasswordValid = _passwordHasher.Verify(command.Password, user.PasswordHash);
         if (!isPasswordValid)
             throw new InvalidOperationException("Email və ya şifrə yanlışdır.");
