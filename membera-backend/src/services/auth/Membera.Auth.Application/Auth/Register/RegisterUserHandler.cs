@@ -29,6 +29,6 @@ public class RegisterUserHandler
 
         await _userRepository.AddAsync(user);
 
-        return new RegisterUserResult(user.Id, user.Email);
+        return new RegisterUserResult(user.Id, user.Email, user.Role.ToString());
     }
 }
