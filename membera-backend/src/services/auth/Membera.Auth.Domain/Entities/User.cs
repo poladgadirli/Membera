@@ -76,5 +76,17 @@ public class User : BaseEntity
         MarkAsUpdated();
     }
 
+    public void PromoteToAdmin()
+    {
+        Role = UserRole.Admin;
+        MarkAsUpdated();
+    }
+
+    public void DemoteToUser()
+    {
+        Role = UserRole.User;
+        MarkAsUpdated();
+    }
+
     public string FullName => $"{FirstName} {LastName}";
 }

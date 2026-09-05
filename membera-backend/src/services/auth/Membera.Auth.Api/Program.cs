@@ -30,6 +30,11 @@ builder.Services.AddScoped<Membera.Auth.Application.Auth.ChangeEmail.ChangeEmail
 builder.Services.AddScoped<Membera.Auth.Application.Auth.DeleteAccount.DeleteAccountHandler>();
 builder.Services.AddScoped<IGoogleAuthService, GoogleAuthService>();
 builder.Services.AddScoped<Membera.Auth.Application.Auth.GoogleLogin.GoogleLoginHandler>();
+builder.Services.AddScoped<Membera.Auth.Application.Auth.Admin.GetAllUsers.GetAllUsersHandler>();
+builder.Services.AddScoped<Membera.Auth.Application.Auth.Admin.DeleteUserByAdmin.DeleteUserByAdminHandler>();
+builder.Services.AddScoped<Membera.Auth.Application.Auth.Admin.PromoteToAdmin.PromoteToAdminHandler>();
+builder.Services.AddScoped<Membera.Auth.Application.Auth.Admin.DemoteAdmin.DemoteAdminHandler>();
+builder.Services.AddScoped<Membera.Auth.Application.Auth.Admin.DeleteAdminAccount.DeleteAdminAccountHandler>();
 
 // JWT Authentication
 var jwtSection = builder.Configuration.GetSection("Jwt");
