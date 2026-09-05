@@ -172,9 +172,12 @@ export const HeroFinancial = () => {
             >
               Log In
             </Link>
-            <button className="bg-neutral-900 text-white px-3 py-3 flex gap-1 items-center rounded-xl font-bold text-sm hover:bg-black transition shadow-[inset_2px_2px_5px_0px_rgba(0,0,0,0.5),inset_-2px_-2px_6px_1px_rgba(80,78,78,0.5)]">
+            <Link
+              to="/signup"
+              className="bg-neutral-900 text-white px-3 py-3 flex gap-1 items-center rounded-xl font-bold text-sm hover:bg-black transition shadow-[inset_2px_2px_5px_0px_rgba(0,0,0,0.5),inset_-2px_-2px_6px_1px_rgba(80,78,78,0.5)]"
+            >
               Get Started <ChevronRight size={20} />
-            </button>
+            </Link>
           </div>
         </div>
       )}
@@ -226,9 +229,12 @@ export const HeroFinancial = () => {
               >
                 Log In
               </Link>
-              <button className="bg-neutral-900 text-white px-3 py-3 flex gap-1 items-center rounded-xl font-bold text-sm hover:bg-black transition shadow-[inset_2px_2px_5px_0px_rgba(0,0,0,0.5),inset_-2px_-2px_6px_1px_rgba(80,78,78,0.5)]">
+              <Link
+                to="/signup"
+                className="bg-neutral-900 text-white px-3 py-3 flex gap-1 items-center rounded-xl font-bold text-sm hover:bg-black transition shadow-[inset_2px_2px_5px_0px_rgba(0,0,0,0.5),inset_-2px_-2px_6px_1px_rgba(80,78,78,0.5)]"
+              >
                 Get Started <ChevronRight size={20} />
-              </button>
+              </Link>
             </div>
           </TimelineAnimation>
         </header>
@@ -269,14 +275,16 @@ export const HeroFinancial = () => {
         </TimelineAnimation>
 
         <div className="flex gap-4 justify-center">
-          <TimelineAnimation
-            as="button"
-            animationNum={4}
-            timelineRef={timelineRef}
-            className="px-4 bg-linear-to-br from-blue-500 via-blue-400 to-blue-200 text-white text-xl rounded-lg shadow-sm transition py-2.5 border border-blue-300"
-          >
-            Get Started
-          </TimelineAnimation>
+          <Link to="/signup">
+            <TimelineAnimation
+              as="span"
+              animationNum={4}
+              timelineRef={timelineRef}
+              className="inline-block px-4 bg-linear-to-br from-blue-500 via-blue-400 to-blue-200 text-white text-xl rounded-lg shadow-sm transition py-2.5 border border-blue-300"
+            >
+              Get Started
+            </TimelineAnimation>
+          </Link>
           <TimelineAnimation
             as="button"
             animationNum={5}

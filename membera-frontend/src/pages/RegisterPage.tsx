@@ -1,6 +1,6 @@
 import type { FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { SignInPage, type Testimonial } from '@/components/ui/sign-in'
+import { SignUpPage, type Testimonial } from '@/components/ui/sign-up'
 
 const testimonials: Testimonial[] = [
   {
@@ -26,31 +26,30 @@ const testimonials: Testimonial[] = [
   },
 ]
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const navigate = useNavigate()
 
-  const handleSignIn = (event: FormEvent<HTMLFormElement>) => {
+  const handleSignUp = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const data = Object.fromEntries(new FormData(event.currentTarget).entries())
-    console.log('Sign in submitted:', data)
-    // TODO: call the auth endpoint, then redirect on success.
+    console.log('Sign up submitted:', data)
+    // TODO: call the register endpoint, then redirect on success.
     navigate('/')
   }
 
   return (
-    <SignInPage
+    <SignUpPage
       title={
         <span className="font-light tracking-tighter text-foreground">
-          Welcome back
+          Create your account
         </span>
       }
-      description="Sign in to manage your plans and redemptions."
+      description="Launch subscription plans your customers redeem with a single scan."
       heroImageSrc="https://images.unsplash.com/photo-1642132652860-471b4228023e?auto=format&fit=crop&w=1600&q=80"
       testimonials={testimonials}
-      onSignIn={handleSignIn}
-      onGoogleSignIn={() => console.log('Continue with Google')}
-      onResetPassword={() => navigate('/contact')}
-      onCreateAccount={() => navigate('/signup')}
+      onSignUp={handleSignUp}
+      onGoogleSignUp={() => console.log('Continue with Google')}
+      onSignIn={() => navigate('/login')}
       onBackToHome={() => navigate('/')}
     />
   )
