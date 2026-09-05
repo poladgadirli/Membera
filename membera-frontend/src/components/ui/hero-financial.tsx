@@ -1,4 +1,5 @@
 import { useRef } from 'react'
+import { Link } from 'react-router-dom'
 import { ChevronRight } from 'lucide-react'
 import { TimelineAnimation } from '@/components/ui/hero-financial-utils/timeline-animation'
 import { EcommerceDash } from '@/components/ui/hero-financial-utils/assets-index'
@@ -164,9 +165,17 @@ export const HeroFinancial = () => {
               </a>
             </nav>
           </MotionDrawer>
-          <button className="bg-neutral-900 text-white px-3 py-3 relative z-2 flex gap-1 items-center rounded-xl font-bold text-sm hover:bg-black transition shadow-[inset_2px_2px_5px_0px_rgba(0,0,0,0.5),inset_-2px_-2px_6px_1px_rgba(80,78,78,0.5)]">
-            Get Started <ChevronRight size={20} />
-          </button>
+          <div className="flex gap-2 items-center relative z-2">
+            <Link
+              to="/login"
+              className="bg-white/70 text-neutral-700 border border-neutral-200 px-3 py-3 flex items-center rounded-xl font-bold text-sm hover:bg-white hover:text-black transition"
+            >
+              Log In
+            </Link>
+            <button className="bg-neutral-900 text-white px-3 py-3 flex gap-1 items-center rounded-xl font-bold text-sm hover:bg-black transition shadow-[inset_2px_2px_5px_0px_rgba(0,0,0,0.5),inset_-2px_-2px_6px_1px_rgba(80,78,78,0.5)]">
+              Get Started <ChevronRight size={20} />
+            </button>
+          </div>
         </div>
       )}
       {/* Header */}
@@ -210,9 +219,17 @@ export const HeroFinancial = () => {
                 Pricing
               </a>
             </nav>
-            <button className="bg-neutral-900 text-white px-3 py-3 flex gap-1 items-center rounded-xl font-bold text-sm hover:bg-black transition shadow-[inset_2px_2px_5px_0px_rgba(0,0,0,0.5),inset_-2px_-2px_6px_1px_rgba(80,78,78,0.5)]">
-              Get Started <ChevronRight size={20} />
-            </button>
+            <div className="flex items-center gap-2">
+              <Link
+                to="/login"
+                className="px-4 py-3 flex items-center rounded-xl font-bold text-sm text-neutral-600 hover:text-black hover:bg-neutral-100 transition"
+              >
+                Log In
+              </Link>
+              <button className="bg-neutral-900 text-white px-3 py-3 flex gap-1 items-center rounded-xl font-bold text-sm hover:bg-black transition shadow-[inset_2px_2px_5px_0px_rgba(0,0,0,0.5),inset_-2px_-2px_6px_1px_rgba(80,78,78,0.5)]">
+                Get Started <ChevronRight size={20} />
+              </button>
+            </div>
           </TimelineAnimation>
         </header>
       )}
