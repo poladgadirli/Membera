@@ -2,5 +2,6 @@
 
 public record RegisterUserResult(
     Guid UserId,
-    string Email
+    string Email,
+    string Role
 );
