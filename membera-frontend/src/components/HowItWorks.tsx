@@ -1,5 +1,7 @@
+import { useRef } from 'react'
 import type { ComponentType, SVGProps } from 'react'
 import { CardIcon, QrIcon, StorefrontIcon } from './icons'
+import { TimelineAnimation } from '@/components/ui/hero-financial-utils/timeline-animation'
 
 type Step = {
   title: string
@@ -29,38 +31,74 @@ const steps: Step[] = [
 ]
 
 export default function HowItWorks() {
+  const sectionRef = useRef<HTMLElement>(null)
+
   return (
-    <section id="how-it-works" className="border-t border-line bg-surface">
-      <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="text-sm font-semibold uppercase tracking-wide text-primary">
-            How it works
-          </p>
-          <h2 className="mt-3 font-display text-3xl text-ink sm:text-4xl">
+    <section
+      ref={sectionRef}
+      id="how-it-works"
+      className="relative overflow-hidden bg-[#f7f9fc] py-20 sm:py-28"
+    >
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-linear-to-b from-blue-100/70 via-blue-50/40 to-transparent"
+      />
+
+      <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-2xl flex-col items-center gap-5 text-center">
+          <TimelineAnimation
+            animationNum={0}
+            timelineRef={sectionRef}
+            className="inline-flex w-fit items-center gap-2 rounded-full border-2 border-white bg-white px-1.5 py-1 text-black shadow-lg shadow-blue-500/20"
+          >
+            <span className="rounded-full bg-linear-to-br from-blue-500 to-blue-200 px-2 py-0.5 text-xs font-medium uppercase tracking-widest text-white">
+              Flow
+            </span>
+            <span className="text-sm font-medium">How it works</span>
+          </TimelineAnimation>
+
+          <TimelineAnimation
+            as="h2"
+            animationNum={1}
+            timelineRef={sectionRef}
+            className="text-4xl font-medium tracking-tight text-neutral-900 sm:text-5xl"
+          >
             Three steps from sign-up to scan
-          </h2>
-          <p className="mt-4 text-lg text-body">
+          </TimelineAnimation>
+
+          <TimelineAnimation
+            as="p"
+            animationNum={2}
+            timelineRef={sectionRef}
+            className="max-w-xl text-lg font-medium text-neutral-500"
+          >
             No point-of-sale integration and no extra hardware — just a plan, a
             subscriber, and a QR code.
-          </p>
+          </TimelineAnimation>
         </div>
 
-        <ol className="mt-14 grid gap-8 sm:grid-cols-3">
+        <ol className="mt-16 grid gap-6 sm:grid-cols-3">
           {steps.map((step, index) => (
-            <li key={step.title} className="relative flex flex-col">
-              <div className="flex items-center gap-4">
-                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
+            <TimelineAnimation
+              as="li"
+              key={step.title}
+              animationNum={3 + index}
+              timelineRef={sectionRef}
+              className="relative flex flex-col rounded-2xl border border-white bg-white/70 p-6 shadow-sm backdrop-blur-xl"
+            >
+              <div className="flex items-center justify-between">
+                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-linear-to-br from-blue-500 via-blue-400 to-blue-200 text-white shadow-sm shadow-blue-500/30">
                   <step.Icon className="h-6 w-6" />
                 </span>
-                <span className="font-display text-2xl text-line">
+                <span className="text-2xl font-medium text-neutral-300">
                   {String(index + 1).padStart(2, '0')}
                 </span>
               </div>
-              <h3 className="mt-5 text-lg font-semibold text-ink">
+              <h3 className="mt-5 text-lg font-semibold text-neutral-900">
                 {step.title}
               </h3>
-              <p className="mt-2 text-body">{step.description}</p>
-            </li>
+              <p className="mt-2 text-neutral-500">{step.description}</p>
+            </TimelineAnimation>
           ))}
         </ol>
       </div>

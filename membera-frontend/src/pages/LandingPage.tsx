@@ -6,7 +6,7 @@ import { HeroFinancial } from '@/components/ui/hero-financial'
 
 export default function LandingPage() {
   return (
-    <div className="flex min-h-screen flex-col bg-canvas">
+    <div className="flex min-h-screen flex-col bg-[#f7f9fc]">
       <main className="flex-1">
         <HeroFinancial />
         <HowItWorks />
