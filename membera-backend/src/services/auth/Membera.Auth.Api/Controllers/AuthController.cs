@@ -49,7 +49,7 @@ public class AuthController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterRequest request)
     {
-        var command = new RegisterUserCommand(request.FirstName, request.LastName, request.Email, request.Password);
+        var command = new RegisterUserCommand(request.FirstName, request.LastName, request.Email, request.Password, request.IsMerchantOwner);
         var result = await _registerUserHandler.HandleAsync(command);
         return Ok(BaseResponse<RegisterUserResult>.SuccessResponse(result));
     }
@@ -159,4 +159,4 @@ public record ChangeEmailRequest(string NewEmail, string CurrentPassword);
 
 public record DeleteAccountRequest(string CurrentPassword);
 
-public record RegisterRequest(string FirstName, string LastName, string Email, string Password, string ConfirmPassword);
+public record RegisterRequest(string FirstName, string LastName, string Email, string Password, string ConfirmPassword, bool IsMerchantOwner);
