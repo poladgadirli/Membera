@@ -27,13 +27,24 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasIndex(u => u.Email)
             .IsUnique();
 
-        builder.Property(u => u.PasswordHash)
-            .IsRequired();
+        builder.Property(u => u.PasswordHash);
 
         builder.Property(u => u.IsDeleted)
             .IsRequired();
 
         builder.Property(u => u.DeletedAt)
             .IsRequired(false);
+
+        builder.Property(u => u.Provider)
+            .IsRequired()
+            .HasConversion<string>()
+            .HasMaxLength(20);
+
+        builder.Property(u => u.GoogleId)
+            .HasMaxLength(100);
+
+        builder.HasIndex(u => u.GoogleId)
+            .IsUnique()
+            .HasFilter("\"GoogleId\" IS NOT NULL");
     }
 }
