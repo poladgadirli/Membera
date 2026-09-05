@@ -1,6 +1,7 @@
 ﻿using Membera.Auth.Application.Abstractions;
 using Membera.Auth.Application.Auth.Login;
 using Membera.Auth.Domain.Entities;
+using Membera.Auth.Domain.Enums;
 using Moq;
 using Xunit;
 
@@ -34,7 +35,7 @@ public class LoginHandlerTests
         // Arrange
         var command = new LoginCommand("polad@test.com", "WrongPassword");
 
-        var existingUser = new User("Polad", "Test", "polad@test.com", "correct-hash-in-db");
+        var existingUser = new User("Polad", "Test", "polad@test.com", "correct-hash-in-db", UserRole.User);
 
         _userRepositoryMock
             .Setup(r => r.GetByEmailAsync(command.Email))
@@ -68,7 +69,7 @@ public class LoginHandlerTests
         // Arrange
         var command = new LoginCommand("polad@test.com", "CorrectPassword");
 
-        var deletedUser = new User("Polad", "Test", "polad@test.com", "some-hash");
+        var deletedUser = new User("Polad", "Test", "polad@test.com", "some-hash", UserRole.User);
         deletedUser.MarkAsDeleted();
 
         _userRepositoryMock
@@ -89,7 +90,7 @@ public class LoginHandlerTests
         // Arrange
         var command = new LoginCommand("polad@test.com", "CorrectPassword");
 
-        var existingUser = new User("Polad", "Test", "polad@test.com", "correct-hash");
+        var existingUser = new User("Polad", "Test", "polad@test.com", "correct-hash", UserRole.User);
 
         _userRepositoryMock
             .Setup(r => r.GetByEmailAsync(command.Email))

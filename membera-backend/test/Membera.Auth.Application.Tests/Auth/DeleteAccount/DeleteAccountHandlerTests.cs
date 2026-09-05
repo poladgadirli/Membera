@@ -1,6 +1,7 @@
 using Membera.Auth.Application.Abstractions;
 using Membera.Auth.Application.Auth.DeleteAccount;
 using Membera.Auth.Domain.Entities;
+using Membera.Auth.Domain.Enums;
 using Moq;
 using Xunit;
 
@@ -48,7 +49,7 @@ public class DeleteAccountHandlerTests
         // Arrange
         var command = new DeleteAccountCommand(Guid.NewGuid(), "Current123");
 
-        var deletedUser = new User("Polad", "Test", "polad@test.com", "hash-in-db");
+        var deletedUser = new User("Polad", "Test", "polad@test.com", "hash-in-db", UserRole.User);
         deletedUser.MarkAsDeleted();
 
         _userRepositoryMock
@@ -87,7 +88,7 @@ public class DeleteAccountHandlerTests
         // Arrange
         var command = new DeleteAccountCommand(Guid.NewGuid(), "WrongCurrent");
 
-        var user = new User("Polad", "Test", "polad@test.com", "hash-in-db");
+        var user = new User("Polad", "Test", "polad@test.com", "hash-in-db", UserRole.User);
 
         _userRepositoryMock
             .Setup(r => r.GetByIdAsync(command.UserId))
@@ -110,7 +111,7 @@ public class DeleteAccountHandlerTests
         // Arrange
         var command = new DeleteAccountCommand(Guid.NewGuid(), "Current123");
 
-        var user = new User("Polad", "Test", "polad@test.com", "hash-in-db");
+        var user = new User("Polad", "Test", "polad@test.com", "hash-in-db", UserRole.User);
 
         _userRepositoryMock
             .Setup(r => r.GetByIdAsync(command.UserId))

@@ -1,6 +1,7 @@
 using Membera.Auth.Application.Abstractions;
 using Membera.Auth.Application.Auth.GoogleLogin;
 using Membera.Auth.Domain.Entities;
+using Membera.Auth.Domain.Enums;
 using Moq;
 using Xunit;
 
@@ -105,7 +106,7 @@ public class GoogleLoginHandlerTests
         var command = new GoogleLoginCommand("valid-id-token");
         var googleUserInfo = new GoogleUserInfo("google-id-123", "polad@test.com", "Polad", "Test");
 
-        var existingUser = new User("Polad", "Test", "polad@test.com", "some-hash");
+        var existingUser = new User("Polad", "Test", "polad@test.com", "some-hash", UserRole.User);
 
         _googleAuthServiceMock
             .Setup(s => s.ValidateTokenAsync(command.IdToken))
@@ -134,7 +135,7 @@ public class GoogleLoginHandlerTests
         var command = new GoogleLoginCommand("valid-id-token");
         var googleUserInfo = new GoogleUserInfo("google-id-123", "polad@test.com", "Polad", "Test");
 
-        var deletedUser = new User("Polad", "Test", "polad@test.com", "some-hash");
+        var deletedUser = new User("Polad", "Test", "polad@test.com", "some-hash", UserRole.User);
         deletedUser.MarkAsDeleted();
 
         _googleAuthServiceMock

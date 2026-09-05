@@ -1,6 +1,7 @@
 using Membera.Auth.Application.Abstractions;
 using Membera.Auth.Application.Auth.RefreshAccessToken;
 using Membera.Auth.Domain.Entities;
+using Membera.Auth.Domain.Enums;
 using Moq;
 using Xunit;
 
@@ -110,7 +111,7 @@ public class RefreshAccessTokenHandlerTests
         // Arrange
         var command = new RefreshAccessTokenCommand("active-token");
 
-        var user = new User("Polad", "Test", "polad@test.com", "some-hash");
+        var user = new User("Polad", "Test", "polad@test.com", "some-hash", UserRole.User);
         var oldToken = new RefreshToken(command.RefreshToken, user.Id, DateTime.UtcNow.AddDays(7));
 
         _refreshTokenRepositoryMock

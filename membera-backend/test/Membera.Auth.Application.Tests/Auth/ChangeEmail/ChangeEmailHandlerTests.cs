@@ -1,6 +1,7 @@
 using Membera.Auth.Application.Abstractions;
 using Membera.Auth.Application.Auth.ChangeEmail;
 using Membera.Auth.Domain.Entities;
+using Membera.Auth.Domain.Enums;
 using Moq;
 using Xunit;
 
@@ -63,7 +64,7 @@ public class ChangeEmailHandlerTests
         // Arrange
         var command = new ChangeEmailCommand(Guid.NewGuid(), "new@test.com", "WrongCurrent");
 
-        var user = new User("Polad", "Test", "polad@test.com", "hash-in-db");
+        var user = new User("Polad", "Test", "polad@test.com", "hash-in-db", UserRole.User);
 
         _userRepositoryMock
             .Setup(r => r.GetByIdAsync(command.UserId))
@@ -86,8 +87,8 @@ public class ChangeEmailHandlerTests
         // Arrange
         var command = new ChangeEmailCommand(Guid.NewGuid(), "taken@test.com", "Current123");
 
-        var user = new User("Polad", "Test", "polad@test.com", "hash-in-db");
-        var otherUser = new User("Other", "User", "taken@test.com", "other-hash");
+        var user = new User("Polad", "Test", "polad@test.com", "hash-in-db", UserRole.User);
+        var otherUser = new User("Other", "User", "taken@test.com", "other-hash", UserRole.User);
 
         _userRepositoryMock
             .Setup(r => r.GetByIdAsync(command.UserId))
@@ -111,7 +112,7 @@ public class ChangeEmailHandlerTests
     public async Task HandleAsync_WhenNewEmailIsSameUsersOwnEmail_ReturnsWithoutUpdating()
     {
         // Arrange
-        var user = new User("Polad", "Test", "polad@test.com", "hash-in-db");
+        var user = new User("Polad", "Test", "polad@test.com", "hash-in-db", UserRole.User);
         var command = new ChangeEmailCommand(user.Id, "polad@test.com", "Current123");
 
         _userRepositoryMock
@@ -140,7 +141,7 @@ public class ChangeEmailHandlerTests
         // Arrange
         var command = new ChangeEmailCommand(Guid.NewGuid(), "new@test.com", "Current123");
 
-        var user = new User("Polad", "Test", "polad@test.com", "hash-in-db");
+        var user = new User("Polad", "Test", "polad@test.com", "hash-in-db", UserRole.User);
 
         _userRepositoryMock
             .Setup(r => r.GetByIdAsync(command.UserId))

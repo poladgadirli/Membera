@@ -1,6 +1,7 @@
 ﻿using Membera.Auth.Application.Abstractions;
 using Membera.Auth.Application.Auth.Register;
 using Membera.Auth.Domain.Entities;
+using Membera.Auth.Domain.Enums;
 using Moq;
 using Xunit;
 
@@ -23,7 +24,7 @@ public class RegisterUserHandlerTests
     public async Task HandleAsync_WithNewEmail_CreatesUserSuccessfully()
     {
         // Arrange
-        var command = new RegisterUserCommand("Polad", "Test", "polad@test.com", "Password123");
+        var command = new RegisterUserCommand("Polad", "Test", "polad@test.com", "Password123", false);
 
         _userRepositoryMock
             .Setup(r => r.GetByEmailAsync(command.Email))
@@ -45,9 +46,9 @@ public class RegisterUserHandlerTests
     public async Task HandleAsync_WithExistingEmail_ThrowsInvalidOperationException()
     {
         // Arrange
-        var command = new RegisterUserCommand("Polad", "Test", "polad@test.com", "Password123");
+        var command = new RegisterUserCommand("Polad", "Test", "polad@test.com", "Password123", false);
 
-        var existingUser = new User("Existing", "User", command.Email, "some-hash");
+        var existingUser = new User("Existing", "User", command.Email, "some-hash", UserRole.User);
 
         _userRepositoryMock
             .Setup(r => r.GetByEmailAsync(command.Email))
@@ -63,7 +64,7 @@ public class RegisterUserHandlerTests
     public async Task HandleAsync_WithNewEmail_HashesPasswordBeforeSaving()
     {
         // Arrange
-        var command = new RegisterUserCommand("Polad", "Test", "polad@test.com", "PlainPassword123");
+        var command = new RegisterUserCommand("Polad", "Test", "polad@test.com", "PlainPassword123", false);
 
         _userRepositoryMock
             .Setup(r => r.GetByEmailAsync(command.Email))

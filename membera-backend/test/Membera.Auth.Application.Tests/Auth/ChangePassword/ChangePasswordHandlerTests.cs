@@ -1,6 +1,7 @@
 using Membera.Auth.Application.Abstractions;
 using Membera.Auth.Application.Auth.ChangePassword;
 using Membera.Auth.Domain.Entities;
+using Membera.Auth.Domain.Enums;
 using Moq;
 using Xunit;
 
@@ -67,7 +68,7 @@ public class ChangePasswordHandlerTests
         // Arrange
         var command = new ChangePasswordCommand(Guid.NewGuid(), "WrongCurrent", "NewPass123");
 
-        var user = new User("Polad", "Test", "polad@test.com", "hash-in-db");
+        var user = new User("Polad", "Test", "polad@test.com", "hash-in-db", UserRole.User);
 
         _userRepositoryMock
             .Setup(r => r.GetByIdAsync(command.UserId))
@@ -90,7 +91,7 @@ public class ChangePasswordHandlerTests
         // Arrange
         var command = new ChangePasswordCommand(Guid.NewGuid(), "Current123", "NewPass123");
 
-        var user = new User("Polad", "Test", "polad@test.com", "old-hash");
+        var user = new User("Polad", "Test", "polad@test.com", "old-hash", UserRole.User);
 
         _userRepositoryMock
             .Setup(r => r.GetByIdAsync(command.UserId))

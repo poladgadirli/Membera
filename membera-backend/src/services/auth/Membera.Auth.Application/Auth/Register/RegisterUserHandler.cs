@@ -1,5 +1,6 @@
 ﻿using Membera.Auth.Application.Abstractions;
 using Membera.Auth.Domain.Entities;
+using Membera.Auth.Domain.Enums;
 
 namespace Membera.Auth.Application.Auth.Register;
 
@@ -22,7 +23,9 @@ public class RegisterUserHandler
 
         var passwordHash = _passwordHasher.Hash(command.Password);
 
-        var user = new User(command.FirstName, command.LastName, command.Email, passwordHash);
+        var role = command.IsMerchantOwner ? UserRole.MerchantOwner : UserRole.User;
+
+        var user = new User(command.FirstName, command.LastName, command.Email, passwordHash, role);
 
         await _userRepository.AddAsync(user);
 
