@@ -1,4 +1,5 @@
-﻿using Membera.Shared.Domain;
+﻿using Membera.Auth.Domain.Enums;
+using Membera.Shared.Domain;
 
 namespace Membera.Auth.Domain.Entities;
 
@@ -11,6 +12,8 @@ public class User : BaseEntity
     public bool IsEmailVerified { get; private set; }
     public bool IsDeleted { get; private set; }
     public DateTime? DeletedAt { get; private set; }
+    public AuthProvider Provider { get; private set; }
+    public string? GoogleId { get; private set; }
 
     private User() { }
 
@@ -22,6 +25,19 @@ public class User : BaseEntity
         PasswordHash = passwordHash;
         IsEmailVerified = false;
         IsDeleted = false;
+        Provider = AuthProvider.Local;
+    }
+    public static User CreateFromGoogle(string firstName, string lastName, string email, string googleId)
+    {
+        var user = new User();
+        user.FirstName = firstName;
+        user.LastName = lastName;
+        user.Email = email;
+        user.GoogleId = googleId;
+        user.Provider = AuthProvider.Google;
+        user.IsEmailVerified = true; // Google has verified the email
+        user.IsDeleted = false;
+        return user;
     }
 
     public void MarkEmailAsVerified()
