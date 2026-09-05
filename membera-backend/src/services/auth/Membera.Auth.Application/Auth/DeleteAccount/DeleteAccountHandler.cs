@@ -27,6 +27,9 @@ public class DeleteAccountHandler
         if (user.IsDeleted)
             throw new InvalidOperationException("Account has already been deleted.");
 
+        if (user.PasswordHash is null)
+            throw new InvalidOperationException("This account uses Google sign-in and does not have a password. Account deletion via password is not available.");
+
         var isCurrentPasswordValid = _passwordHasher.Verify(command.CurrentPassword, user.PasswordHash);
         if (!isCurrentPasswordValid)
             throw new InvalidOperationException("Current password is incorrect.");

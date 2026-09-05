@@ -1,6 +1,7 @@
 using FluentValidation;
+using Membera.Auth.Api.Controllers;
 
-namespace Membera.Auth.Api.Controllers;
+namespace Membera.Auth.Api.Validations;
 
 public class ChangeEmailRequestValidator : AbstractValidator<ChangeEmailRequest>
 {

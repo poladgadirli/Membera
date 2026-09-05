@@ -1,7 +1,7 @@
-﻿using System.Security.Claims;
-using Membera.Auth.Application.Auth.ChangeEmail;
+﻿using Membera.Auth.Application.Auth.ChangeEmail;
 using Membera.Auth.Application.Auth.ChangePassword;
 using Membera.Auth.Application.Auth.DeleteAccount;
+using Membera.Auth.Application.Auth.GoogleLogin;
 using Membera.Auth.Application.Auth.Login;
 using Membera.Auth.Application.Auth.Logout;
 using Membera.Auth.Application.Auth.RefreshAccessToken;
@@ -9,6 +9,7 @@ using Membera.Auth.Application.Auth.Register;
 using Membera.Shared.Contracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Membera.Auth.Api.Controllers;
 
@@ -23,6 +24,7 @@ public class AuthController : ControllerBase
     private readonly ChangePasswordHandler _changePasswordHandler;
     private readonly ChangeEmailHandler _changeEmailHandler;
     private readonly DeleteAccountHandler _deleteAccountHandler;
+    private readonly GoogleLoginHandler _googleLoginHandler;
 
     public AuthController(
         RegisterUserHandler registerUserHandler,
@@ -31,7 +33,8 @@ public class AuthController : ControllerBase
         LogoutHandler logoutHandler,
         ChangePasswordHandler changePasswordHandler,
         ChangeEmailHandler changeEmailHandler,
-        DeleteAccountHandler deleteAccountHandler)
+        DeleteAccountHandler deleteAccountHandler,
+        GoogleLoginHandler googleLoginHandler)
     {
         _registerUserHandler = registerUserHandler;
         _loginHandler = loginHandler;
@@ -40,6 +43,7 @@ public class AuthController : ControllerBase
         _changePasswordHandler = changePasswordHandler;
         _changeEmailHandler = changeEmailHandler;
         _deleteAccountHandler = deleteAccountHandler;
+        _googleLoginHandler = googleLoginHandler;
     }
 
     [HttpPost("register")]
@@ -139,6 +143,13 @@ public class AuthController : ControllerBase
         var command = new DeleteAccountCommand(userId, request.CurrentPassword);
         await _deleteAccountHandler.HandleAsync(command);
         return NoContent();
+    }
+
+    [HttpPost("google-login")]
+    public async Task<IActionResult> GoogleLogin(GoogleLoginCommand command)
+    {
+        var result = await _googleLoginHandler.HandleAsync(command);
+        return Ok(BaseResponse<Membera.Auth.Application.Auth.Login.LoginResult>.SuccessResponse(result));
     }
 }
 
