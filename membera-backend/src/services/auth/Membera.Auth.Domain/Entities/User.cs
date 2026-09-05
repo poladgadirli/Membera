@@ -14,10 +14,11 @@ public class User : BaseEntity
     public DateTime? DeletedAt { get; private set; }
     public AuthProvider Provider { get; private set; }
     public string? GoogleId { get; private set; }
+    public UserRole Role { get; private set; }
 
     private User() { }
 
-    public User(string firstName, string lastName, string email, string passwordHash)
+    public User(string firstName, string lastName, string email, string passwordHash, UserRole role)
     {
         FirstName = firstName;
         LastName = lastName;
@@ -26,6 +27,7 @@ public class User : BaseEntity
         IsEmailVerified = false;
         IsDeleted = false;
         Provider = AuthProvider.Local;
+        Role = role;
     }
     public static User CreateFromGoogle(string firstName, string lastName, string email, string googleId)
     {
@@ -37,6 +39,7 @@ public class User : BaseEntity
         user.Provider = AuthProvider.Google;
         user.IsEmailVerified = true; // Google has verified the email
         user.IsDeleted = false;
+        user.Role = UserRole.User;
         return user;
     }
 
