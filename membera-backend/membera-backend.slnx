@@ -11,5 +11,7 @@
     <Project Path="src/services/auth/Membera.Auth.Domain/Membera.Auth.Domain.csproj" />
     <Project Path="src/services/auth/Membera.Auth.Infrastructure/Membera.Auth.Infrastructure.csproj" />
   </Folder>
-  <Folder Name="/test/" />
+  <Folder Name="/test/">
+    <Project Path="test/Membera.Auth.Application.Tests/Membera.Auth.Application.Tests.csproj" Id="d558feb5-d574-4406-a1fa-012a50efbf55" />
+  </Folder>
 </Solution>
