@@ -14,3 +14,6 @@ obj/
 packages/
 *.nupkg
 /membera-backend/src/services/auth/Membera.Auth.Api/appsettings.Development.json
+/membera-backend/.env
+
+.env
