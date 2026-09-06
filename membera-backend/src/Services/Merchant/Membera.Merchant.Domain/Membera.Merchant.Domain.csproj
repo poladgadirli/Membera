@@ -7,7 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\BuildingBlocks\Membera.Shared.Contracts\Membera.Shared.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\Membera.Shared.Domain\Membera.Shared.Domain.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\Membera.Shared.Contracts\Membera.Shared.Contracts.csproj" />
   </ItemGroup>
 
 </Project>

@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\services\auth\Membera.Auth.Application\Membera.Auth.Application.csproj" />
+    <ProjectReference Include="..\..\src\Services\Auth\Membera.Auth.Application\Membera.Auth.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -12,16 +12,16 @@
   </Folder>
   <Folder Name="/src/Services/" />
   <Folder Name="/src/Services/Auth/">
-    <Project Path="src/services/auth/Membera.Auth.Api/Membera.Auth.Api.csproj" />
-    <Project Path="src/services/auth/Membera.Auth.Application/Membera.Auth.Application.csproj" />
-    <Project Path="src/services/auth/Membera.Auth.Domain/Membera.Auth.Domain.csproj" />
-    <Project Path="src/services/auth/Membera.Auth.Infrastructure/Membera.Auth.Infrastructure.csproj" />
+    <Project Path="src/Services/Auth/Membera.Auth.Api/Membera.Auth.Api.csproj" />
+    <Project Path="src/Services/Auth/Membera.Auth.Application/Membera.Auth.Application.csproj" />
+    <Project Path="src/Services/Auth/Membera.Auth.Domain/Membera.Auth.Domain.csproj" />
+    <Project Path="src/Services/Auth/Membera.Auth.Infrastructure/Membera.Auth.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/src/Services/Merchant/">
+    <Project Path="src/Services/Merchant/Membera.Merchant.Api/Membera.Merchant.Api.csproj" />
     <Project Path="src/Services/Merchant/Membera.Merchant.Application/Membera.Merchant.Application.csproj" />
     <Project Path="src/Services/Merchant/Membera.Merchant.Domain/Membera.Merchant.Domain.csproj" />
     <Project Path="src/Services/Merchant/Membera.Merchant.Infrastructure/Membera.Merchant.Infrastructure.csproj" />
-    <Project Path="src/Services/Merchant/WebApplication1/Membera.Merchant.Api.csproj" />
   </Folder>
   <Folder Name="/test/">
     <Project Path="test/Membera.Auth.Application.Tests/Membera.Auth.Application.Tests.csproj" Id="d558feb5-d574-4406-a1fa-012a50efbf55" />

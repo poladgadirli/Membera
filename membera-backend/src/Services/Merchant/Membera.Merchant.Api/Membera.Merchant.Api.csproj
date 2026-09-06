@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\BuildingBlocks\Membera.Shared.Contracts\Membera.Shared.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\Membera.Shared.Contracts\Membera.Shared.Contracts.csproj" />
     <ProjectReference Include="..\Membera.Merchant.Application\Membera.Merchant.Application.csproj" />
     <ProjectReference Include="..\Membera.Merchant.Infrastructure\Membera.Merchant.Infrastructure.csproj" />
   </ItemGroup>
