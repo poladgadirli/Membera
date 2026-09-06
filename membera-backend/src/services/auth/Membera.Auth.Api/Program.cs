@@ -1,4 +1,3 @@
-using System.Text;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Membera.Auth.Api.Middleware;
@@ -6,9 +5,11 @@ using Membera.Auth.Application.Abstractions;
 using Membera.Auth.Application.Auth.Register;
 using Membera.Auth.Infrastructure.Persistence;
 using Membera.Auth.Infrastructure.Security;
+using Membera.Shared.Messaging;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,6 +36,9 @@ builder.Services.AddScoped<Membera.Auth.Application.Auth.Admin.DeleteUserByAdmin
 builder.Services.AddScoped<Membera.Auth.Application.Auth.Admin.PromoteToAdmin.PromoteToAdminHandler>();
 builder.Services.AddScoped<Membera.Auth.Application.Auth.Admin.DemoteAdmin.DemoteAdminHandler>();
 builder.Services.AddScoped<Membera.Auth.Application.Auth.Admin.DeleteAdminAccount.DeleteAdminAccountHandler>();
+
+var rabbitMqPublisher = await RabbitMqEventPublisher.CreateAsync("localhost");
+builder.Services.AddSingleton<IEventPublisher>(rabbitMqPublisher);
 
 // JWT Authentication
 var jwtSection = builder.Configuration.GetSection("Jwt");
