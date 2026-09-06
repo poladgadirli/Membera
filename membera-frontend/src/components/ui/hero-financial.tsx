@@ -2,9 +2,14 @@ import { useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { ChevronRight } from 'lucide-react'
 import { TimelineAnimation } from '@/components/ui/hero-financial-utils/timeline-animation'
-import { EcommerceDash } from '@/components/ui/hero-financial-utils/assets-index'
+import { HeroImage } from '@/components/ui/hero-financial-utils/assets-index'
 import { useMediaQuery } from '@/components/ui/hero-financial-utils/use-media-query'
 import MotionDrawer from '@/components/ui/hero-financial-utils/motion-drawer'
+
+const navLinks = [
+  { label: 'How it works', href: '#how-it-works' },
+  { label: "Who it's for", href: '#who-its-for' },
+]
 
 export const HeroFinancial = () => {
   const timelineRef = useRef<HTMLElement>(null)
@@ -143,26 +148,17 @@ export const HeroFinancial = () => {
                 >
                   <path d="M55.5 0C61.0005 0.00109895 64.5005 2.50586 64.5 7.5V17C64.5 24.5059 68.5005 27.5 81 27.5H88C94.0005 27.5059 96.5 29.5059 96.5 37.5V98.5C96.5 106.006 95.0005 107.5 88 107.5H41.5C36.5005 107.5 32 104.506 32 98.5V88C32 84.5 28.5 80 20.5 80H8.5C3 80 0 76.5 0 71.5V6.5C0.00048844 1.50586 2.50049 0.00585937 8.5 0H55.5ZM31 20C28.7909 20 27 21.7909 27 24V74C27 76.2091 28.7909 78 31 78H58C60.2091 78 62 76.2091 62 74V24C62 21.7909 60.2091 20 58 20H31Z" />
                 </svg>
-                <span>UI-Layouts</span>
+                <span>Membera</span>
               </div>
-              <a
-                href="#"
-                className="block p-2 hover:bg-neutral-200 hover:text-black rounded-sm"
-              >
-                Our Service
-              </a>
-              <a
-                href="#"
-                className="block p-2 hover:bg-neutral-200 hover:text-black rounded-sm"
-              >
-                About Us
-              </a>
-              <a
-                href="#"
-                className="block p-2 hover:bg-neutral-200 hover:text-black rounded-sm"
-              >
-                Contact
-              </a>
+              {navLinks.map((link) => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  className="block p-2 hover:bg-neutral-200 hover:text-black rounded-sm"
+                >
+                  {link.label}
+                </a>
+              ))}
             </nav>
           </MotionDrawer>
           <div className="flex gap-2 items-center relative z-2">
@@ -202,25 +198,19 @@ export const HeroFinancial = () => {
                 <path d="M55.5 0C61.0005 0.00109895 64.5005 2.50586 64.5 7.5V17C64.5 24.5059 68.5005 27.5 81 27.5H88C94.0005 27.5059 96.5 29.5059 96.5 37.5V98.5C96.5 106.006 95.0005 107.5 88 107.5H41.5C36.5005 107.5 32 104.506 32 98.5V88C32 84.5 28.5 80 20.5 80H8.5C3 80 0 76.5 0 71.5V6.5C0.00048844 1.50586 2.50049 0.00585937 8.5 0H55.5ZM31 20C28.7909 20 27 21.7909 27 24V74C27 76.2091 28.7909 78 31 78H58C60.2091 78 62 76.2091 62 74V24C62 21.7909 60.2091 20 58 20H31Z" />
               </svg>
               <span className="text-xl font-bold tracking-tight text-slate-900">
-                UI-Layout
+                Membera
               </span>
             </div>
             <nav className="hidden md:flex items-center gap-10 text-sm font-semibold text-neutral-500">
-              <a href="#" className="hover:text-[#3b82f6] transition">
-                Home
-              </a>
-              <a href="#" className="hover:text-[#3b82f6] transition">
-                About Us
-              </a>
-              <a href="#" className="hover:text-[#3b82f6] transition">
-                Blog
-              </a>
-              <a href="#" className="hover:text-[#3b82f6] transition">
-                Pages
-              </a>
-              <a href="#" className="hover:text-[#3b82f6] transition">
-                Pricing
-              </a>
+              {navLinks.map((link) => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  className="hover:text-[#3b82f6] transition"
+                >
+                  {link.label}
+                </a>
+              ))}
             </nav>
             <div className="flex items-center gap-2">
               <Link
@@ -242,25 +232,12 @@ export const HeroFinancial = () => {
       {/* Hero Content */}
       <div className="relative z-10 text-center pt-24 pb-16 px-4 flex flex-col gap-6">
         <TimelineAnimation
-          animationNum={1}
-          timelineRef={timelineRef}
-          className="bg-white w-fit mx-auto text-black px-1.5 py-1 rounded-full inline-flex items-center gap-2 shadow-lg shadow-blue-500/20 border-2 border-white"
-        >
-          <span className="bg-linear-to-br from-blue-500 to-blue-200 text-white px-2 py-0.5 rounded-full text-xs font-medium uppercase tracking-widest">
-            New
-          </span>
-          <span className="text-sm font-medium">
-            Anouncing our latest product launch
-          </span>
-        </TimelineAnimation>
-
-        <TimelineAnimation
           as="h1"
           animationNum={2}
           timelineRef={timelineRef}
           className="sm:text-6xl text-5xl md:text-8xl font-medium tracking-tight text-neutral-900 max-w-6xl"
         >
-          Make your financial <br /> operations seamless.
+          Subscriptions made simple <br /> for local businesses.
         </TimelineAnimation>
 
         <TimelineAnimation
@@ -269,9 +246,9 @@ export const HeroFinancial = () => {
           timelineRef={timelineRef}
           className="text-xl md:text-2xl text-neutral-500 font-medium max-w-3xl mx-auto leading-relaxed px-4"
         >
-          Take control of your finances with Startive the next-generation
-          finance software built to simplify, automate, and elevate your
-          financial operations.
+          Membera lets businesses offer subscription plans that customers buy
+          once and redeem by scanning a QR code at the counter. No app to
+          download, no punch cards &mdash; just a fast, simple scan.
         </TimelineAnimation>
 
         <div className="flex gap-4 justify-center">
@@ -286,12 +263,13 @@ export const HeroFinancial = () => {
             </TimelineAnimation>
           </Link>
           <TimelineAnimation
-            as="button"
+            as="a"
+            href="#how-it-works"
             animationNum={5}
             timelineRef={timelineRef}
             className="px-4 bg-linear-to-br from-neutral-50 via-neutral-100 to-neutral-300 text-black text-xl rounded-lg shadow-sm  transition py-2.5 border border-neutral-300"
           >
-            Learn more
+            See how it works
           </TimelineAnimation>
         </div>
       </div>
@@ -307,8 +285,8 @@ export const HeroFinancial = () => {
             animationNum={7}
             as="img"
             timelineRef={timelineRef}
-            src={EcommerceDash.src}
-            alt={EcommerceDash.alt}
+            src={HeroImage.src}
+            alt={HeroImage.alt}
             className="w-full relative z-4 rounded-2xl"
           />
         </TimelineAnimation>
