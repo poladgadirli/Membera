@@ -2,6 +2,8 @@
 using Membera.Auth.Application.Auth.Register;
 using Membera.Auth.Domain.Entities;
 using Membera.Auth.Domain.Enums;
+using Membera.Shared.Contracts;
+using Membera.Shared.Messaging;
 using Moq;
 using Xunit;
 
@@ -11,13 +13,18 @@ public class RegisterUserHandlerTests
 {
     private readonly Mock<IUserRepository> _userRepositoryMock;
     private readonly Mock<IPasswordHasher> _passwordHasherMock;
+    private readonly Mock<IEventPublisher> _eventPublisherMock;
     private readonly RegisterUserHandler _handler;
 
     public RegisterUserHandlerTests()
     {
         _userRepositoryMock = new Mock<IUserRepository>();
         _passwordHasherMock = new Mock<IPasswordHasher>();
-        _handler = new RegisterUserHandler(_userRepositoryMock.Object, _passwordHasherMock.Object);
+        _eventPublisherMock = new Mock<IEventPublisher>();
+        _handler = new RegisterUserHandler(
+            _userRepositoryMock.Object,
+            _passwordHasherMock.Object,
+            _eventPublisherMock.Object);
     }
 
     [Fact]
@@ -40,6 +47,9 @@ public class RegisterUserHandlerTests
         // Assert
         Assert.Equal(command.Email, result.Email);
         _userRepositoryMock.Verify(r => r.AddAsync(It.IsAny<User>()), Times.Once);
+        _eventPublisherMock.Verify(
+            p => p.PublishAsync(It.IsAny<UserRegisteredEvent>(), "user.registered"),
+            Times.Once);
     }
 
     [Fact]
@@ -58,6 +68,9 @@ public class RegisterUserHandlerTests
         await Assert.ThrowsAsync<InvalidOperationException>(() => _handler.HandleAsync(command));
 
         _userRepositoryMock.Verify(r => r.AddAsync(It.IsAny<User>()), Times.Never);
+        _eventPublisherMock.Verify(
+            p => p.PublishAsync(It.IsAny<UserRegisteredEvent>(), It.IsAny<string>()),
+            Times.Never);
     }
 
     [Fact]
