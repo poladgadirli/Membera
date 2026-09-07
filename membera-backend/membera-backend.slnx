@@ -25,5 +25,6 @@
   </Folder>
   <Folder Name="/test/">
     <Project Path="test/Membera.Auth.Application.Tests/Membera.Auth.Application.Tests.csproj" Id="d558feb5-d574-4406-a1fa-012a50efbf55" />
+    <Project Path="test/Membera.Merchant.Application.Tests/Membera.Merchant.Application.Tests.csproj" />
   </Folder>
 </Solution>
