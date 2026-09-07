@@ -1,13 +1,14 @@
-using System.Text;
 using Membera.Merchant.Api.Middleware;
 using Membera.Merchant.Application.Abstractions;
 using Membera.Merchant.Application.Merchants.CreateMerchant;
 using Membera.Merchant.Application.Merchants.GetMerchantByOwnerId;
 using Membera.Merchant.Application.Merchants.UpdateMerchant;
+using Membera.Merchant.Infrastructure.Messaging;
 using Membera.Merchant.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +23,7 @@ builder.Services.AddScoped<IMerchantRepository, MerchantRepository>();
 builder.Services.AddScoped<CreateMerchantHandler>();
 builder.Services.AddScoped<GetMerchantByOwnerIdHandler>();
 builder.Services.AddScoped<UpdateMerchantHandler>();
+builder.Services.AddHostedService<UserRegisteredConsumer>();
 
 // JWT Authentication
 var jwtSection = builder.Configuration.GetSection("Jwt");
