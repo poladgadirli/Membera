@@ -2,6 +2,7 @@
 using Membera.Merchant.Application.Merchants.CreateMerchant;
 using Membera.Merchant.Application.Merchants.GetMerchantByOwnerId;
 using Membera.Merchant.Application.Merchants.UpdateMerchant;
+using Membera.Shared.Contracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -37,14 +38,14 @@ public class MerchantController : ControllerBase
     {
         var command = new CreateMerchantCommand(GetOwnerId(), request.BusinessName);
         var result = await _createMerchantHandler.HandleAsync(command);
-        return Ok(result);
+        return Ok(BaseResponse<CreateMerchantResult>.SuccessResponse(result));
     }
 
     [HttpGet("me")]
     public async Task<IActionResult> GetMine()
     {
         var result = await _getMerchantByOwnerIdHandler.HandleAsync(new GetMerchantByOwnerIdQuery(GetOwnerId()));
-        return Ok(result);
+        return Ok(BaseResponse<GetMerchantByOwnerIdResult>.SuccessResponse(result));
     }
 
     [HttpPut]

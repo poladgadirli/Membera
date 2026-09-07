@@ -1,4 +1,5 @@
 using System.Text;
+using Membera.Merchant.Api.Middleware;
 using Membera.Merchant.Application.Abstractions;
 using Membera.Merchant.Application.Merchants.CreateMerchant;
 using Membera.Merchant.Application.Merchants.GetMerchantByOwnerId;
@@ -78,6 +79,8 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 var app = builder.Build();
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
