@@ -17,3 +17,4 @@ packages/
 /membera-backend/.env
 
 .env
+/membera-backend/src/Services/Merchant/Membera.Merchant.Api/appsettings.Development.json
