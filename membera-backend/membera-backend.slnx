@@ -7,17 +7,24 @@
   <Folder Name="/src/" />
   <Folder Name="/src/BuildingBlocks/">
     <Project Path="src/BuildingBlocks/Membera.Shared.Contracts/Membera.Shared.Contracts.csproj" Id="80c2ab37-fe00-4652-9352-4bce24a6b10d" />
+    <Project Path="src/BuildingBlocks/Membera.Shared.Domain/Membera.Shared.Domain.csproj" />
     <Project Path="src/BuildingBlocks/Membera.Shared.Messaging/Membera.Shared.Messaging.csproj" />
-    <Project Path="src/Membera.Shared.Domain/Membera.Shared.Domain.csproj" Id="a4529200-7221-48c9-bdd7-a4aed812ccff" />
   </Folder>
   <Folder Name="/src/Services/" />
   <Folder Name="/src/Services/Auth/">
-    <Project Path="src/services/auth/Membera.Auth.Api/Membera.Auth.Api.csproj" />
-    <Project Path="src/services/auth/Membera.Auth.Application/Membera.Auth.Application.csproj" />
-    <Project Path="src/services/auth/Membera.Auth.Domain/Membera.Auth.Domain.csproj" />
-    <Project Path="src/services/auth/Membera.Auth.Infrastructure/Membera.Auth.Infrastructure.csproj" />
+    <Project Path="src/Services/Auth/Membera.Auth.Api/Membera.Auth.Api.csproj" />
+    <Project Path="src/Services/Auth/Membera.Auth.Application/Membera.Auth.Application.csproj" />
+    <Project Path="src/Services/Auth/Membera.Auth.Domain/Membera.Auth.Domain.csproj" />
+    <Project Path="src/Services/Auth/Membera.Auth.Infrastructure/Membera.Auth.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Services/Merchant/">
+    <Project Path="src/Services/Merchant/Membera.Merchant.Api/Membera.Merchant.Api.csproj" />
+    <Project Path="src/Services/Merchant/Membera.Merchant.Application/Membera.Merchant.Application.csproj" />
+    <Project Path="src/Services/Merchant/Membera.Merchant.Domain/Membera.Merchant.Domain.csproj" />
+    <Project Path="src/Services/Merchant/Membera.Merchant.Infrastructure/Membera.Merchant.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/test/">
     <Project Path="test/Membera.Auth.Application.Tests/Membera.Auth.Application.Tests.csproj" Id="d558feb5-d574-4406-a1fa-012a50efbf55" />
+    <Project Path="test/Membera.Merchant.Application.Tests/Membera.Merchant.Application.Tests.csproj" />
   </Folder>
 </Solution>
