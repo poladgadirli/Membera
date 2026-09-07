@@ -1,12 +1,15 @@
-﻿using Membera.Merchant.Application.Merchants.CreateMerchant;
+﻿using System.Security.Claims;
+using Membera.Merchant.Application.Merchants.CreateMerchant;
 using Membera.Merchant.Application.Merchants.GetMerchantByOwnerId;
 using Membera.Merchant.Application.Merchants.UpdateMerchant;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Membera.Merchant.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class MerchantController : ControllerBase
 {
     private readonly CreateMerchantHandler _createMerchantHandler;
@@ -23,24 +26,35 @@ public class MerchantController : ControllerBase
         _updateMerchantHandler = updateMerchantHandler;
     }
 
-    [HttpPost]
-    public async Task<IActionResult> Create(CreateMerchantCommand command)
+    private Guid GetOwnerId()
     {
+        return Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)
+                          ?? User.FindFirstValue("sub")!);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Create(CreateMerchantRequest request)
+    {
+        var command = new CreateMerchantCommand(GetOwnerId(), request.BusinessName);
         var result = await _createMerchantHandler.HandleAsync(command);
         return Ok(result);
     }
 
-    [HttpGet("{ownerId}")]
-    public async Task<IActionResult> GetByOwnerId(Guid ownerId)
+    [HttpGet("me")]
+    public async Task<IActionResult> GetMine()
     {
-        var result = await _getMerchantByOwnerIdHandler.HandleAsync(new GetMerchantByOwnerIdQuery(ownerId));
+        var result = await _getMerchantByOwnerIdHandler.HandleAsync(new GetMerchantByOwnerIdQuery(GetOwnerId()));
         return Ok(result);
     }
 
     [HttpPut]
-    public async Task<IActionResult> Update(UpdateMerchantCommand command)
+    public async Task<IActionResult> Update(UpdateMerchantRequest request)
     {
+        var command = new UpdateMerchantCommand(GetOwnerId(), request.BusinessName, request.Description);
         await _updateMerchantHandler.HandleAsync(command);
         return NoContent();
     }
 }
+
+public record CreateMerchantRequest(string BusinessName);
+public record UpdateMerchantRequest(string BusinessName, string? Description);
