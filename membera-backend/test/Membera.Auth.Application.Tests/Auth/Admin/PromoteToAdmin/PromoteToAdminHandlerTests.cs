@@ -2,6 +2,7 @@ using Membera.Auth.Application.Abstractions;
 using Membera.Auth.Application.Auth.Admin.PromoteToAdmin;
 using Membera.Auth.Domain.Entities;
 using Membera.Auth.Domain.Enums;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -10,13 +11,15 @@ namespace Membera.Auth.Application.Tests.Auth.Admin.PromoteToAdmin;
 public class PromoteToAdminHandlerTests
 {
     private readonly Mock<IUserRepository> _userRepositoryMock;
+    private readonly Mock<ILogger<PromoteToAdminHandler>> _loggerMock;
     private readonly PromoteToAdminHandler _handler;
 
     public PromoteToAdminHandlerTests()
     {
         _userRepositoryMock = new Mock<IUserRepository>();
+        _loggerMock = new Mock<ILogger<PromoteToAdminHandler>>();
 
-        _handler = new PromoteToAdminHandler(_userRepositoryMock.Object);
+        _handler = new PromoteToAdminHandler(_userRepositoryMock.Object, _loggerMock.Object);
     }
 
     [Fact]

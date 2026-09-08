@@ -2,6 +2,7 @@
 using Membera.Auth.Application.Auth.Login;
 using Membera.Auth.Domain.Entities;
 using Membera.Auth.Domain.Enums;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -13,6 +14,7 @@ public class LoginHandlerTests
     private readonly Mock<IPasswordHasher> _passwordHasherMock;
     private readonly Mock<ITokenService> _tokenServiceMock;
     private readonly Mock<IRefreshTokenRepository> _refreshTokenRepositoryMock;
+    private readonly Mock<ILogger<LoginHandler>> _loggerMock;
     private readonly LoginHandler _handler;
 
     public LoginHandlerTests()
@@ -21,12 +23,14 @@ public class LoginHandlerTests
         _passwordHasherMock = new Mock<IPasswordHasher>();
         _tokenServiceMock = new Mock<ITokenService>();
         _refreshTokenRepositoryMock = new Mock<IRefreshTokenRepository>();
+        _loggerMock = new Mock<ILogger<LoginHandler>>();
 
         _handler = new LoginHandler(
             _userRepositoryMock.Object,
             _passwordHasherMock.Object,
             _tokenServiceMock.Object,
-            _refreshTokenRepositoryMock.Object);
+            _refreshTokenRepositoryMock.Object,
+            _loggerMock.Object);
     }
 
     [Fact]

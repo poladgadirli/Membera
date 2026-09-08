@@ -2,6 +2,7 @@ using Membera.Auth.Application.Abstractions;
 using Membera.Auth.Application.Auth.Admin.DemoteAdmin;
 using Membera.Auth.Domain.Entities;
 using Membera.Auth.Domain.Enums;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -11,16 +12,19 @@ public class DemoteAdminHandlerTests
 {
     private readonly Mock<IUserRepository> _userRepositoryMock;
     private readonly Mock<IRefreshTokenRepository> _refreshTokenRepositoryMock;
+    private readonly Mock<ILogger<DemoteAdminHandler>> _loggerMock;
     private readonly DemoteAdminHandler _handler;
 
     public DemoteAdminHandlerTests()
     {
         _userRepositoryMock = new Mock<IUserRepository>();
         _refreshTokenRepositoryMock = new Mock<IRefreshTokenRepository>();
+        _loggerMock = new Mock<ILogger<DemoteAdminHandler>>();
 
         _handler = new DemoteAdminHandler(
             _userRepositoryMock.Object,
-            _refreshTokenRepositoryMock.Object);
+            _refreshTokenRepositoryMock.Object,
+            _loggerMock.Object);
     }
 
     [Fact]

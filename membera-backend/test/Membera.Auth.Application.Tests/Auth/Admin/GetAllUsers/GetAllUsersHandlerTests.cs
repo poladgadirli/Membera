@@ -2,6 +2,7 @@ using Membera.Auth.Application.Abstractions;
 using Membera.Auth.Application.Auth.Admin.GetAllUsers;
 using Membera.Auth.Domain.Entities;
 using Membera.Auth.Domain.Enums;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -10,13 +11,15 @@ namespace Membera.Auth.Application.Tests.Auth.Admin.GetAllUsers;
 public class GetAllUsersHandlerTests
 {
     private readonly Mock<IUserRepository> _userRepositoryMock;
+    private readonly Mock<ILogger<GetAllUsersHandler>> _loggerMock;
     private readonly GetAllUsersHandler _handler;
 
     public GetAllUsersHandlerTests()
     {
         _userRepositoryMock = new Mock<IUserRepository>();
+        _loggerMock = new Mock<ILogger<GetAllUsersHandler>>();
 
-        _handler = new GetAllUsersHandler(_userRepositoryMock.Object);
+        _handler = new GetAllUsersHandler(_userRepositoryMock.Object, _loggerMock.Object);
     }
 
     [Fact]
