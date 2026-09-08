@@ -6,6 +6,7 @@
   </Folder>
   <Folder Name="/src/" />
   <Folder Name="/src/BuildingBlocks/">
+    <Project Path="src/BuildingBlocks/Membera.Shared.Caching/Membera.Shared.Caching.csproj" Id="8f3256ea-70ab-4c08-a231-ff5fdb570c24" />
     <Project Path="src/BuildingBlocks/Membera.Shared.Contracts/Membera.Shared.Contracts.csproj" Id="80c2ab37-fe00-4652-9352-4bce24a6b10d" />
     <Project Path="src/BuildingBlocks/Membera.Shared.Domain/Membera.Shared.Domain.csproj" />
     <Project Path="src/BuildingBlocks/Membera.Shared.Messaging/Membera.Shared.Messaging.csproj" />
