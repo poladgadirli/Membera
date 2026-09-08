@@ -2,6 +2,7 @@ using Membera.Auth.Application.Abstractions;
 using Membera.Auth.Application.Auth.Admin.DeleteAdminAccount;
 using Membera.Auth.Domain.Entities;
 using Membera.Auth.Domain.Enums;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -11,16 +12,19 @@ public class DeleteAdminAccountHandlerTests
 {
     private readonly Mock<IUserRepository> _userRepositoryMock;
     private readonly Mock<IRefreshTokenRepository> _refreshTokenRepositoryMock;
+    private readonly Mock<ILogger<DeleteAdminAccountHandler>> _loggerMock;
     private readonly DeleteAdminAccountHandler _handler;
 
     public DeleteAdminAccountHandlerTests()
     {
         _userRepositoryMock = new Mock<IUserRepository>();
         _refreshTokenRepositoryMock = new Mock<IRefreshTokenRepository>();
+        _loggerMock = new Mock<ILogger<DeleteAdminAccountHandler>>();
 
         _handler = new DeleteAdminAccountHandler(
             _userRepositoryMock.Object,
-            _refreshTokenRepositoryMock.Object);
+            _refreshTokenRepositoryMock.Object,
+            _loggerMock.Object);
     }
 
     [Fact]

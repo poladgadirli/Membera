@@ -4,6 +4,7 @@ using Membera.Auth.Domain.Entities;
 using Membera.Auth.Domain.Enums;
 using Membera.Shared.Contracts;
 using Membera.Shared.Messaging;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -14,6 +15,7 @@ public class RegisterUserHandlerTests
     private readonly Mock<IUserRepository> _userRepositoryMock;
     private readonly Mock<IPasswordHasher> _passwordHasherMock;
     private readonly Mock<IEventPublisher> _eventPublisherMock;
+    private readonly Mock<ILogger<RegisterUserHandler>> _loggerMock;
     private readonly RegisterUserHandler _handler;
 
     public RegisterUserHandlerTests()
@@ -21,10 +23,12 @@ public class RegisterUserHandlerTests
         _userRepositoryMock = new Mock<IUserRepository>();
         _passwordHasherMock = new Mock<IPasswordHasher>();
         _eventPublisherMock = new Mock<IEventPublisher>();
+        _loggerMock = new Mock<ILogger<RegisterUserHandler>>();
         _handler = new RegisterUserHandler(
             _userRepositoryMock.Object,
             _passwordHasherMock.Object,
-            _eventPublisherMock.Object);
+            _eventPublisherMock.Object,
+            _loggerMock.Object);
     }
 
     [Fact]

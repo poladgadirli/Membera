@@ -1,5 +1,6 @@
 using Membera.Merchant.Application.Abstractions;
 using Membera.Merchant.Application.Merchants.CreateMerchant;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 using MerchantEntity = Membera.Merchant.Domain.Entities.Merchant;
@@ -9,12 +10,14 @@ namespace Membera.Merchant.Application.Tests.Merchants.CreateMerchant;
 public class CreateMerchantHandlerTests
 {
     private readonly Mock<IMerchantRepository> _merchantRepositoryMock;
+    private readonly Mock<ILogger<CreateMerchantHandler>> _loggerMock;
     private readonly CreateMerchantHandler _handler;
 
     public CreateMerchantHandlerTests()
     {
         _merchantRepositoryMock = new Mock<IMerchantRepository>();
-        _handler = new CreateMerchantHandler(_merchantRepositoryMock.Object);
+        _loggerMock = new Mock<ILogger<CreateMerchantHandler>>();
+        _handler = new CreateMerchantHandler(_merchantRepositoryMock.Object, _loggerMock.Object);
     }
 
     [Fact]

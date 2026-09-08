@@ -1,24 +1,32 @@
 ﻿using Membera.Merchant.Application.Abstractions;
+using Microsoft.Extensions.Logging;
 
 namespace Membera.Merchant.Application.Merchants.UpdateMerchant;
 
 public class UpdateMerchantHandler
 {
     private readonly IMerchantRepository _merchantRepository;
+    private readonly ILogger<UpdateMerchantHandler> _logger;
 
-    public UpdateMerchantHandler(IMerchantRepository merchantRepository)
+    public UpdateMerchantHandler(IMerchantRepository merchantRepository, ILogger<UpdateMerchantHandler> logger)
     {
         _merchantRepository = merchantRepository;
+        _logger = logger;
     }
 
     public async Task HandleAsync(UpdateMerchantCommand command)
     {
         var merchant = await _merchantRepository.GetByOwnerIdAsync(command.OwnerId);
         if (merchant is null)
+        {
+            _logger.LogWarning("Merchant profile update attempt for missing profile. OwnerId: {OwnerId}", command.OwnerId);
             throw new InvalidOperationException("Merchant profile not found.");
+        }
 
         merchant.UpdateProfile(command.BusinessName, command.Description);
 
         await _merchantRepository.UpdateAsync(merchant);
+
+        _logger.LogInformation("Merchant profile updated for OwnerId: {OwnerId}, BusinessName: {BusinessName}", command.OwnerId, merchant.BusinessName);
     }
 }
