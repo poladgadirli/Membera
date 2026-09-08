@@ -1,6 +1,7 @@
 using Membera.Auth.Application.Abstractions;
 using Membera.Auth.Application.Auth.Logout;
 using Membera.Auth.Domain.Entities;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -9,12 +10,14 @@ namespace Membera.Auth.Application.Tests.Auth.Logout;
 public class LogoutHandlerTests
 {
     private readonly Mock<IRefreshTokenRepository> _refreshTokenRepositoryMock;
+    private readonly Mock<ILogger<LogoutHandler>> _loggerMock;
     private readonly LogoutHandler _handler;
 
     public LogoutHandlerTests()
     {
         _refreshTokenRepositoryMock = new Mock<IRefreshTokenRepository>();
-        _handler = new LogoutHandler(_refreshTokenRepositoryMock.Object);
+        _loggerMock = new Mock<ILogger<LogoutHandler>>();
+        _handler = new LogoutHandler(_refreshTokenRepositoryMock.Object, _loggerMock.Object);
     }
 
     [Fact]

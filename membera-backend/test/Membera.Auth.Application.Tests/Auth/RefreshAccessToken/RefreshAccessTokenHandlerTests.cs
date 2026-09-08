@@ -2,6 +2,7 @@ using Membera.Auth.Application.Abstractions;
 using Membera.Auth.Application.Auth.RefreshAccessToken;
 using Membera.Auth.Domain.Entities;
 using Membera.Auth.Domain.Enums;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -12,6 +13,7 @@ public class RefreshAccessTokenHandlerTests
     private readonly Mock<IRefreshTokenRepository> _refreshTokenRepositoryMock;
     private readonly Mock<IUserRepository> _userRepositoryMock;
     private readonly Mock<ITokenService> _tokenServiceMock;
+    private readonly Mock<ILogger<RefreshAccessTokenHandler>> _loggerMock;
     private readonly RefreshAccessTokenHandler _handler;
 
     public RefreshAccessTokenHandlerTests()
@@ -19,11 +21,13 @@ public class RefreshAccessTokenHandlerTests
         _refreshTokenRepositoryMock = new Mock<IRefreshTokenRepository>();
         _userRepositoryMock = new Mock<IUserRepository>();
         _tokenServiceMock = new Mock<ITokenService>();
+        _loggerMock = new Mock<ILogger<RefreshAccessTokenHandler>>();
 
         _handler = new RefreshAccessTokenHandler(
             _refreshTokenRepositoryMock.Object,
             _userRepositoryMock.Object,
-            _tokenServiceMock.Object);
+            _tokenServiceMock.Object,
+            _loggerMock.Object);
     }
 
     [Fact]

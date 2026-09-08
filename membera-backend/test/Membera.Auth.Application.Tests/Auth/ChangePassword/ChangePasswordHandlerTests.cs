@@ -2,6 +2,7 @@ using Membera.Auth.Application.Abstractions;
 using Membera.Auth.Application.Auth.ChangePassword;
 using Membera.Auth.Domain.Entities;
 using Membera.Auth.Domain.Enums;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -12,6 +13,7 @@ public class ChangePasswordHandlerTests
     private readonly Mock<IUserRepository> _userRepositoryMock;
     private readonly Mock<IPasswordHasher> _passwordHasherMock;
     private readonly Mock<IRefreshTokenRepository> _refreshTokenRepositoryMock;
+    private readonly Mock<ILogger<ChangePasswordHandler>> _loggerMock;
     private readonly ChangePasswordHandler _handler;
 
     public ChangePasswordHandlerTests()
@@ -19,11 +21,13 @@ public class ChangePasswordHandlerTests
         _userRepositoryMock = new Mock<IUserRepository>();
         _passwordHasherMock = new Mock<IPasswordHasher>();
         _refreshTokenRepositoryMock = new Mock<IRefreshTokenRepository>();
+        _loggerMock = new Mock<ILogger<ChangePasswordHandler>>();
 
         _handler = new ChangePasswordHandler(
             _userRepositoryMock.Object,
             _passwordHasherMock.Object,
-            _refreshTokenRepositoryMock.Object);
+            _refreshTokenRepositoryMock.Object,
+            _loggerMock.Object);
     }
 
     [Fact]

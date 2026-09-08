@@ -2,6 +2,7 @@ using Membera.Auth.Application.Abstractions;
 using Membera.Auth.Application.Auth.GoogleLogin;
 using Membera.Auth.Domain.Entities;
 using Membera.Auth.Domain.Enums;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -13,6 +14,7 @@ public class GoogleLoginHandlerTests
     private readonly Mock<IUserRepository> _userRepositoryMock;
     private readonly Mock<ITokenService> _tokenServiceMock;
     private readonly Mock<IRefreshTokenRepository> _refreshTokenRepositoryMock;
+    private readonly Mock<ILogger<GoogleLoginHandler>> _loggerMock;
     private readonly GoogleLoginHandler _handler;
 
     public GoogleLoginHandlerTests()
@@ -21,12 +23,14 @@ public class GoogleLoginHandlerTests
         _userRepositoryMock = new Mock<IUserRepository>();
         _tokenServiceMock = new Mock<ITokenService>();
         _refreshTokenRepositoryMock = new Mock<IRefreshTokenRepository>();
+        _loggerMock = new Mock<ILogger<GoogleLoginHandler>>();
 
         _handler = new GoogleLoginHandler(
             _googleAuthServiceMock.Object,
             _userRepositoryMock.Object,
             _tokenServiceMock.Object,
-            _refreshTokenRepositoryMock.Object);
+            _refreshTokenRepositoryMock.Object,
+            _loggerMock.Object);
     }
 
     private void SetupTokenService(User user)
