@@ -5,10 +5,12 @@ using Membera.Merchant.Application.Merchants.GetMerchantByOwnerId;
 using Membera.Merchant.Application.Merchants.UpdateMerchant;
 using Membera.Merchant.Infrastructure.Messaging;
 using Membera.Merchant.Infrastructure.Persistence;
+using Membera.Shared.Caching;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
+using StackExchange.Redis;
 using System.Text;
 
 Log.Logger = new LoggerConfiguration()
@@ -33,6 +35,11 @@ builder.Services.AddScoped<CreateMerchantHandler>();
 builder.Services.AddScoped<GetMerchantByOwnerIdHandler>();
 builder.Services.AddScoped<UpdateMerchantHandler>();
 builder.Services.AddHostedService<UserRegisteredConsumer>();
+
+builder.Services.AddSingleton<IConnectionMultiplexer>(
+    ConnectionMultiplexer.Connect("localhost:6379"));
+
+builder.Services.AddScoped<ICacheService, RedisCacheService>();
 
 // JWT Authentication
 var jwtSection = builder.Configuration.GetSection("Jwt");
