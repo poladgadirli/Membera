@@ -20,7 +20,11 @@ public class TokenService : ITokenService
     public string GenerateAccessToken(User user)
     {
         var jwtSection = _configuration.GetSection("Jwt");
-        var secretKey = jwtSection["SecretKey"]!;
+        // Read the signing key the same way Program.cs reads the validation key:
+        // environment variable (.env / OS) first, falling back to configuration.
+        // Keeping both sides on an identical source/priority prevents
+        // "Signature validation failed" from key drift between signing and validation.
+        var secretKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY") ?? jwtSection["SecretKey"]!;
         var issuer = jwtSection["Issuer"];
         var audience = jwtSection["Audience"];
         var expirationMinutes = int.Parse(jwtSection["AccessTokenExpirationMinutes"]!);

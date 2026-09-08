@@ -5,11 +5,18 @@ using Membera.Merchant.Application.Merchants.GetMerchantByOwnerId;
 using Membera.Merchant.Application.Merchants.UpdateMerchant;
 using Membera.Merchant.Infrastructure.Messaging;
 using Membera.Merchant.Infrastructure.Persistence;
+using Membera.Shared.Caching;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
+using StackExchange.Redis;
 using System.Text;
+
+// Load environment variables from the repo-root .env file (the same file
+// docker-compose.yml uses) so JWT_SECRET_KEY / POSTGRES_PASSWORD are picked up
+// without manually setting OS-level environment variables on every machine.
+LoadDotEnv();
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
@@ -22,8 +29,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseSerilog();
 
 // DbContext qeydiyyatı
+var postgresPassword = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD");
+var connectionString = postgresPassword is not null
+    ? $"Host=localhost;Port=5432;Database=membera_merchant;Username=postgres;Password={postgresPassword}"
+    : builder.Configuration.GetConnectionString("MerchantDb");
+
 builder.Services.AddDbContext<MerchantDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("MerchantDb")));
+    options.UseNpgsql(connectionString));
 
 // Repository
 builder.Services.AddScoped<IMerchantRepository, MerchantRepository>();
@@ -34,9 +46,16 @@ builder.Services.AddScoped<GetMerchantByOwnerIdHandler>();
 builder.Services.AddScoped<UpdateMerchantHandler>();
 builder.Services.AddHostedService<UserRegisteredConsumer>();
 
+builder.Services.AddSingleton<IConnectionMultiplexer>(
+    ConnectionMultiplexer.Connect("localhost:6379"));
+
+builder.Services.AddScoped<ICacheService, RedisCacheService>();
+
 // JWT Authentication
 var jwtSection = builder.Configuration.GetSection("Jwt");
-var secretKey = jwtSection["SecretKey"]!;
+var secretKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY") ?? jwtSection["SecretKey"]!;
+var issuer = Environment.GetEnvironmentVariable("JWT_ISSUER") ?? jwtSection["Issuer"];
+var audience = Environment.GetEnvironmentVariable("JWT_AUDIENCE") ?? jwtSection["Audience"];
 
 builder.Services.AddAuthentication(options =>
 {
@@ -51,8 +70,8 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = jwtSection["Issuer"],
-        ValidAudience = jwtSection["Audience"],
+        ValidIssuer = issuer,
+        ValidAudience = audience,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
     };
 });
@@ -107,3 +126,30 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+// Walks upward from the current working directory and the app base directory
+// (e.g. bin/Debug/net8.0 when launched from Visual Studio) until it finds a
+// .env file, then loads it. The .env lives at the repo root, several levels
+// above each Api project's output directory, so a search-upward approach works
+// no matter which service runs or from where. If no .env is found the app keeps
+// running on OS environment variables / appsettings (the existing fallback).
+static void LoadDotEnv()
+{
+    foreach (var start in new[] { Directory.GetCurrentDirectory(), AppContext.BaseDirectory })
+    {
+        for (var dir = new DirectoryInfo(start); dir is not null; dir = dir.Parent)
+        {
+            var candidate = Path.Combine(dir.FullName, ".env");
+            if (File.Exists(candidate))
+            {
+                // NoClobber: an already-set OS environment variable wins over .env.
+                DotNetEnv.Env.NoClobber().Load(candidate);
+                Console.WriteLine($"[env] Loaded environment variables from {candidate}");
+                return;
+            }
+        }
+    }
+
+    Console.WriteLine("[env] Warning: no .env file found in any parent directory; " +
+        "falling back to OS environment variables and appsettings.json.");
+}

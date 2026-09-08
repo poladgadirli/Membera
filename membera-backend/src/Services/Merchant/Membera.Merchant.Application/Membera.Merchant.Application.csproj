@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\BuildingBlocks\Membera.Shared.Caching\Membera.Shared.Caching.csproj" />
     <ProjectReference Include="..\Membera.Merchant.Domain\Membera.Merchant.Domain.csproj" />
   </ItemGroup>
 

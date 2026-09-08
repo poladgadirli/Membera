@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Services\Merchant\Membera.Merchant.Application\Membera.Merchant.Application.csproj" />
+    <ProjectReference Include="..\..\src\BuildingBlocks\Membera.Shared.Caching\Membera.Shared.Caching.csproj" />
   </ItemGroup>
 
   <ItemGroup>
