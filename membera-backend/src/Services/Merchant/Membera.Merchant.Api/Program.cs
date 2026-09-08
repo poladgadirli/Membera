@@ -8,9 +8,18 @@ using Membera.Merchant.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
 using System.Text;
 
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .WriteTo.Console()
+    .WriteTo.File("logs/merchant-.txt", rollingInterval: RollingInterval.Day)
+    .CreateLogger();
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog();
 
 // DbContext qeydiyyatı
 builder.Services.AddDbContext<MerchantDbContext>(options =>
