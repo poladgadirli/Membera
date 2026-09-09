@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Text.Json;
 using Membera.Merchant.Application.Abstractions;
 using Membera.Merchant.Application.Subscriptions.CreateCheckoutSession;
 using Membera.Merchant.Application.Subscriptions.GetMySubscriptions;
@@ -73,18 +74,26 @@ public class SubscriptionController : ControllerBase
     }
 
     [HttpPost("webhook")]
-    public async Task<IActionResult> Webhook()
+    public async Task<IActionResult> Webhook([FromBody] JsonElement rawEvent)
     {
         // Stripe calls this endpoint directly, so it is not [Authorize]d.
         // SIMPLIFIED: no signature verification yet. In production this MUST verify
         // the "Stripe-Signature" header against a configured webhook signing secret
         // (EventUtility.ConstructEvent) to reject forged payloads.
-        using var reader = new StreamReader(Request.Body);
-        var json = await reader.ReadToEndAsync();
+        //
+        // LOCAL MANUAL TESTING: the body is bound as a JsonElement so Swagger UI
+        // renders an editable JSON body field. We serialize it straight back to the
+        // raw JSON string that EventUtility.ParseEvent expects. Stripe's real calls
+        // send "application/json" too, so they still bind here unchanged.
+        var json = rawEvent.GetRawText();
 
         try
         {
-            var stripeEvent = EventUtility.ParseEvent(json);
+            // throwOnApiVersionMismatch: false — real Stripe webhooks always carry
+            // the API version this integration is configured for, but hand-crafted
+            // JSON used for manual/local testing may not match that exact version
+            // string. Disabling the check avoids false parse failures there.
+            var stripeEvent = EventUtility.ParseEvent(json, throwOnApiVersionMismatch: false);
 
             if (stripeEvent.Type == "checkout.session.completed")
             {
