@@ -91,6 +91,21 @@ builder.Services.AddValidatorsFromAssemblyContaining<RegisterUserCommandValidato
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddFluentValidationAutoValidation();
 
+// CORS – allow the SPA dev server (and any origins passed via FRONTEND_ORIGINS)
+// to call the auth endpoints from the browser.
+const string frontendCorsPolicy = "FrontendCors";
+var frontendOrigins = (Environment.GetEnvironmentVariable("FRONTEND_ORIGINS")
+                       ?? "http://localhost:5173;http://localhost:5174")
+    .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(frontendCorsPolicy, policy =>
+        policy.WithOrigins(frontendOrigins)
+              .AllowAnyHeader()
+              .AllowAnyMethod());
+});
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -131,7 +146,16 @@ if (app.Environment.IsDevelopment())
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
-app.UseHttpsRedirection();
+// CORS must run before anything that can short-circuit the pipeline (an HTTPS
+// redirect would 307 the browser's preflight and the CORS check never happens).
+app.UseCors(frontendCorsPolicy);
+
+// In development the SPA calls the plain-HTTP endpoint, so don't force a redirect
+// to HTTPS (it breaks CORS preflight). Keep the redirect for other environments.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseAuthentication();
 app.UseAuthorization();

@@ -47,6 +47,8 @@ interface SignInPageProps {
   onResetPassword?: () => void
   onCreateAccount?: () => void
   onBackToHome?: () => void
+  error?: string | null
+  loading?: boolean
 }
 
 // --- SUB-COMPONENTS ---
@@ -94,6 +96,8 @@ export const SignInPage: React.FC<SignInPageProps> = ({
   onResetPassword,
   onCreateAccount,
   onBackToHome,
+  error,
+  loading = false,
 }) => {
   const [showPassword, setShowPassword] = useState(false)
 
@@ -129,6 +133,7 @@ export const SignInPage: React.FC<SignInPageProps> = ({
                   <input
                     name="email"
                     type="email"
+                    autoComplete="email"
                     placeholder="Enter your email address"
                     className="w-full bg-transparent text-sm p-4 rounded-2xl focus:outline-none"
                   />
@@ -144,6 +149,7 @@ export const SignInPage: React.FC<SignInPageProps> = ({
                     <input
                       name="password"
                       type={showPassword ? 'text' : 'password'}
+                      autoComplete="current-password"
                       placeholder="Enter your password"
                       className="w-full bg-transparent text-sm p-4 pr-12 rounded-2xl focus:outline-none"
                     />
@@ -183,11 +189,18 @@ export const SignInPage: React.FC<SignInPageProps> = ({
                 </a>
               </div>
 
+              {error && (
+                <div className="animate-element rounded-2xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                  {error}
+                </div>
+              )}
+
               <button
                 type="submit"
-                className="animate-element animate-delay-600 w-full rounded-2xl bg-primary py-4 font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+                disabled={loading}
+                className="animate-element animate-delay-600 w-full rounded-2xl bg-primary py-4 font-medium text-primary-foreground hover:bg-primary/90 transition-colors disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Sign In
+                {loading ? 'Signing in…' : 'Sign In'}
               </button>
             </form>
 

@@ -38,6 +38,8 @@ interface SignUpPageProps {
   onGoogleSignUp?: () => void
   onSignIn?: () => void
   onBackToHome?: () => void
+  error?: string | null
+  loading?: boolean
 }
 
 // --- SUB-COMPONENTS ---
@@ -86,8 +88,11 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
   onGoogleSignUp,
   onSignIn,
   onBackToHome,
+  error,
+  loading = false,
 }) => {
   const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   return (
     <div className="h-[100dvh] flex flex-col md:flex-row font-geist w-[100dvw]">
@@ -113,18 +118,35 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
             </p>
 
             <form className="space-y-5" onSubmit={onSignUp}>
-              <div className="animate-element animate-delay-300">
-                <label className="text-sm font-medium text-muted-foreground">
-                  Full Name
-                </label>
-                <GlassInputWrapper>
-                  <input
-                    name="name"
-                    type="text"
-                    placeholder="Enter your full name"
-                    className="w-full bg-transparent text-sm p-4 rounded-2xl focus:outline-none"
-                  />
-                </GlassInputWrapper>
+              <div className="animate-element animate-delay-300 grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">
+                    First Name
+                  </label>
+                  <GlassInputWrapper>
+                    <input
+                      name="firstName"
+                      type="text"
+                      autoComplete="given-name"
+                      placeholder="First name"
+                      className="w-full bg-transparent text-sm p-4 rounded-2xl focus:outline-none"
+                    />
+                  </GlassInputWrapper>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">
+                    Last Name
+                  </label>
+                  <GlassInputWrapper>
+                    <input
+                      name="lastName"
+                      type="text"
+                      autoComplete="family-name"
+                      placeholder="Last name"
+                      className="w-full bg-transparent text-sm p-4 rounded-2xl focus:outline-none"
+                    />
+                  </GlassInputWrapper>
+                </div>
               </div>
 
               <div className="animate-element animate-delay-400">
@@ -135,6 +157,7 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
                   <input
                     name="email"
                     type="email"
+                    autoComplete="email"
                     placeholder="Enter your email address"
                     className="w-full bg-transparent text-sm p-4 rounded-2xl focus:outline-none"
                   />
@@ -150,6 +173,7 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
                     <input
                       name="password"
                       type={showPassword ? 'text' : 'password'}
+                      autoComplete="new-password"
                       placeholder="Create a password"
                       className="w-full bg-transparent text-sm p-4 pr-12 rounded-2xl focus:outline-none"
                     />
@@ -168,7 +192,41 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
                 </GlassInputWrapper>
               </div>
 
-              <label className="animate-element animate-delay-600 flex items-center gap-3 text-sm cursor-pointer">
+              <div className="animate-element animate-delay-600">
+                <label className="text-sm font-medium text-muted-foreground">
+                  Confirm Password
+                </label>
+                <GlassInputWrapper>
+                  <div className="relative">
+                    <input
+                      name="confirmPassword"
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      autoComplete="new-password"
+                      placeholder="Re-enter your password"
+                      className="w-full bg-transparent text-sm p-4 pr-12 rounded-2xl focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute inset-y-0 right-3 flex items-center"
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="w-5 h-5 text-muted-foreground hover:text-foreground transition-colors" />
+                      ) : (
+                        <Eye className="w-5 h-5 text-muted-foreground hover:text-foreground transition-colors" />
+                      )}
+                    </button>
+                  </div>
+                </GlassInputWrapper>
+              </div>
+
+              {error && (
+                <div className="animate-element rounded-2xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                  {error}
+                </div>
+              )}
+
+              <label className="animate-element animate-delay-700 flex items-center gap-3 text-sm cursor-pointer">
                 <input
                   type="checkbox"
                   name="acceptTerms"
@@ -182,9 +240,10 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
 
               <button
                 type="submit"
-                className="animate-element animate-delay-700 w-full rounded-2xl bg-primary py-4 font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+                disabled={loading}
+                className="animate-element animate-delay-800 w-full rounded-2xl bg-primary py-4 font-medium text-primary-foreground hover:bg-primary/90 transition-colors disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Create Account
+                {loading ? 'Creating account…' : 'Create Account'}
               </button>
             </form>
 

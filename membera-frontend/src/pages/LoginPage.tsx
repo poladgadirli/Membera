@@ -1,6 +1,7 @@
-import type { FormEvent } from 'react'
+import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { SignInPage, type Testimonial } from '@/components/ui/sign-in'
+import { ApiError, authStorage, login } from '@/lib/api'
 
 const testimonials: Testimonial[] = [
   {
@@ -28,13 +29,36 @@ const testimonials: Testimonial[] = [
 
 export default function LoginPage() {
   const navigate = useNavigate()
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
 
-  const handleSignIn = (event: FormEvent<HTMLFormElement>) => {
+  const handleSignIn = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    setError(null)
+
     const data = Object.fromEntries(new FormData(event.currentTarget).entries())
-    console.log('Sign in submitted:', data)
-    // TODO: call the auth endpoint, then redirect on success.
-    navigate('/')
+    const email = String(data.email ?? '').trim()
+    const password = String(data.password ?? '')
+
+    if (!email || !password) {
+      setError('Please enter your email and password.')
+      return
+    }
+
+    setLoading(true)
+    try {
+      const result = await login(email, password)
+      authStorage.save(result)
+      navigate('/')
+    } catch (err) {
+      setError(
+        err instanceof ApiError
+          ? err.message
+          : 'Unable to sign in right now. Please try again.',
+      )
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -48,6 +72,8 @@ export default function LoginPage() {
       heroImageSrc="https://images.unsplash.com/photo-1642132652860-471b4228023e?auto=format&fit=crop&w=1600&q=80"
       testimonials={testimonials}
       onSignIn={handleSignIn}
+      error={error}
+      loading={loading}
       onGoogleSignIn={() => console.log('Continue with Google')}
       onResetPassword={() => navigate('/contact')}
       onCreateAccount={() => navigate('/signup')}
