@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { SignUpPage, type Testimonial } from '@/components/ui/sign-up'
-import { ApiError, authStorage, googleLogin, login, register } from '@/lib/api'
+import { useAuth } from '@/hooks/useAuth'
+import { ApiError, googleLogin, login, register } from '@/lib/api'
 
 const testimonials: Testimonial[] = [
   {
@@ -29,6 +30,7 @@ const testimonials: Testimonial[] = [
 
 export default function RegisterPage() {
   const navigate = useNavigate()
+  const { login: startSession } = useAuth()
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
@@ -68,8 +70,8 @@ export default function RegisterPage() {
       })
       // Registration succeeded — sign the new user straight in.
       const session = await login(email, password)
-      authStorage.save(session)
-      navigate('/')
+      startSession(session.accessToken, session.refreshToken)
+      navigate('/dashboard', { replace: true })
     } catch (err) {
       setError(
         err instanceof ApiError
@@ -87,8 +89,8 @@ export default function RegisterPage() {
     try {
       // Same endpoint as Google login — it creates the account on first use.
       const session = await googleLogin(idToken)
-      authStorage.save(session)
-      navigate('/')
+      startSession(session.accessToken, session.refreshToken)
+      navigate('/dashboard', { replace: true })
     } catch (err) {
       setError(
         err instanceof ApiError

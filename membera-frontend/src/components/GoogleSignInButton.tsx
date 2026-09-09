@@ -19,8 +19,13 @@ export function GoogleSignInButton({
   const containerRef = useRef<HTMLDivElement>(null)
   const onCredentialRef = useRef(onCredential)
   const onErrorRef = useRef(onError)
-  onCredentialRef.current = onCredential
-  onErrorRef.current = onError
+
+  // Keep the latest callbacks reachable from the one-time init effect below
+  // without making that effect depend on their identity.
+  useEffect(() => {
+    onCredentialRef.current = onCredential
+    onErrorRef.current = onError
+  })
 
   useEffect(() => {
     let cancelled = false

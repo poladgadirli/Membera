@@ -102,6 +102,22 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
+// CORS – allow the SPA dev server (and any origins passed via FRONTEND_ORIGINS)
+// to call the merchant endpoints from the browser. Kept identical to
+// Membera.Auth.Api so both services behave the same for the frontend.
+const string frontendCorsPolicy = "FrontendCors";
+var frontendOrigins = (Environment.GetEnvironmentVariable("FRONTEND_ORIGINS")
+                       ?? "http://localhost:5173;http://localhost:5174")
+    .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(frontendCorsPolicy, policy =>
+        policy.WithOrigins(frontendOrigins)
+              .AllowAnyHeader()
+              .AllowAnyMethod());
+});
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>

@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { SignInPage, type Testimonial } from '@/components/ui/sign-in'
-import { ApiError, authStorage, googleLogin, login } from '@/lib/api'
+import { useAuth } from '@/hooks/useAuth'
+import { ApiError, googleLogin, login } from '@/lib/api'
 
 const testimonials: Testimonial[] = [
   {
@@ -29,8 +30,14 @@ const testimonials: Testimonial[] = [
 
 export default function LoginPage() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const { login: startSession } = useAuth()
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+
+  const redirectTo =
+    (location.state as { from?: { pathname?: string } } | null)?.from?.pathname ??
+    '/dashboard'
 
   const handleSignIn = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -48,8 +55,8 @@ export default function LoginPage() {
     setLoading(true)
     try {
       const result = await login(email, password)
-      authStorage.save(result)
-      navigate('/')
+      startSession(result.accessToken, result.refreshToken)
+      navigate(redirectTo, { replace: true })
     } catch (err) {
       setError(
         err instanceof ApiError
@@ -66,8 +73,8 @@ export default function LoginPage() {
     setLoading(true)
     try {
       const result = await googleLogin(idToken)
-      authStorage.save(result)
-      navigate('/')
+      startSession(result.accessToken, result.refreshToken)
+      navigate(redirectTo, { replace: true })
     } catch (err) {
       setError(
         err instanceof ApiError
