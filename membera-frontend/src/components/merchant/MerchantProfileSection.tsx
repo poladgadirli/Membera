@@ -1,0 +1,289 @@
+import { useCallback, useEffect, useState, type FormEvent } from 'react'
+import { Spinner } from '@/components/Spinner'
+import { StatusBadge } from '@/components/StatusBadge'
+import { ApiError } from '@/lib/apiClient'
+import {
+  createMerchant,
+  getMyMerchant,
+  isMerchantNotFound,
+  updateMerchant,
+  type MerchantProfile,
+} from '@/lib/merchant'
+
+const fieldClass =
+  'mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring'
+const labelClass = 'block text-sm font-medium text-foreground'
+const primaryButton =
+  'inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-60'
+const secondaryButton =
+  'inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-60'
+
+type Status = 'loading' | 'setup' | 'ready' | 'error'
+
+function ErrorNote({ message }: { message: string }) {
+  return (
+    <div className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+      {message}
+    </div>
+  )
+}
+
+export function MerchantProfileSection() {
+  const [status, setStatus] = useState<Status>('loading')
+  const [profile, setProfile] = useState<MerchantProfile | null>(null)
+  const [loadError, setLoadError] = useState<string | null>(null)
+
+  const [editing, setEditing] = useState(false)
+  const [businessName, setBusinessName] = useState('')
+  const [description, setDescription] = useState('')
+  const [formError, setFormError] = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
+
+  // All setState happens after `await`, so this is safe to call from an effect.
+  const load = useCallback(async () => {
+    try {
+      const data = await getMyMerchant()
+      setProfile(data)
+      setStatus('ready')
+    } catch (err) {
+      if (isMerchantNotFound(err)) {
+        setProfile(null)
+        setStatus('setup')
+        return
+      }
+      setLoadError(
+        err instanceof ApiError
+          ? err.message
+          : 'Could not load your business profile.',
+      )
+      setStatus('error')
+    }
+  }, [])
+
+  useEffect(() => {
+    let active = true
+    getMyMerchant().then(
+      (data) => {
+        if (!active) return
+        setProfile(data)
+        setStatus('ready')
+      },
+      (err) => {
+        if (!active) return
+        if (isMerchantNotFound(err)) {
+          setProfile(null)
+          setStatus('setup')
+          return
+        }
+        setLoadError(
+          err instanceof ApiError
+            ? err.message
+            : 'Could not load your business profile.',
+        )
+        setStatus('error')
+      },
+    )
+    return () => {
+      active = false
+    }
+  }, [])
+
+  const retry = () => {
+    setStatus('loading')
+    setLoadError(null)
+    void load()
+  }
+
+  const startEditing = () => {
+    setBusinessName(profile?.businessName ?? '')
+    setDescription(profile?.description ?? '')
+    setFormError(null)
+    setEditing(true)
+  }
+
+  const handleCreate = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setFormError(null)
+    const name = businessName.trim()
+    if (!name) return setFormError('Enter your business name.')
+
+    setSaving(true)
+    try {
+      await createMerchant(name)
+      setBusinessName('')
+      setDescription('')
+      await load()
+    } catch (err) {
+      setFormError(
+        err instanceof ApiError
+          ? err.message
+          : 'Could not create your business profile.',
+      )
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleUpdate = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setFormError(null)
+    const name = businessName.trim()
+    if (!name) return setFormError('Business name cannot be empty.')
+
+    setSaving(true)
+    try {
+      await updateMerchant({ businessName: name, description: description.trim() })
+      setEditing(false)
+      await load()
+    } catch (err) {
+      setFormError(
+        err instanceof ApiError
+          ? err.message
+          : 'Could not save your changes.',
+      )
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <section aria-labelledby="business-profile-heading">
+      <h2
+        id="business-profile-heading"
+        className="text-sm font-medium text-muted-foreground"
+      >
+        Business profile
+      </h2>
+
+      <div className="mt-3 rounded-2xl border border-border bg-card p-6">
+        {status === 'loading' && (
+          <div className="flex items-center gap-3 text-sm text-muted-foreground">
+            <Spinner /> Loading your business profile…
+          </div>
+        )}
+
+        {status === 'error' && (
+          <div className="space-y-3">
+            <ErrorNote message={loadError ?? 'Something went wrong.'} />
+            <button type="button" onClick={retry} className={secondaryButton}>
+              Try again
+            </button>
+          </div>
+        )}
+
+        {status === 'setup' && (
+          <form onSubmit={handleCreate} className="space-y-4">
+            <div>
+              <h3 className="text-base font-semibold text-foreground">
+                Set up your business profile
+              </h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Add your business name to start creating subscription plans.
+              </p>
+            </div>
+
+            {formError && <ErrorNote message={formError} />}
+
+            <div>
+              <label htmlFor="setup-business-name" className={labelClass}>
+                Business name
+              </label>
+              <input
+                id="setup-business-name"
+                className={fieldClass}
+                value={businessName}
+                onChange={(e) => setBusinessName(e.target.value)}
+                placeholder="Blue Bottle Coffee"
+                maxLength={120}
+              />
+            </div>
+
+            <button type="submit" disabled={saving} className={primaryButton}>
+              {saving && <Spinner className="h-4 w-4" />}
+              Create profile
+            </button>
+          </form>
+        )}
+
+        {status === 'ready' && profile && !editing && (
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <h3 className="text-lg font-semibold tracking-tight text-foreground">
+                  {profile.businessName}
+                </h3>
+                <StatusBadge active={profile.isActive} />
+              </div>
+              <p className="mt-1 max-w-prose text-sm text-muted-foreground">
+                {profile.description?.trim()
+                  ? profile.description
+                  : 'No description yet.'}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={startEditing}
+              className={`${secondaryButton} shrink-0`}
+            >
+              Edit
+            </button>
+          </div>
+        )}
+
+        {status === 'ready' && profile && editing && (
+          <form onSubmit={handleUpdate} className="space-y-4">
+            <h3 className="text-base font-semibold text-foreground">
+              Edit business profile
+            </h3>
+
+            {formError && <ErrorNote message={formError} />}
+
+            <div>
+              <label htmlFor="edit-business-name" className={labelClass}>
+                Business name
+              </label>
+              <input
+                id="edit-business-name"
+                className={fieldClass}
+                value={businessName}
+                onChange={(e) => setBusinessName(e.target.value)}
+                maxLength={120}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="edit-business-description" className={labelClass}>
+                Description{' '}
+                <span className="font-normal text-muted-foreground">
+                  (optional)
+                </span>
+              </label>
+              <textarea
+                id="edit-business-description"
+                className={`${fieldClass} min-h-20 resize-y`}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                maxLength={500}
+              />
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button type="submit" disabled={saving} className={primaryButton}>
+                {saving && <Spinner className="h-4 w-4" />}
+                Save changes
+              </button>
+              <button
+                type="button"
+                onClick={() => setEditing(false)}
+                disabled={saving}
+                className={secondaryButton}
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
+    </section>
+  )
+}
