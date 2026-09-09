@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Membera.Merchant.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 using MerchantEntity = Membera.Merchant.Domain.Entities.Merchant;
 
 namespace Membera.Merchant.Infrastructure.Persistence;
@@ -10,6 +11,7 @@ public class MerchantDbContext : DbContext
     }
 
     public DbSet<MerchantEntity> Merchants => Set<MerchantEntity>();
+    public DbSet<SubscriptionPlan> SubscriptionPlans => Set<SubscriptionPlan>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

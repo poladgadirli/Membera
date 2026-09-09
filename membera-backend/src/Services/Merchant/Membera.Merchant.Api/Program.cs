@@ -3,6 +3,10 @@ using Membera.Merchant.Application.Abstractions;
 using Membera.Merchant.Application.Merchants.CreateMerchant;
 using Membera.Merchant.Application.Merchants.GetMerchantByOwnerId;
 using Membera.Merchant.Application.Merchants.UpdateMerchant;
+using Membera.Merchant.Application.SubscriptionPlans.CreateSubscriptionPlan;
+using Membera.Merchant.Application.SubscriptionPlans.DeactivateSubscriptionPlan;
+using Membera.Merchant.Application.SubscriptionPlans.GetPlansByMerchantId;
+using Membera.Merchant.Application.SubscriptionPlans.UpdateSubscriptionPlan;
 using Membera.Merchant.Infrastructure.Messaging;
 using Membera.Merchant.Infrastructure.Persistence;
 using Membera.Shared.Caching;
@@ -45,6 +49,13 @@ builder.Services.AddScoped<CreateMerchantHandler>();
 builder.Services.AddScoped<GetMerchantByOwnerIdHandler>();
 builder.Services.AddScoped<UpdateMerchantHandler>();
 builder.Services.AddHostedService<UserRegisteredConsumer>();
+
+builder.Services.AddScoped<ISubscriptionPlanRepository, SubscriptionPlanRepository>();
+
+builder.Services.AddScoped<CreateSubscriptionPlanHandler>();
+builder.Services.AddScoped<GetPlansByMerchantIdHandler>();
+builder.Services.AddScoped<UpdateSubscriptionPlanHandler>();
+builder.Services.AddScoped<DeactivateSubscriptionPlanHandler>();
 
 builder.Services.AddSingleton<IConnectionMultiplexer>(
     ConnectionMultiplexer.Connect("localhost:6379"));
