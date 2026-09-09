@@ -7,7 +7,12 @@ using Membera.Merchant.Application.SubscriptionPlans.CreateSubscriptionPlan;
 using Membera.Merchant.Application.SubscriptionPlans.DeactivateSubscriptionPlan;
 using Membera.Merchant.Application.SubscriptionPlans.GetPlansByMerchantId;
 using Membera.Merchant.Application.SubscriptionPlans.UpdateSubscriptionPlan;
+using Membera.Merchant.Application.Subscriptions.CreateCheckoutSession;
+using Membera.Merchant.Application.Subscriptions.GetMySubscriptions;
+using Membera.Merchant.Application.Subscriptions.HandleStripeWebhook;
+using Membera.Merchant.Application.Subscriptions.RedeemSubscription;
 using Membera.Merchant.Infrastructure.Messaging;
+using Membera.Merchant.Infrastructure.Payments;
 using Membera.Merchant.Infrastructure.Persistence;
 using Membera.Shared.Caching;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -56,6 +61,14 @@ builder.Services.AddScoped<CreateSubscriptionPlanHandler>();
 builder.Services.AddScoped<GetPlansByMerchantIdHandler>();
 builder.Services.AddScoped<UpdateSubscriptionPlanHandler>();
 builder.Services.AddScoped<DeactivateSubscriptionPlanHandler>();
+
+builder.Services.AddScoped<IUserSubscriptionRepository, UserSubscriptionRepository>();
+builder.Services.AddScoped<IStripeService, StripeService>();
+
+builder.Services.AddScoped<CreateCheckoutSessionHandler>();
+builder.Services.AddScoped<HandleStripeWebhookHandler>();
+builder.Services.AddScoped<RedeemSubscriptionHandler>();
+builder.Services.AddScoped<GetMySubscriptionsHandler>();
 
 builder.Services.AddSingleton<IConnectionMultiplexer>(
     ConnectionMultiplexer.Connect("localhost:6379"));

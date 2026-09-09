@@ -12,6 +12,7 @@ public class MerchantDbContext : DbContext
 
     public DbSet<MerchantEntity> Merchants => Set<MerchantEntity>();
     public DbSet<SubscriptionPlan> SubscriptionPlans => Set<SubscriptionPlan>();
+    public DbSet<UserSubscription> UserSubscriptions => Set<UserSubscription>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
