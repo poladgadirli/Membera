@@ -158,7 +158,16 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// CORS must run before anything that can short-circuit the pipeline (an HTTPS
+// redirect would 307 the browser's preflight and the CORS check never happens).
+app.UseCors(frontendCorsPolicy);
+
+// In development the SPA calls the plain-HTTP endpoint, so don't force a redirect
+// to HTTPS (it breaks CORS preflight). Keep the redirect for other environments.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseAuthentication();
 app.UseAuthorization();
