@@ -108,6 +108,13 @@ export function register(payload: RegisterPayload): Promise<RegisterResult> {
   return post<RegisterResult>('/api/auth/register', payload)
 }
 
+// Exchanges a Google ID token for a Membera session. The endpoint signs the
+// user in, creating the account on first use, so it covers both "log in with
+// Google" and "sign up with Google".
+export function googleLogin(idToken: string): Promise<LoginResult> {
+  return post<LoginResult>('/api/auth/google-login', { idToken })
+}
+
 const ACCESS_TOKEN_KEY = 'membera.accessToken'
 const REFRESH_TOKEN_KEY = 'membera.refreshToken'
 const EXPIRES_AT_KEY = 'membera.accessTokenExpiresAt'

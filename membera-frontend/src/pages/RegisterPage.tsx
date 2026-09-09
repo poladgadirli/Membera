@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { SignUpPage, type Testimonial } from '@/components/ui/sign-up'
-import { ApiError, authStorage, login, register } from '@/lib/api'
+import { ApiError, authStorage, googleLogin, login, register } from '@/lib/api'
 
 const testimonials: Testimonial[] = [
   {
@@ -81,6 +81,25 @@ export default function RegisterPage() {
     }
   }
 
+  const handleGoogleSignUp = async (idToken: string) => {
+    setError(null)
+    setLoading(true)
+    try {
+      // Same endpoint as Google login — it creates the account on first use.
+      const session = await googleLogin(idToken)
+      authStorage.save(session)
+      navigate('/')
+    } catch (err) {
+      setError(
+        err instanceof ApiError
+          ? err.message
+          : 'Unable to sign up with Google right now. Please try again.',
+      )
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <SignUpPage
       title={
@@ -94,7 +113,8 @@ export default function RegisterPage() {
       onSignUp={handleSignUp}
       error={error}
       loading={loading}
-      onGoogleSignUp={() => console.log('Continue with Google')}
+      onGoogleSignUp={handleGoogleSignUp}
+      onGoogleError={setError}
       onSignIn={() => navigate('/login')}
       onBackToHome={() => navigate('/')}
     />

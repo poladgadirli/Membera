@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { SignInPage, type Testimonial } from '@/components/ui/sign-in'
-import { ApiError, authStorage, login } from '@/lib/api'
+import { ApiError, authStorage, googleLogin, login } from '@/lib/api'
 
 const testimonials: Testimonial[] = [
   {
@@ -61,6 +61,24 @@ export default function LoginPage() {
     }
   }
 
+  const handleGoogleSignIn = async (idToken: string) => {
+    setError(null)
+    setLoading(true)
+    try {
+      const result = await googleLogin(idToken)
+      authStorage.save(result)
+      navigate('/')
+    } catch (err) {
+      setError(
+        err instanceof ApiError
+          ? err.message
+          : 'Unable to sign in with Google right now. Please try again.',
+      )
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <SignInPage
       title={
@@ -74,7 +92,8 @@ export default function LoginPage() {
       onSignIn={handleSignIn}
       error={error}
       loading={loading}
-      onGoogleSignIn={() => console.log('Continue with Google')}
+      onGoogleSignIn={handleGoogleSignIn}
+      onGoogleError={setError}
       onResetPassword={() => navigate('/contact')}
       onCreateAccount={() => navigate('/signup')}
       onBackToHome={() => navigate('/')}
