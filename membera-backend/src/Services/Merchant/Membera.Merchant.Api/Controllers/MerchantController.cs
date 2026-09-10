@@ -74,7 +74,11 @@ public class MerchantController : ControllerBase
     }
 
     [HttpPost("logo")]
-    public async Task<IActionResult> UploadLogo([FromForm] IFormFile file)
+    // No [FromForm]: an IFormFile parameter is already bound from multipart form
+    // data by [ApiController] inference, and Swashbuckle throws at swagger-gen
+    // time if [FromForm] is combined with IFormFile (by design — see its
+    // "Handle Forms and File Uploads" docs).
+    public async Task<IActionResult> UploadLogo(IFormFile file)
     {
         var merchantId = await GetMerchantIdForCurrentUserAsync();
 

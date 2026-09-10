@@ -89,10 +89,16 @@ async function request<T>(
         : undefined,
       signal: options.signal,
     })
-  } catch {
+  } catch (cause) {
+    // Don't swallow the underlying failure. `fetch` rejects (or throws) for CORS
+    // blocks, TLS/cert errors, offline, and any bug in the request setup above —
+    // without this log they all collapse into one vague message and never reach
+    // the console or DevTools.
+    console.error(`[apiClient] ${options.method ?? 'GET'} ${path} failed before a response:`, cause)
     throw new ApiError(
       'Unable to reach the server. Check that the API is running and try again.',
       0,
+      cause,
     )
   }
 

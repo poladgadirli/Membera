@@ -97,7 +97,10 @@ public class SubscriptionPlanController : ControllerBase
     }
 
     [HttpPost("{planId}/image")]
-    public async Task<IActionResult> UploadImage(Guid planId, [FromForm] IFormFile file)
+    // planId binds from the route; file binds from multipart form data via
+    // [ApiController] inference. No [FromForm] on IFormFile — Swashbuckle rejects
+    // that combination at swagger-gen time (see its file-upload docs).
+    public async Task<IActionResult> UploadImage(Guid planId, IFormFile file)
     {
         var merchantId = await GetMerchantIdForCurrentUserAsync();
 

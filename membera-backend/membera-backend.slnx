@@ -10,7 +10,7 @@
     <Project Path="src/BuildingBlocks/Membera.Shared.Contracts/Membera.Shared.Contracts.csproj" Id="80c2ab37-fe00-4652-9352-4bce24a6b10d" />
     <Project Path="src/BuildingBlocks/Membera.Shared.Domain/Membera.Shared.Domain.csproj" />
     <Project Path="src/BuildingBlocks/Membera.Shared.Messaging/Membera.Shared.Messaging.csproj" />
-    <Project Path="src/BuildingBlocks/Membera.Shared.Storage/Membera.Shared.Storage.csproj" />
+    <Project Path="src/BuildingBlocks/Membera.Shared.Storage/Membera.Shared.Storage.csproj" Id="6357cffe-4e6c-4b9c-8b34-54b947cc2ab1" />
   </Folder>
   <Folder Name="/src/Gateway/">
     <Project Path="src/gateway/Membera.Gateway/Membera.Gateway.csproj" Id="8dd5050b-b608-4393-b370-4724cffc6e86" />
