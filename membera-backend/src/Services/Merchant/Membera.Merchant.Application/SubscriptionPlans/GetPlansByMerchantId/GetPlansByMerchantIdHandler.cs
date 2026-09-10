@@ -21,7 +21,7 @@ public class GetPlansByMerchantIdHandler
         var plans = await _subscriptionPlanRepository.GetByMerchantIdAsync(query.MerchantId);
 
         var summaries = plans.Select(p => new SubscriptionPlanSummary(
-            p.Id, p.Name, p.Description, p.Price, p.DurationInDays, p.UsageLimit, p.ActiveFrom, p.ActiveUntil, p.IsActive
+            p.Id, p.Name, p.Description, p.Price, p.DurationInDays, p.UsageLimit, p.ActiveFrom, p.ActiveUntil, p.ImageUrl, p.IsActive
         )).ToList();
 
         _logger.LogInformation("Retrieved {Count} subscription plans for MerchantId: {MerchantId}", summaries.Count, query.MerchantId);

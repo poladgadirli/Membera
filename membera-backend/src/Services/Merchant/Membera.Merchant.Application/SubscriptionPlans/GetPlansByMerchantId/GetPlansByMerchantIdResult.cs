@@ -9,6 +9,7 @@ public record SubscriptionPlanSummary(
     int? UsageLimit,
     TimeOnly ActiveFrom,
     TimeOnly ActiveUntil,
+    string? ImageUrl,
     bool IsActive
 );
 

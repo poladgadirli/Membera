@@ -7,6 +7,7 @@ public class Merchant : BaseEntity
     public Guid OwnerId { get; private set; }
     public string BusinessName { get; private set; }
     public string? Description { get; private set; }
+    public string? LogoUrl { get; private set; }
     public bool IsActive { get; private set; }
 
     private Merchant() { }
@@ -22,6 +23,12 @@ public class Merchant : BaseEntity
     {
         BusinessName = businessName;
         Description = description;
+        MarkAsUpdated();
+    }
+
+    public void UpdateLogo(string logoUrl)
+    {
+        LogoUrl = logoUrl;
         MarkAsUpdated();
     }
 

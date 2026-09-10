@@ -41,7 +41,7 @@ public class GetMerchantByOwnerIdHandler
         }
 
         var result = new GetMerchantByOwnerIdResult(
-            merchant.Id, merchant.OwnerId, merchant.BusinessName, merchant.Description, merchant.IsActive);
+            merchant.Id, merchant.OwnerId, merchant.BusinessName, merchant.Description, merchant.LogoUrl, merchant.IsActive);
 
         await _cacheService.SetAsync(cacheKey, result, TimeSpan.FromMinutes(5));
 

@@ -3,6 +3,7 @@ using System;
 using Membera.Merchant.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Membera.Merchant.Infrastructure.Migrations
 {
     [DbContext(typeof(MerchantDbContext))]
-    partial class MerchantDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260910105450_AddMerchantLogoUrl")]
+    partial class AddMerchantLogoUrl
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -79,10 +82,6 @@ namespace Membera.Merchant.Infrastructure.Migrations
 
                     b.Property<int>("DurationInDays")
                         .HasColumnType("integer");
-
-                    b.Property<string>("ImageUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");

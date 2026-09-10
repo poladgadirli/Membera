@@ -12,6 +12,7 @@ public class SubscriptionPlan : BaseEntity
     public int? UsageLimit { get; private set; }
     public TimeOnly ActiveFrom { get; private set; }
     public TimeOnly ActiveUntil { get; private set; }
+    public string? ImageUrl { get; private set; }
     public bool IsActive { get; private set; }
 
     private SubscriptionPlan() { }
@@ -53,6 +54,12 @@ public class SubscriptionPlan : BaseEntity
         UsageLimit = usageLimit;
         ActiveFrom = activeFrom;
         ActiveUntil = activeUntil;
+        MarkAsUpdated();
+    }
+
+    public void UpdateImage(string imageUrl)
+    {
+        ImageUrl = imageUrl;
         MarkAsUpdated();
     }
 
