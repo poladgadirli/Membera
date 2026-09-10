@@ -1,5 +1,6 @@
 ﻿using System.Security.Claims;
 using Membera.Merchant.Application.Abstractions;
+using Membera.Merchant.Application.SubscriptionPlans.BrowseActivePlans;
 using Membera.Merchant.Application.SubscriptionPlans.CreateSubscriptionPlan;
 using Membera.Merchant.Application.SubscriptionPlans.DeactivateSubscriptionPlan;
 using Membera.Merchant.Application.SubscriptionPlans.GetPlansByMerchantId;
@@ -18,6 +19,7 @@ public class SubscriptionPlanController : ControllerBase
 {
     private readonly CreateSubscriptionPlanHandler _createHandler;
     private readonly GetPlansByMerchantIdHandler _getByMerchantIdHandler;
+    private readonly BrowseActivePlansHandler _browseActivePlansHandler;
     private readonly UpdateSubscriptionPlanHandler _updateHandler;
     private readonly DeactivateSubscriptionPlanHandler _deactivateHandler;
     private readonly UploadSubscriptionPlanImageHandler _uploadImageHandler;
@@ -26,6 +28,7 @@ public class SubscriptionPlanController : ControllerBase
     public SubscriptionPlanController(
         CreateSubscriptionPlanHandler createHandler,
         GetPlansByMerchantIdHandler getByMerchantIdHandler,
+        BrowseActivePlansHandler browseActivePlansHandler,
         UpdateSubscriptionPlanHandler updateHandler,
         DeactivateSubscriptionPlanHandler deactivateHandler,
         UploadSubscriptionPlanImageHandler uploadImageHandler,
@@ -33,6 +36,7 @@ public class SubscriptionPlanController : ControllerBase
     {
         _createHandler = createHandler;
         _getByMerchantIdHandler = getByMerchantIdHandler;
+        _browseActivePlansHandler = browseActivePlansHandler;
         _updateHandler = updateHandler;
         _deactivateHandler = deactivateHandler;
         _uploadImageHandler = uploadImageHandler;
@@ -73,6 +77,17 @@ public class SubscriptionPlanController : ControllerBase
         var merchantId = await GetMerchantIdForCurrentUserAsync();
         var result = await _getByMerchantIdHandler.HandleAsync(new GetPlansByMerchantIdQuery(merchantId));
         return Ok(BaseResponse<GetPlansByMerchantIdResult>.SuccessResponse(result));
+    }
+
+    // GET /api/subscription-plans — every active plan across all merchants, for
+    // the customer-facing browse page. Inherits the controller's [Authorize], so
+    // any signed-in user (including the "User" role) can call it; it just needs a
+    // valid token, which the SPA always attaches. Distinct from "mine" above.
+    [HttpGet]
+    public async Task<IActionResult> BrowseActive()
+    {
+        var result = await _browseActivePlansHandler.HandleAsync(new BrowseActivePlansQuery());
+        return Ok(BaseResponse<BrowseActivePlansResult>.SuccessResponse(result));
     }
 
     [HttpPut("{planId}")]

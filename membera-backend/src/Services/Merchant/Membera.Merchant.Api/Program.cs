@@ -4,6 +4,7 @@ using Membera.Merchant.Application.Merchants.CreateMerchant;
 using Membera.Merchant.Application.Merchants.GetMerchantByOwnerId;
 using Membera.Merchant.Application.Merchants.UpdateMerchant;
 using Membera.Merchant.Application.Merchants.UploadMerchantLogo;
+using Membera.Merchant.Application.SubscriptionPlans.BrowseActivePlans;
 using Membera.Merchant.Application.SubscriptionPlans.CreateSubscriptionPlan;
 using Membera.Merchant.Application.SubscriptionPlans.DeactivateSubscriptionPlan;
 using Membera.Merchant.Application.SubscriptionPlans.GetPlansByMerchantId;
@@ -62,6 +63,7 @@ builder.Services.AddScoped<ISubscriptionPlanRepository, SubscriptionPlanReposito
 
 builder.Services.AddScoped<CreateSubscriptionPlanHandler>();
 builder.Services.AddScoped<GetPlansByMerchantIdHandler>();
+builder.Services.AddScoped<BrowseActivePlansHandler>();
 builder.Services.AddScoped<UpdateSubscriptionPlanHandler>();
 builder.Services.AddScoped<DeactivateSubscriptionPlanHandler>();
 

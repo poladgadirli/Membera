@@ -25,6 +25,13 @@ public class SubscriptionPlanRepository : ISubscriptionPlanRepository
             .ToListAsync();
     }
 
+    public async Task<List<SubscriptionPlan>> GetAllActiveAsync()
+    {
+        return await _context.SubscriptionPlans
+            .Where(p => p.IsActive)
+            .ToListAsync();
+    }
+
     public async Task AddAsync(SubscriptionPlan plan)
     {
         await _context.SubscriptionPlans.AddAsync(plan);
