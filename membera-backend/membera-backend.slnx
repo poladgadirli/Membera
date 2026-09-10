@@ -11,6 +11,9 @@
     <Project Path="src/BuildingBlocks/Membera.Shared.Domain/Membera.Shared.Domain.csproj" />
     <Project Path="src/BuildingBlocks/Membera.Shared.Messaging/Membera.Shared.Messaging.csproj" />
   </Folder>
+  <Folder Name="/src/Gateway/">
+    <Project Path="src/gateway/Membera.Gateway/Membera.Gateway.csproj" Id="8dd5050b-b608-4393-b370-4724cffc6e86" />
+  </Folder>
   <Folder Name="/src/Services/" />
   <Folder Name="/src/Services/Auth/">
     <Project Path="src/Services/Auth/Membera.Auth.Api/Membera.Auth.Api.csproj" />
