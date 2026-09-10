@@ -1,8 +1,8 @@
 // Merchant service calls (plans, merchant profile). Thin wrappers over the
-// merchantApi client (src/lib/apiClient.ts), which attaches the bearer token,
+// shared api client (src/lib/apiClient.ts), which attaches the bearer token,
 // unwraps BaseResponse<T> and throws ApiError.
 
-import { ApiError, merchantApi } from '@/lib/apiClient'
+import { ApiError, api } from '@/lib/apiClient'
 
 export interface MerchantProfile {
   businessName: string
@@ -39,18 +39,18 @@ export interface PlanInput {
 // --- Merchant profile ---
 
 export function getMyMerchant(): Promise<MerchantProfile> {
-  return merchantApi.get<MerchantProfile>('/Merchant/me')
+  return api.get<MerchantProfile>('/Merchant/me')
 }
 
 export function createMerchant(businessName: string): Promise<MerchantProfile> {
-  return merchantApi.post<MerchantProfile>('/Merchant', { businessName })
+  return api.post<MerchantProfile>('/Merchant', { businessName })
 }
 
 export function updateMerchant(input: {
   businessName: string
   description: string
 }): Promise<MerchantProfile> {
-  return merchantApi.put<MerchantProfile>('/Merchant', input)
+  return api.put<MerchantProfile>('/Merchant', input)
 }
 
 /** The API answers a missing profile with a 400 + "Merchant profile not found." */
@@ -64,28 +64,28 @@ export function isMerchantNotFound(error: unknown): boolean {
 // --- Subscription plans ---
 
 export async function getMyPlans(): Promise<SubscriptionPlan[]> {
-  const data = await merchantApi.get<SubscriptionPlan[]>(
+  const data = await api.get<SubscriptionPlan[]>(
     '/subscription-plans/mine',
   )
   return Array.isArray(data) ? data : []
 }
 
 export function createPlan(input: PlanInput): Promise<SubscriptionPlan> {
-  return merchantApi.post<SubscriptionPlan>('/subscription-plans', input)
+  return api.post<SubscriptionPlan>('/subscription-plans', input)
 }
 
 export function updatePlan(
   planId: string,
   input: PlanInput,
 ): Promise<SubscriptionPlan> {
-  return merchantApi.put<SubscriptionPlan>(
+  return api.put<SubscriptionPlan>(
     `/subscription-plans/${planId}`,
     input,
   )
 }
 
 export function deactivatePlan(planId: string): Promise<void> {
-  return merchantApi.post<void>(`/subscription-plans/${planId}/deactivate`)
+  return api.post<void>(`/subscription-plans/${planId}/deactivate`)
 }
 
 // --- Formatting helpers ---

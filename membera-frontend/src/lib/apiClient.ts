@@ -1,18 +1,14 @@
-// fetch wrapper for the two backend APIs. Attaches the bearer token, unwraps the
-// BaseResponse<T> envelope, and normalises errors. On 401 it notifies a handler
-// (registered by the AuthContext) which clears the session and sends the user to
-// /login. Automatic refresh-token retry is intentionally not implemented yet.
+// fetch wrapper for the backend API (reached through the Membera.Gateway reverse
+// proxy). Attaches the bearer token, unwraps the BaseResponse<T> envelope, and
+// normalises errors. On 401 it notifies a handler (registered by the AuthContext)
+// which clears the session and sends the user to /login. Automatic refresh-token
+// retry is intentionally not implemented yet.
 
 import { getAccessToken } from '@/lib/authStorage'
 
-const AUTH_API_BASE_URL = (
-  (import.meta.env.VITE_AUTH_API_URL as string | undefined) ??
-  'https://localhost:7214/api'
-).replace(/\/$/, '')
-
-const MERCHANT_API_BASE_URL = (
-  (import.meta.env.VITE_MERCHANT_API_URL as string | undefined) ??
-  'https://localhost:7241/api'
+const API_BASE_URL = (
+  (import.meta.env.VITE_API_URL as string | undefined) ??
+  'https://localhost:7174/api'
 ).replace(/\/$/, '')
 
 export class ApiError extends Error {
@@ -151,8 +147,9 @@ function makeClient(baseUrl: string) {
   }
 }
 
-/** Calls the Auth service (login, register, token refresh, account settings). */
-export const authApi = makeClient(AUTH_API_BASE_URL)
-
-/** Calls the Merchant service (plans, subscriptions, redemptions). */
-export const merchantApi = makeClient(MERCHANT_API_BASE_URL)
+/**
+ * The single API client. Every request goes through the gateway, which routes
+ * it to the Auth or Merchant service by path prefix (/auth, /admin → Auth;
+ * /merchant, /subscription-plans, /subscriptions → Merchant).
+ */
+export const api = makeClient(API_BASE_URL)
