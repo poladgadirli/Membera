@@ -5,6 +5,7 @@ import DashboardPage from './pages/DashboardPage'
 import LandingPage from './pages/LandingPage'
 import LoginPage from './pages/LoginPage'
 import NotAuthorizedPage from './pages/NotAuthorizedPage'
+import NotFoundPage from './pages/NotFoundPage'
 import PlaceholderPage from './pages/PlaceholderPage'
 import RegisterPage from './pages/RegisterPage'
 import SubscriptionCancelPage from './pages/SubscriptionCancelPage'
@@ -60,7 +61,9 @@ function App() {
       <Route path="/about" element={<PlaceholderPage title="About" />} />
       <Route path="/contact" element={<PlaceholderPage title="Contact" />} />
       <Route path="/privacy" element={<PlaceholderPage title="Privacy" />} />
-      <Route path="*" element={<PlaceholderPage title="Page not found" />} />
+
+      {/* Catch-all — must stay last so it only matches unknown routes. */}
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   )
 }
