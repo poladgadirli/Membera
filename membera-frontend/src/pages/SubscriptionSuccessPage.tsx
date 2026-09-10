@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { DashboardShell } from '@/components/DashboardShell'
 import { CheckIcon } from '@/components/icons'
-import { Spinner } from '@/components/Spinner'
 import { SubscriptionStatusBadge } from '@/components/SubscriptionStatusBadge'
+import LoaderOne from '@/components/ui/loader-one'
 import { BTN_PRIMARY, BTN_SECONDARY, CARD } from '@/lib/ui'
 import { getMySubscriptions, type UserSubscription } from '@/lib/subscriptions'
 
@@ -93,8 +93,9 @@ export default function SubscriptionSuccessPage() {
             </p>
           </div>
         ) : polling ? (
-          <div className="mt-6 flex items-center justify-center gap-3 text-sm text-neutral-500">
-            <Spinner className="h-4 w-4" /> Waiting for activation…
+          <div className="mt-6 flex flex-col items-center gap-3 text-sm text-neutral-500">
+            <LoaderOne />
+            Waiting for activation…
           </div>
         ) : (
           <div className="mt-6 space-y-3">
