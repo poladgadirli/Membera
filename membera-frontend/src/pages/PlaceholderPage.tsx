@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { BTN_PRIMARY, CARD, LOGO_MARK, PAGE_BG, PAGE_WASH } from '@/lib/ui'
 
 type PlaceholderPageProps = {
   title: string
@@ -6,29 +7,26 @@ type PlaceholderPageProps = {
 
 /**
  * Temporary stand-in for routes that are linked from the landing page but not
- * built yet (sign-up and the footer links).
+ * built yet (the footer links). Matches the landing page's frosted-glass look.
  */
 export default function PlaceholderPage({ title }: PlaceholderPageProps) {
   return (
-    <div className="grid min-h-screen place-items-center bg-background px-4">
-      <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 text-center shadow-sm">
-        <span
-          aria-hidden="true"
-          className="mx-auto grid h-10 w-10 place-items-center rounded-lg bg-primary text-base font-semibold text-primary-foreground"
-        >
+    <div
+      className={`relative grid min-h-screen place-items-center overflow-hidden px-4 ${PAGE_BG}`}
+    >
+      <div aria-hidden="true" className={PAGE_WASH} />
+      <div className={`relative z-10 w-full max-w-md ${CARD} p-8 text-center`}>
+        <span aria-hidden="true" className={`mx-auto h-10 w-10 text-base ${LOGO_MARK}`}>
           M
         </span>
-        <h1 className="mt-4 text-2xl font-medium tracking-tight text-foreground">
+        <h1 className="mt-4 text-2xl font-medium tracking-tight text-neutral-900">
           {title}
         </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
+        <p className="mt-2 text-sm text-neutral-500">
           This page is coming soon. The landing page links here so the flow is in
           place.
         </p>
-        <Link
-          to="/"
-          className="mt-6 inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-        >
+        <Link to="/" className={`${BTN_PRIMARY} mt-6`}>
           Back to home
         </Link>
       </div>
