@@ -4,19 +4,22 @@ import {
   useRef,
   useState,
   type ChangeEvent,
+  type ReactNode,
 } from 'react'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
+import {
+  CalendarIcon,
+  CameraIcon,
+  ClockIcon,
+  ImageIcon,
+  PencilIcon,
+  RepeatIcon,
+} from '@/components/icons'
 import { Spinner } from '@/components/Spinner'
 import { StatusBadge } from '@/components/StatusBadge'
 import { PlanFormModal } from '@/components/merchant/PlanFormModal'
 import { ApiError } from '@/lib/apiClient'
-import {
-  BTN_PRIMARY,
-  BTN_SECONDARY_SM,
-  CARD,
-  ERROR_BANNER,
-  SECTION_LABEL,
-} from '@/lib/ui'
+import { BTN_PRIMARY, CARD, ERROR_BANNER, SECTION_LABEL } from '@/lib/ui'
 import {
   createPlan,
   deactivatePlan,
@@ -32,7 +35,10 @@ import {
 } from '@/lib/merchant'
 
 const primaryButton = BTN_PRIMARY
-const secondaryButton = BTN_SECONDARY_SM
+
+/** Quiet text button for a plan card's secondary actions. */
+const cardAction =
+  'inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 disabled:cursor-not-allowed disabled:opacity-50'
 
 type Status = 'loading' | 'ready' | 'error'
 type FormTarget = { mode: 'create' } | { mode: 'edit'; plan: SubscriptionPlan }
@@ -127,7 +133,11 @@ export function PlansSection() {
         {status === 'error' && (
           <div className={`${CARD} space-y-3 p-6`}>
             <div className={ERROR_BANNER}>{loadError}</div>
-            <button type="button" onClick={retry} className={secondaryButton}>
+            <button
+              type="button"
+              onClick={retry}
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-sm font-semibold text-neutral-900 shadow-sm transition hover:bg-neutral-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+            >
               Try again
             </button>
           </div>
@@ -151,65 +161,83 @@ export function PlansSection() {
         )}
 
         {status === 'ready' && plans.length > 0 && (
-          <ul className="space-y-3">
+          <ul className="grid gap-4">
             {plans.map((plan) => (
-              <li key={plan.id} className={`${CARD} p-5`}>
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                  <div className="flex min-w-0 gap-4">
-                    {plan.imageUrl && (
-                      <img
-                        src={plan.imageUrl}
-                        alt=""
-                        className="h-14 w-14 shrink-0 rounded-lg border border-neutral-200 object-cover"
-                      />
-                    )}
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="text-base font-semibold tracking-tight text-neutral-900">
-                          {plan.name}
-                        </h3>
-                        <StatusBadge active={plan.isActive} />
-                      </div>
-                      {plan.description?.trim() && (
-                        <p className="mt-1 max-w-prose text-sm text-neutral-500">
-                          {plan.description}
-                        </p>
-                      )}
-                      <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-sm">
-                        <Detail label="Price" value={formatPrice(plan.price)} />
-                        <Detail
-                          label="Duration"
-                          value={formatDuration(plan.durationInDays)}
-                        />
-                        <Detail
-                          label="Usage"
-                          value={formatUsageLimit(plan.usageLimit)}
-                        />
-                        <Detail
-                          label="Active hours"
-                          value={formatTimeRange(
-                            plan.activeFrom,
-                            plan.activeUntil,
-                          )}
-                        />
-                      </dl>
+              <li
+                key={plan.id}
+                className={`${CARD} group flex flex-col overflow-hidden transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-md hover:shadow-blue-500/10 sm:flex-row`}
+              >
+                {/* Prominent product image — ~34% width on desktop, full-bleed on mobile. */}
+                <div className="relative aspect-[16/10] shrink-0 overflow-hidden bg-linear-to-br from-blue-100 via-blue-50 to-white sm:aspect-auto sm:w-[34%] sm:max-w-[300px]">
+                  {plan.imageUrl ? (
+                    <img
+                      src={plan.imageUrl}
+                      alt=""
+                      className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="grid h-full w-full place-items-center text-blue-300">
+                      <ImageIcon className="h-10 w-10" />
                     </div>
+                  )}
+                </div>
+
+                {/* Details */}
+                <div className="flex min-w-0 flex-1 flex-col p-5 sm:p-6">
+                  <div className="flex flex-wrap items-start gap-x-3 gap-y-1.5">
+                    <h3 className="text-lg font-semibold tracking-tight text-neutral-900">
+                      {plan.name}
+                    </h3>
+                    <StatusBadge active={plan.isActive} />
                   </div>
 
-                  <div className="flex shrink-0 items-start gap-2">
+                  {plan.description?.trim() && (
+                    <p className="mt-1.5 line-clamp-2 max-w-prose text-sm leading-relaxed text-neutral-500">
+                      {plan.description}
+                    </p>
+                  )}
+
+                  <p className="mt-3 text-2xl font-semibold tracking-tight text-neutral-900">
+                    {formatPrice(plan.price)}
+                    <span className="ml-1.5 text-sm font-medium text-neutral-400">
+                      / {formatDuration(plan.durationInDays)}
+                    </span>
+                  </p>
+
+                  <dl className="mt-3 flex flex-wrap gap-x-5 gap-y-1.5 text-sm text-neutral-500">
+                    <Meta
+                      icon={<CalendarIcon className="h-4 w-4" />}
+                      label="Duration"
+                      value={formatDuration(plan.durationInDays)}
+                    />
+                    <Meta
+                      icon={<RepeatIcon className="h-4 w-4" />}
+                      label="Usage"
+                      value={formatUsageLimit(plan.usageLimit)}
+                    />
+                    <Meta
+                      icon={<ClockIcon className="h-4 w-4" />}
+                      label="Active hours"
+                      value={formatTimeRange(plan.activeFrom, plan.activeUntil)}
+                    />
+                  </dl>
+
+                  {/* Secondary actions — small and quiet under the content. */}
+                  <div className="mt-auto flex flex-wrap items-center gap-1 pt-4">
                     <PlanImageButton plan={plan} onUploaded={load} />
                     <button
                       type="button"
                       onClick={() => setFormTarget({ mode: 'edit', plan })}
-                      className={secondaryButton}
+                      className={cardAction}
                     >
+                      <PencilIcon className="h-4 w-4" />
                       Edit
                     </button>
                     <button
                       type="button"
                       onClick={() => setPlanToDeactivate(plan)}
                       disabled={!plan.isActive}
-                      className={`${secondaryButton} disabled:cursor-not-allowed disabled:opacity-50`}
+                      className={`${cardAction} hover:bg-red-50 hover:text-red-600`}
                     >
                       Deactivate
                     </button>
@@ -278,21 +306,29 @@ function PlanImageButton({
   }
 
   return (
-    <div className="flex flex-col items-end gap-1">
+    <>
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
         disabled={uploading}
-        className={secondaryButton}
+        className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {uploading && <Spinner className="h-3.5 w-3.5" />}
+        {uploading ? (
+          <Spinner className="h-3.5 w-3.5" />
+        ) : (
+          <CameraIcon className="h-4 w-4" />
+        )}
         {uploading
           ? 'Uploading…'
           : plan.imageUrl
             ? 'Change image'
             : 'Add image'}
       </button>
-      {error && <p className="text-xs text-red-600">{error}</p>}
+      {error && (
+        <p className="w-full text-xs text-red-600" role="alert">
+          {error}
+        </p>
+      )}
       <input
         ref={inputRef}
         type="file"
@@ -300,15 +336,23 @@ function PlanImageButton({
         className="hidden"
         onChange={handleChange}
       />
-    </div>
+    </>
   )
 }
 
-function Detail({ label, value }: { label: string; value: string }) {
+function Meta({
+  icon,
+  label,
+  value,
+}: {
+  icon: ReactNode
+  label: string
+  value: string
+}) {
   return (
-    <div className="flex items-baseline gap-1.5">
-      <dt className="text-neutral-500">{label}</dt>
-      <dd className="font-medium text-neutral-900">{value}</dd>
+    <div className="flex items-center gap-1.5" title={label}>
+      <span className="text-neutral-400">{icon}</span>
+      <span className="font-medium text-neutral-700">{value}</span>
     </div>
   )
 }
