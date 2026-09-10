@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\BuildingBlocks\Membera.Shared.Caching\Membera.Shared.Caching.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\Membera.Shared.Storage\Membera.Shared.Storage.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\Membera.Shared.Messaging\Membera.Shared.Messaging.csproj" />
     <ProjectReference Include="..\..\Auth\Membera.Auth.Application\Membera.Auth.Application.csproj" />
     <ProjectReference Include="..\Membera.Merchant.Application\Membera.Merchant.Application.csproj" />
