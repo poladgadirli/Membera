@@ -1,6 +1,6 @@
-// Auth API calls. Thin wrappers over authApi (src/lib/apiClient.ts).
+// Auth API calls. Thin wrappers over the shared api client (src/lib/apiClient.ts).
 
-import { authApi } from '@/lib/apiClient'
+import { api } from '@/lib/apiClient'
 
 export { ApiError } from '@/lib/apiClient'
 
@@ -26,16 +26,16 @@ export interface RegisterPayload {
 }
 
 export function login(email: string, password: string): Promise<LoginResult> {
-  return authApi.post<LoginResult>('/auth/login', { email, password })
+  return api.post<LoginResult>('/auth/login', { email, password })
 }
 
 export function register(payload: RegisterPayload): Promise<RegisterResult> {
-  return authApi.post<RegisterResult>('/auth/register', payload)
+  return api.post<RegisterResult>('/auth/register', payload)
 }
 
 // Exchanges a Google ID token for a Membera session. The endpoint signs the
 // user in, creating the account on first use, so it covers both "log in with
 // Google" and "sign up with Google".
 export function googleLogin(idToken: string): Promise<LoginResult> {
-  return authApi.post<LoginResult>('/auth/google-login', { idToken })
+  return api.post<LoginResult>('/auth/google-login', { idToken })
 }
