@@ -1,5 +1,6 @@
 using Membera.Merchant.Application.Abstractions;
 using Membera.Merchant.Application.Merchants.UploadMerchantLogo;
+using Membera.Shared.Caching;
 using Membera.Shared.Storage;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -12,6 +13,7 @@ public class UploadMerchantLogoHandlerTests
 {
     private readonly Mock<IMerchantRepository> _merchantRepositoryMock;
     private readonly Mock<IFileStorageService> _fileStorageServiceMock;
+    private readonly Mock<ICacheService> _cacheServiceMock;
     private readonly Mock<ILogger<UploadMerchantLogoHandler>> _loggerMock;
     private readonly UploadMerchantLogoHandler _handler;
 
@@ -19,9 +21,11 @@ public class UploadMerchantLogoHandlerTests
     {
         _merchantRepositoryMock = new Mock<IMerchantRepository>();
         _fileStorageServiceMock = new Mock<IFileStorageService>();
+        _cacheServiceMock = new Mock<ICacheService>();
         _loggerMock = new Mock<ILogger<UploadMerchantLogoHandler>>();
         _handler = new UploadMerchantLogoHandler(
-            _merchantRepositoryMock.Object, _fileStorageServiceMock.Object, _loggerMock.Object);
+            _merchantRepositoryMock.Object, _fileStorageServiceMock.Object,
+            _cacheServiceMock.Object, _loggerMock.Object);
     }
 
     private static UploadMerchantLogoCommand BuildCommand(Guid merchantId, string contentType = "image/png") =>
@@ -74,7 +78,8 @@ public class UploadMerchantLogoHandlerTests
         // Arrange
         var merchantId = Guid.NewGuid();
         var command = BuildCommand(merchantId);
-        var merchant = new MerchantEntity(Guid.NewGuid(), "Polad's Business");
+        var ownerId = Guid.NewGuid();
+        var merchant = new MerchantEntity(ownerId, "Polad's Business");
         const string expectedUrl = "http://localhost:9000/merchant-logos/some-object.png";
 
         _merchantRepositoryMock
@@ -98,5 +103,6 @@ public class UploadMerchantLogoHandlerTests
             s => s.UploadFileAsync("merchant-logos", It.IsAny<string>(), It.IsAny<Stream>(), command.ContentType),
             Times.Once);
         _merchantRepositoryMock.Verify(r => r.UpdateAsync(merchant), Times.Once);
+        _cacheServiceMock.Verify(c => c.RemoveAsync($"merchant:owner:{ownerId}"), Times.Once);
     }
 }
