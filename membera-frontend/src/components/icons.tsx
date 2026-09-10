@@ -151,6 +151,25 @@ export function CalendarIcon(props: IconProps) {
   )
 }
 
+export function MoreVerticalIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <circle cx="12" cy="5" r="1" />
+      <circle cx="12" cy="12" r="1" />
+      <circle cx="12" cy="19" r="1" />
+    </svg>
+  )
+}
+
+export function PowerIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M12 3v9" />
+      <path d="M18.4 6.6a9 9 0 1 1-12.8 0" />
+    </svg>
+  )
+}
+
 export function RepeatIcon(props: IconProps) {
   return (
     <svg {...base(props)}>
