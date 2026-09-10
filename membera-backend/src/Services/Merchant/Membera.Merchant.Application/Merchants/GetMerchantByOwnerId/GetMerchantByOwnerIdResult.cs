@@ -5,5 +5,6 @@ public record GetMerchantByOwnerIdResult(
     Guid OwnerId,
     string BusinessName,
     string? Description,
+    string? LogoUrl,
     bool IsActive
 );

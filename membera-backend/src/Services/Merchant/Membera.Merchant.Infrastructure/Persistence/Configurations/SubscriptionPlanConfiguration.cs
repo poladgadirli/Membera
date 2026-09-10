@@ -37,6 +37,9 @@ public class SubscriptionPlanConfiguration : IEntityTypeConfiguration<Subscripti
         builder.Property(p => p.ActiveUntil)
             .IsRequired();
 
+        builder.Property(p => p.ImageUrl)
+            .HasMaxLength(500);
+
         builder.Property(p => p.IsActive)
             .IsRequired();
 

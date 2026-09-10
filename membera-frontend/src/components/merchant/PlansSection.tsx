@@ -1,16 +1,27 @@
-import { useCallback, useEffect, useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type ReactNode,
+} from 'react'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
+import {
+  CalendarIcon,
+  CameraIcon,
+  ClockIcon,
+  ImageIcon,
+  MoreVerticalIcon,
+  PencilIcon,
+  PowerIcon,
+  RepeatIcon,
+} from '@/components/icons'
 import { Spinner } from '@/components/Spinner'
 import { StatusBadge } from '@/components/StatusBadge'
 import { PlanFormModal } from '@/components/merchant/PlanFormModal'
 import { ApiError } from '@/lib/apiClient'
-import {
-  BTN_PRIMARY,
-  BTN_SECONDARY_SM,
-  CARD,
-  ERROR_BANNER,
-  SECTION_LABEL,
-} from '@/lib/ui'
+import { BTN_PRIMARY, CARD, ERROR_BANNER, SECTION_LABEL } from '@/lib/ui'
 import {
   createPlan,
   deactivatePlan,
@@ -20,12 +31,12 @@ import {
   formatUsageLimit,
   getMyPlans,
   updatePlan,
+  uploadSubscriptionPlanImage,
   type PlanInput,
   type SubscriptionPlan,
 } from '@/lib/merchant'
 
 const primaryButton = BTN_PRIMARY
-const secondaryButton = BTN_SECONDARY_SM
 
 type Status = 'loading' | 'ready' | 'error'
 type FormTarget = { mode: 'create' } | { mode: 'edit'; plan: SubscriptionPlan }
@@ -120,7 +131,11 @@ export function PlansSection() {
         {status === 'error' && (
           <div className={`${CARD} space-y-3 p-6`}>
             <div className={ERROR_BANNER}>{loadError}</div>
-            <button type="button" onClick={retry} className={secondaryButton}>
+            <button
+              type="button"
+              onClick={retry}
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-sm font-semibold text-neutral-900 shadow-sm transition hover:bg-neutral-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+            >
               Try again
             </button>
           </div>
@@ -144,58 +159,15 @@ export function PlansSection() {
         )}
 
         {status === 'ready' && plans.length > 0 && (
-          <ul className="space-y-3">
+          <ul className="grid gap-5 sm:grid-cols-2">
             {plans.map((plan) => (
-              <li key={plan.id} className={`${CARD} p-5`}>
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="text-base font-semibold tracking-tight text-neutral-900">
-                        {plan.name}
-                      </h3>
-                      <StatusBadge active={plan.isActive} />
-                    </div>
-                    {plan.description?.trim() && (
-                      <p className="mt-1 max-w-prose text-sm text-neutral-500">
-                        {plan.description}
-                      </p>
-                    )}
-                    <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-sm">
-                      <Detail label="Price" value={formatPrice(plan.price)} />
-                      <Detail
-                        label="Duration"
-                        value={formatDuration(plan.durationInDays)}
-                      />
-                      <Detail
-                        label="Usage"
-                        value={formatUsageLimit(plan.usageLimit)}
-                      />
-                      <Detail
-                        label="Active hours"
-                        value={formatTimeRange(plan.activeFrom, plan.activeUntil)}
-                      />
-                    </dl>
-                  </div>
-
-                  <div className="flex shrink-0 items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setFormTarget({ mode: 'edit', plan })}
-                      className={secondaryButton}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setPlanToDeactivate(plan)}
-                      disabled={!plan.isActive}
-                      className={`${secondaryButton} disabled:cursor-not-allowed disabled:opacity-50`}
-                    >
-                      Deactivate
-                    </button>
-                  </div>
-                </div>
-              </li>
+              <PlanCard
+                key={plan.id}
+                plan={plan}
+                onReload={load}
+                onEdit={() => setFormTarget({ mode: 'edit', plan })}
+                onDeactivate={() => setPlanToDeactivate(plan)}
+              />
             ))}
           </ul>
         )}
@@ -227,11 +199,253 @@ export function PlansSection() {
   )
 }
 
-function Detail({ label, value }: { label: string; value: string }) {
+function PlanCard({
+  plan,
+  onReload,
+  onEdit,
+  onDeactivate,
+}: {
+  plan: SubscriptionPlan
+  onReload: () => Promise<void> | void
+  onEdit: () => void
+  onDeactivate: () => void
+}) {
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+
+  const menuRef = useRef<HTMLDivElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (!menuOpen) return
+    const onDocPointer = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMenuOpen(false)
+      }
+    }
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setMenuOpen(false)
+    }
+    document.addEventListener('mousedown', onDocPointer)
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', onDocPointer)
+      document.removeEventListener('keydown', onKeyDown)
+    }
+  }, [menuOpen])
+
+  const triggerUpload = () => {
+    setMenuOpen(false)
+    fileInputRef.current?.click()
+  }
+
+  const handleFile = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    event.target.value = '' // let the same file be re-picked later
+    if (!file) return
+
+    setUploadError(null)
+    setUploading(true)
+    try {
+      await uploadSubscriptionPlanImage(plan.id, file)
+      await onReload()
+    } catch (err) {
+      setUploadError(
+        err instanceof ApiError ? err.message : 'Could not upload the image.',
+      )
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const monogram = plan.name.trim().charAt(0).toUpperCase() || 'P'
+
   return (
-    <div className="flex items-baseline gap-1.5">
-      <dt className="text-neutral-500">{label}</dt>
-      <dd className="font-medium text-neutral-900">{value}</dd>
+    <li
+      className={`${CARD} group relative flex flex-col transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-md hover:shadow-blue-500/10`}
+    >
+      {/* Top ~70%: the plan image (or a placeholder that doubles as an upload target). */}
+      <div className="relative aspect-[3/2] overflow-hidden rounded-t-2xl bg-linear-to-br from-blue-100 via-blue-50 to-white">
+        {plan.imageUrl ? (
+          <img
+            src={plan.imageUrl}
+            alt=""
+            className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+          />
+        ) : (
+          <button
+            type="button"
+            onClick={triggerUpload}
+            disabled={uploading}
+            className="flex h-full w-full flex-col items-center justify-center gap-2 text-blue-400 transition-colors hover:text-blue-500 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-blue-500 disabled:opacity-60"
+          >
+            {uploading ? (
+              <Spinner className="h-6 w-6" />
+            ) : (
+              <ImageIcon className="h-8 w-8" />
+            )}
+            <span className="text-sm font-medium">
+              {uploading ? 'Uploading…' : 'Add an image'}
+            </span>
+          </button>
+        )}
+
+        <span className="absolute left-3 top-3 z-10 drop-shadow-sm">
+          <StatusBadge active={plan.isActive} />
+        </span>
+      </div>
+
+      {/* Overflow menu — kept outside the image's overflow-hidden so it can drop down. */}
+      <div ref={menuRef} className="absolute right-3 top-3 z-20">
+        <button
+          type="button"
+          onClick={() => setMenuOpen((v) => !v)}
+          aria-haspopup="menu"
+          aria-expanded={menuOpen}
+          aria-label="Plan actions"
+          className="grid h-8 w-8 place-items-center rounded-full bg-white/85 text-neutral-700 shadow-sm backdrop-blur transition-colors hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+        >
+          <MoreVerticalIcon className="h-4 w-4" />
+        </button>
+
+        {menuOpen && (
+          <div
+            role="menu"
+            className="absolute right-0 top-full mt-1.5 w-48 overflow-hidden rounded-xl border border-neutral-200 bg-white py-1 text-sm shadow-lg shadow-blue-500/10"
+          >
+            <MenuItem icon={<CameraIcon className="h-4 w-4" />} onClick={triggerUpload}>
+              {plan.imageUrl ? 'Change image' : 'Add image'}
+            </MenuItem>
+            <MenuItem
+              icon={<PencilIcon className="h-4 w-4" />}
+              onClick={() => {
+                setMenuOpen(false)
+                onEdit()
+              }}
+            >
+              Edit plan
+            </MenuItem>
+            <MenuItem
+              icon={<PowerIcon className="h-4 w-4" />}
+              destructive
+              disabled={!plan.isActive}
+              onClick={() => {
+                setMenuOpen(false)
+                onDeactivate()
+              }}
+            >
+              Deactivate
+            </MenuItem>
+          </div>
+        )}
+      </div>
+
+      {/* Bottom ~30%: author-style avatar + plan name / price / details. */}
+      <div className="flex items-start gap-3 p-4">
+        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-linear-to-br from-blue-500 via-blue-400 to-blue-200 text-sm font-bold text-white shadow-sm shadow-blue-500/30">
+          {monogram}
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <div className="flex items-baseline justify-between gap-2">
+            <h3 className="truncate text-base font-semibold tracking-tight text-neutral-900">
+              {plan.name}
+            </h3>
+            <span className="shrink-0 text-base font-semibold text-neutral-900">
+              {formatPrice(plan.price)}
+            </span>
+          </div>
+
+          {plan.description?.trim() && (
+            <p className="mt-0.5 line-clamp-1 text-xs text-neutral-500">
+              {plan.description}
+            </p>
+          )}
+
+          <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-neutral-500">
+            <Meta
+              icon={<CalendarIcon className="h-3.5 w-3.5" />}
+              label="Duration"
+              value={formatDuration(plan.durationInDays)}
+            />
+            <Meta
+              icon={<RepeatIcon className="h-3.5 w-3.5" />}
+              label="Usage"
+              value={formatUsageLimit(plan.usageLimit)}
+            />
+            <Meta
+              icon={<ClockIcon className="h-3.5 w-3.5" />}
+              label="Active hours"
+              value={formatTimeRange(plan.activeFrom, plan.activeUntil)}
+            />
+          </div>
+
+          {uploadError && (
+            <p className="mt-2 text-xs text-red-600" role="alert">
+              {uploadError}
+            </p>
+          )}
+        </div>
+      </div>
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleFile}
+      />
+    </li>
+  )
+}
+
+function MenuItem({
+  icon,
+  children,
+  onClick,
+  disabled,
+  destructive,
+}: {
+  icon: ReactNode
+  children: ReactNode
+  onClick: () => void
+  disabled?: boolean
+  destructive?: boolean
+}) {
+  return (
+    <button
+      type="button"
+      role="menuitem"
+      onClick={onClick}
+      disabled={disabled}
+      className={`flex w-full items-center gap-2.5 px-3 py-2 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
+        destructive
+          ? 'text-red-600 hover:bg-red-50'
+          : 'text-neutral-700 hover:bg-neutral-50'
+      }`}
+    >
+      <span className={destructive ? 'text-red-400' : 'text-neutral-400'}>
+        {icon}
+      </span>
+      {children}
+    </button>
+  )
+}
+
+function Meta({
+  icon,
+  label,
+  value,
+}: {
+  icon: ReactNode
+  label: string
+  value: string
+}) {
+  return (
+    <div className="flex items-center gap-1.5" title={label}>
+      <span className="text-neutral-400">{icon}</span>
+      <span className="font-medium text-neutral-700">{value}</span>
     </div>
   )
 }

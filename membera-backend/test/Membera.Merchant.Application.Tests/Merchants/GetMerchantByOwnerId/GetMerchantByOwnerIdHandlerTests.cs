@@ -79,7 +79,7 @@ public class GetMerchantByOwnerIdHandlerTests
         var cacheKey = $"merchant:owner:{ownerId}";
 
         var cachedResult = new GetMerchantByOwnerIdResult(
-            Guid.NewGuid(), ownerId, "Cached Business", "Cached description", true);
+            Guid.NewGuid(), ownerId, "Cached Business", "Cached description", null, true);
 
         _cacheServiceMock
             .Setup(c => c.GetAsync<GetMerchantByOwnerIdResult>(cacheKey))

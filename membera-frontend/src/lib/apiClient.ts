@@ -65,7 +65,12 @@ async function request<T>(
 ): Promise<T> {
   const headers = new Headers(options.headers)
   const hasBody = options.body !== undefined && options.body !== null
-  if (hasBody && !headers.has('Content-Type')) {
+  // FormData (file uploads) must NOT get a Content-Type header — the browser
+  // sets `multipart/form-data` with the correct boundary itself. Everything
+  // else is sent as JSON.
+  const isFormData =
+    typeof FormData !== 'undefined' && options.body instanceof FormData
+  if (hasBody && !isFormData && !headers.has('Content-Type')) {
     headers.set('Content-Type', 'application/json')
   }
 
@@ -77,13 +82,23 @@ async function request<T>(
     response = await fetch(`${baseUrl}${path}`, {
       method: options.method ?? 'GET',
       headers,
-      body: hasBody ? JSON.stringify(options.body) : undefined,
+      body: hasBody
+        ? isFormData
+          ? (options.body as FormData)
+          : JSON.stringify(options.body)
+        : undefined,
       signal: options.signal,
     })
-  } catch {
+  } catch (cause) {
+    // Don't swallow the underlying failure. `fetch` rejects (or throws) for CORS
+    // blocks, TLS/cert errors, offline, and any bug in the request setup above —
+    // without this log they all collapse into one vague message and never reach
+    // the console or DevTools.
+    console.error(`[apiClient] ${options.method ?? 'GET'} ${path} failed before a response:`, cause)
     throw new ApiError(
       'Unable to reach the server. Check that the API is running and try again.',
       0,
+      cause,
     )
   }
 
@@ -130,6 +145,12 @@ function makeClient(baseUrl: string) {
     post: <T>(
       path: string,
       body?: unknown,
+      options?: Omit<RequestOptions, 'method' | 'body'>,
+    ) => request<T>(baseUrl, path, { ...options, method: 'POST', body }),
+    /** POST a FormData body (file uploads). Skips the JSON Content-Type header. */
+    postForm: <T>(
+      path: string,
+      body: FormData,
       options?: Omit<RequestOptions, 'method' | 'body'>,
     ) => request<T>(baseUrl, path, { ...options, method: 'POST', body }),
     put: <T>(

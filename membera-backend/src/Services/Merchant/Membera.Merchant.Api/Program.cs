@@ -3,9 +3,11 @@ using Membera.Merchant.Application.Abstractions;
 using Membera.Merchant.Application.Merchants.CreateMerchant;
 using Membera.Merchant.Application.Merchants.GetMerchantByOwnerId;
 using Membera.Merchant.Application.Merchants.UpdateMerchant;
+using Membera.Merchant.Application.Merchants.UploadMerchantLogo;
 using Membera.Merchant.Application.SubscriptionPlans.CreateSubscriptionPlan;
 using Membera.Merchant.Application.SubscriptionPlans.DeactivateSubscriptionPlan;
 using Membera.Merchant.Application.SubscriptionPlans.GetPlansByMerchantId;
+using Membera.Merchant.Application.SubscriptionPlans.UploadSubscriptionPlanImage;
 using Membera.Merchant.Application.SubscriptionPlans.UpdateSubscriptionPlan;
 using Membera.Merchant.Application.Subscriptions.CreateCheckoutSession;
 using Membera.Merchant.Application.Subscriptions.GetMySubscriptions;
@@ -15,6 +17,7 @@ using Membera.Merchant.Infrastructure.Messaging;
 using Membera.Merchant.Infrastructure.Payments;
 using Membera.Merchant.Infrastructure.Persistence;
 using Membera.Shared.Caching;
+using Membera.Shared.Storage;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -74,6 +77,13 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(
     ConnectionMultiplexer.Connect("localhost:6379"));
 
 builder.Services.AddScoped<ICacheService, RedisCacheService>();
+
+// File storage (MinIO). The Minio client is thread-safe and holds a connection
+// pool, so register it once as a singleton like the Redis multiplexer above.
+builder.Services.AddSingleton<IFileStorageService, MinioFileStorageService>();
+
+builder.Services.AddScoped<UploadMerchantLogoHandler>();
+builder.Services.AddScoped<UploadSubscriptionPlanImageHandler>();
 
 // JWT Authentication
 var jwtSection = builder.Configuration.GetSection("Jwt");

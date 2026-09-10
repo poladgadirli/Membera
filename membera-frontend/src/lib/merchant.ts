@@ -7,6 +7,7 @@ import { ApiError, api } from '@/lib/apiClient'
 export interface MerchantProfile {
   businessName: string
   description: string | null
+  logoUrl: string | null
   isActive: boolean
 }
 
@@ -21,6 +22,7 @@ export interface SubscriptionPlan {
   activeFrom: string | null
   /** "HH:mm:ss" */
   activeUntil: string | null
+  imageUrl: string | null
   isActive: boolean
 }
 
@@ -53,6 +55,17 @@ export function updateMerchant(input: {
   return api.put<MerchantProfile>('/Merchant', input)
 }
 
+/**
+ * Uploads a new merchant logo (multipart/form-data) and returns its public URL.
+ * The API stores the URL on the merchant, so callers should refetch the profile
+ * afterwards to pick up the change.
+ */
+export function uploadMerchantLogo(file: File): Promise<string> {
+  const form = new FormData()
+  form.append('file', file)
+  return api.postForm<string>('/merchant/logo', form)
+}
+
 /** The API answers a missing profile with a 400 + "Merchant profile not found." */
 export function isMerchantNotFound(error: unknown): boolean {
   return (
@@ -64,10 +77,17 @@ export function isMerchantNotFound(error: unknown): boolean {
 // --- Subscription plans ---
 
 export async function getMyPlans(): Promise<SubscriptionPlan[]> {
-  const data = await api.get<SubscriptionPlan[]>(
+  // GET /subscription-plans/mine answers with BaseResponse<GetPlansByMerchantIdResult>.
+  // The shared client strips the BaseResponse envelope, which leaves the inner
+  // result object `{ plans: [...] }` — NOT a bare array. Reading it as an array
+  // (and silently falling back to `[]`) is why a freshly created plan never
+  // showed up until a full reload. Accept both shapes so we're robust to either.
+  const data = await api.get<SubscriptionPlan[] | { plans?: SubscriptionPlan[] }>(
     '/subscription-plans/mine',
   )
-  return Array.isArray(data) ? data : []
+  if (Array.isArray(data)) return data
+  if (data && Array.isArray(data.plans)) return data.plans
+  return []
 }
 
 export function createPlan(input: PlanInput): Promise<SubscriptionPlan> {
@@ -86,6 +106,19 @@ export function updatePlan(
 
 export function deactivatePlan(planId: string): Promise<void> {
   return api.post<void>(`/subscription-plans/${planId}/deactivate`)
+}
+
+/**
+ * Uploads an image for a single subscription plan (multipart/form-data) and
+ * returns its public URL. Callers should refetch the plans list afterwards.
+ */
+export function uploadSubscriptionPlanImage(
+  planId: string,
+  file: File,
+): Promise<string> {
+  const form = new FormData()
+  form.append('file', file)
+  return api.postForm<string>(`/subscription-plans/${planId}/image`, form)
 }
 
 // --- Formatting helpers ---

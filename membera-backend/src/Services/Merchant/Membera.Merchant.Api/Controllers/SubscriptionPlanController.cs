@@ -4,6 +4,7 @@ using Membera.Merchant.Application.SubscriptionPlans.CreateSubscriptionPlan;
 using Membera.Merchant.Application.SubscriptionPlans.DeactivateSubscriptionPlan;
 using Membera.Merchant.Application.SubscriptionPlans.GetPlansByMerchantId;
 using Membera.Merchant.Application.SubscriptionPlans.UpdateSubscriptionPlan;
+using Membera.Merchant.Application.SubscriptionPlans.UploadSubscriptionPlanImage;
 using Membera.Shared.Contracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,6 +20,7 @@ public class SubscriptionPlanController : ControllerBase
     private readonly GetPlansByMerchantIdHandler _getByMerchantIdHandler;
     private readonly UpdateSubscriptionPlanHandler _updateHandler;
     private readonly DeactivateSubscriptionPlanHandler _deactivateHandler;
+    private readonly UploadSubscriptionPlanImageHandler _uploadImageHandler;
     private readonly IMerchantRepository _merchantRepository;
 
     public SubscriptionPlanController(
@@ -26,12 +28,14 @@ public class SubscriptionPlanController : ControllerBase
         GetPlansByMerchantIdHandler getByMerchantIdHandler,
         UpdateSubscriptionPlanHandler updateHandler,
         DeactivateSubscriptionPlanHandler deactivateHandler,
+        UploadSubscriptionPlanImageHandler uploadImageHandler,
         IMerchantRepository merchantRepository)
     {
         _createHandler = createHandler;
         _getByMerchantIdHandler = getByMerchantIdHandler;
         _updateHandler = updateHandler;
         _deactivateHandler = deactivateHandler;
+        _uploadImageHandler = uploadImageHandler;
         _merchantRepository = merchantRepository;
     }
 
@@ -90,6 +94,22 @@ public class SubscriptionPlanController : ControllerBase
         var merchantId = await GetMerchantIdForCurrentUserAsync();
         await _deactivateHandler.HandleAsync(new DeactivateSubscriptionPlanCommand(planId, merchantId));
         return NoContent();
+    }
+
+    [HttpPost("{planId}/image")]
+    // planId binds from the route; file binds from multipart form data via
+    // [ApiController] inference. No [FromForm] on IFormFile — Swashbuckle rejects
+    // that combination at swagger-gen time (see its file-upload docs).
+    public async Task<IActionResult> UploadImage(Guid planId, IFormFile file)
+    {
+        var merchantId = await GetMerchantIdForCurrentUserAsync();
+
+        await using var stream = file.OpenReadStream();
+        var command = new UploadSubscriptionPlanImageCommand(
+            planId, merchantId, stream, file.FileName, file.ContentType);
+
+        var imageUrl = await _uploadImageHandler.HandleAsync(command);
+        return Ok(BaseResponse<string>.SuccessResponse(imageUrl));
     }
 }
 
