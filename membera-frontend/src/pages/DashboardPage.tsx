@@ -2,7 +2,9 @@ import { DashboardShell } from '@/components/DashboardShell'
 import { PageHeading } from '@/components/PageHeading'
 import { useAuth } from '@/hooks/useAuth'
 import { CARD } from '@/lib/ui'
+import AdminDashboardPage from '@/pages/AdminDashboardPage'
 import MerchantDashboardPage from '@/pages/MerchantDashboardPage'
+import UserDashboardPage from '@/pages/UserDashboardPage'
 
 const ROLE_LABELS: Record<string, string> = {
   User: 'Member',
@@ -11,16 +13,25 @@ const ROLE_LABELS: Record<string, string> = {
   SuperAdmin: 'Super administrator',
 }
 
+/**
+ * `/dashboard` is the single entry point for every signed-in user. It renders
+ * the dashboard for their role. Unknown / missing roles fall through to a
+ * minimal account summary.
+ */
 export default function DashboardPage() {
   const { user } = useAuth()
 
-  // Role-specific dashboards. Merchant owners get the full experience; other
-  // roles keep the generic placeholder until their dashboards are built.
-  if (user?.role === 'MerchantOwner') {
-    return <MerchantDashboardPage />
+  switch (user?.role) {
+    case 'MerchantOwner':
+      return <MerchantDashboardPage />
+    case 'Admin':
+    case 'SuperAdmin':
+      return <AdminDashboardPage />
+    case 'User':
+      return <UserDashboardPage />
+    default:
+      return <GenericDashboard />
   }
-
-  return <GenericDashboard />
 }
 
 function GenericDashboard() {
@@ -39,8 +50,6 @@ function GenericDashboard() {
           <>
             You&rsquo;re signed in as{' '}
             <span className="font-semibold text-neutral-900">{roleLabel}</span>.
-            Your role-specific dashboard is coming next &mdash; this placeholder
-            confirms the auth flow is working end to end.
           </>
         }
       />
