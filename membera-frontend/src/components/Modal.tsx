@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, type ReactNode } from 'react'
+import { MODAL_BACKDROP, MODAL_PANEL } from '@/lib/ui'
 
 interface ModalProps {
   open: boolean
@@ -62,7 +63,7 @@ export function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center overflow-y-auto bg-foreground/40 p-4 backdrop-blur-sm sm:items-center"
+      className={MODAL_BACKDROP}
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose()
       }}
@@ -73,18 +74,18 @@ export function Modal({
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={description ? descId : undefined}
-        className="my-8 w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-lg"
+        className={MODAL_PANEL}
       >
         <div className="flex items-start justify-between gap-4">
           <div>
             <h2
               id={titleId}
-              className="text-lg font-semibold tracking-tight text-foreground"
+              className="text-lg font-semibold tracking-tight text-neutral-900"
             >
               {title}
             </h2>
             {description && (
-              <p id={descId} className="mt-1 text-sm text-muted-foreground">
+              <p id={descId} className="mt-1 text-sm text-neutral-500">
                 {description}
               </p>
             )}
@@ -93,7 +94,7 @@ export function Modal({
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="-mr-1 -mt-1 rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            className="-mr-1 -mt-1 rounded-lg p-1.5 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
           >
             <svg
               viewBox="0 0 20 20"

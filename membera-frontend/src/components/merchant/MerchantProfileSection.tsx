@@ -3,6 +3,15 @@ import { Spinner } from '@/components/Spinner'
 import { StatusBadge } from '@/components/StatusBadge'
 import { ApiError } from '@/lib/apiClient'
 import {
+  BTN_PRIMARY,
+  BTN_SECONDARY,
+  CARD,
+  ERROR_BANNER,
+  INPUT,
+  LABEL,
+  SECTION_LABEL,
+} from '@/lib/ui'
+import {
   createMerchant,
   getMyMerchant,
   isMerchantNotFound,
@@ -10,22 +19,15 @@ import {
   type MerchantProfile,
 } from '@/lib/merchant'
 
-const fieldClass =
-  'mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring'
-const labelClass = 'block text-sm font-medium text-foreground'
-const primaryButton =
-  'inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-60'
-const secondaryButton =
-  'inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-60'
+const fieldClass = INPUT
+const labelClass = LABEL
+const primaryButton = BTN_PRIMARY
+const secondaryButton = BTN_SECONDARY
 
 type Status = 'loading' | 'setup' | 'ready' | 'error'
 
 function ErrorNote({ message }: { message: string }) {
-  return (
-    <div className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-      {message}
-    </div>
-  )
+  return <div className={ERROR_BANNER}>{message}</div>
 }
 
 export function MerchantProfileSection() {
@@ -148,16 +150,13 @@ export function MerchantProfileSection() {
 
   return (
     <section aria-labelledby="business-profile-heading">
-      <h2
-        id="business-profile-heading"
-        className="text-sm font-medium text-muted-foreground"
-      >
+      <h2 id="business-profile-heading" className={SECTION_LABEL}>
         Business profile
       </h2>
 
-      <div className="mt-3 rounded-2xl border border-border bg-card p-6">
+      <div className={`mt-3 ${CARD} p-6`}>
         {status === 'loading' && (
-          <div className="flex items-center gap-3 text-sm text-muted-foreground">
+          <div className="flex items-center gap-3 text-sm text-neutral-500">
             <Spinner /> Loading your business profile…
           </div>
         )}
@@ -174,10 +173,10 @@ export function MerchantProfileSection() {
         {status === 'setup' && (
           <form onSubmit={handleCreate} className="space-y-4">
             <div>
-              <h3 className="text-base font-semibold text-foreground">
+              <h3 className="text-base font-semibold text-neutral-900">
                 Set up your business profile
               </h3>
-              <p className="mt-1 text-sm text-muted-foreground">
+              <p className="mt-1 text-sm text-neutral-500">
                 Add your business name to start creating subscription plans.
               </p>
             </div>
@@ -209,12 +208,12 @@ export function MerchantProfileSection() {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <h3 className="text-lg font-semibold tracking-tight text-foreground">
+                <h3 className="text-lg font-semibold tracking-tight text-neutral-900">
                   {profile.businessName}
                 </h3>
                 <StatusBadge active={profile.isActive} />
               </div>
-              <p className="mt-1 max-w-prose text-sm text-muted-foreground">
+              <p className="mt-1 max-w-prose text-sm text-neutral-500">
                 {profile.description?.trim()
                   ? profile.description
                   : 'No description yet.'}
@@ -232,7 +231,7 @@ export function MerchantProfileSection() {
 
         {status === 'ready' && profile && editing && (
           <form onSubmit={handleUpdate} className="space-y-4">
-            <h3 className="text-base font-semibold text-foreground">
+            <h3 className="text-base font-semibold text-neutral-900">
               Edit business profile
             </h3>
 
@@ -254,7 +253,7 @@ export function MerchantProfileSection() {
             <div>
               <label htmlFor="edit-business-description" className={labelClass}>
                 Description{' '}
-                <span className="font-normal text-muted-foreground">
+                <span className="font-normal text-neutral-500">
                   (optional)
                 </span>
               </label>

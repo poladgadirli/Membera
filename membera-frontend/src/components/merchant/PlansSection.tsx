@@ -5,6 +5,13 @@ import { StatusBadge } from '@/components/StatusBadge'
 import { PlanFormModal } from '@/components/merchant/PlanFormModal'
 import { ApiError } from '@/lib/apiClient'
 import {
+  BTN_PRIMARY,
+  BTN_SECONDARY_SM,
+  CARD,
+  ERROR_BANNER,
+  SECTION_LABEL,
+} from '@/lib/ui'
+import {
   createPlan,
   deactivatePlan,
   formatDuration,
@@ -17,10 +24,8 @@ import {
   type SubscriptionPlan,
 } from '@/lib/merchant'
 
-const primaryButton =
-  'inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring'
-const secondaryButton =
-  'inline-flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-secondary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring'
+const primaryButton = BTN_PRIMARY
+const secondaryButton = BTN_SECONDARY_SM
 
 type Status = 'loading' | 'ready' | 'error'
 type FormTarget = { mode: 'create' } | { mode: 'edit'; plan: SubscriptionPlan }
@@ -91,10 +96,7 @@ export function PlansSection() {
   return (
     <section aria-labelledby="plans-heading" className="mt-10">
       <div className="flex items-center justify-between gap-4">
-        <h2
-          id="plans-heading"
-          className="text-sm font-medium text-muted-foreground"
-        >
+        <h2 id="plans-heading" className={SECTION_LABEL}>
           Subscription plans
         </h2>
         <button
@@ -108,18 +110,16 @@ export function PlansSection() {
 
       <div className="mt-3">
         {status === 'loading' && (
-          <div className="rounded-2xl border border-border bg-card p-6">
-            <div className="flex items-center gap-3 text-sm text-muted-foreground">
+          <div className={`${CARD} p-6`}>
+            <div className="flex items-center gap-3 text-sm text-neutral-500">
               <Spinner /> Loading plans…
             </div>
           </div>
         )}
 
         {status === 'error' && (
-          <div className="space-y-3 rounded-2xl border border-border bg-card p-6">
-            <div className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-              {loadError}
-            </div>
+          <div className={`${CARD} space-y-3 p-6`}>
+            <div className={ERROR_BANNER}>{loadError}</div>
             <button type="button" onClick={retry} className={secondaryButton}>
               Try again
             </button>
@@ -127,9 +127,9 @@ export function PlansSection() {
         )}
 
         {status === 'ready' && plans.length === 0 && (
-          <div className="rounded-2xl border border-dashed border-border bg-card p-8 text-center">
-            <p className="text-sm font-medium text-foreground">No plans yet</p>
-            <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">
+          <div className={`${CARD} border-dashed border-neutral-300 p-8 text-center`}>
+            <p className="text-sm font-medium text-neutral-900">No plans yet</p>
+            <p className="mx-auto mt-1 max-w-sm text-sm text-neutral-500">
               Create your first subscription plan so customers can buy and redeem
               it with a QR code.
             </p>
@@ -146,20 +146,17 @@ export function PlansSection() {
         {status === 'ready' && plans.length > 0 && (
           <ul className="space-y-3">
             {plans.map((plan) => (
-              <li
-                key={plan.id}
-                className="rounded-2xl border border-border bg-card p-5"
-              >
+              <li key={plan.id} className={`${CARD} p-5`}>
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="text-base font-semibold tracking-tight text-foreground">
+                      <h3 className="text-base font-semibold tracking-tight text-neutral-900">
                         {plan.name}
                       </h3>
                       <StatusBadge active={plan.isActive} />
                     </div>
                     {plan.description?.trim() && (
-                      <p className="mt-1 max-w-prose text-sm text-muted-foreground">
+                      <p className="mt-1 max-w-prose text-sm text-neutral-500">
                         {plan.description}
                       </p>
                     )}
@@ -233,8 +230,8 @@ export function PlansSection() {
 function Detail({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-baseline gap-1.5">
-      <dt className="text-muted-foreground">{label}</dt>
-      <dd className="font-medium text-foreground">{value}</dd>
+      <dt className="text-neutral-500">{label}</dt>
+      <dd className="font-medium text-neutral-900">{value}</dd>
     </div>
   )
 }

@@ -105,7 +105,7 @@ export default function RegisterPage() {
   return (
     <SignUpPage
       title={
-        <span className="font-light tracking-tighter text-foreground">
+        <span className="font-medium tracking-tight text-neutral-900">
           Create your account
         </span>
       }

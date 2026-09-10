@@ -1,5 +1,7 @@
 import { DashboardShell } from '@/components/DashboardShell'
+import { PageHeading } from '@/components/PageHeading'
 import { useAuth } from '@/hooks/useAuth'
+import { CARD } from '@/lib/ui'
 import MerchantDashboardPage from '@/pages/MerchantDashboardPage'
 
 const ROLE_LABELS: Record<string, string> = {
@@ -30,39 +32,41 @@ function GenericDashboard() {
 
   return (
     <DashboardShell>
-      <p className="text-sm font-medium text-muted-foreground">Dashboard</p>
-      <h1 className="mt-1 text-3xl font-semibold tracking-tight text-foreground">
-        Welcome, {firstName}!
-      </h1>
-      <p className="mt-2 max-w-prose text-sm text-muted-foreground">
-        You&rsquo;re signed in as{' '}
-        <span className="font-medium text-foreground">{roleLabel}</span>. Your
-        role-specific dashboard is coming next &mdash; this placeholder confirms
-        the auth flow is working end to end.
-      </p>
+      <PageHeading
+        eyebrow="Dashboard"
+        title={`Welcome, ${firstName}!`}
+        description={
+          <>
+            You&rsquo;re signed in as{' '}
+            <span className="font-semibold text-neutral-900">{roleLabel}</span>.
+            Your role-specific dashboard is coming next &mdash; this placeholder
+            confirms the auth flow is working end to end.
+          </>
+        }
+      />
 
-      <dl className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <div className="rounded-2xl border border-border bg-card p-5">
-          <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+      <dl className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className={`${CARD} p-5`}>
+          <dt className="text-xs font-medium uppercase tracking-wide text-neutral-500">
             Name
           </dt>
-          <dd className="mt-1 text-sm font-medium text-foreground">
+          <dd className="mt-1 text-sm font-medium text-neutral-900">
             {[user?.firstName, user?.lastName].filter(Boolean).join(' ') || '—'}
           </dd>
         </div>
-        <div className="rounded-2xl border border-border bg-card p-5">
-          <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        <div className={`${CARD} p-5`}>
+          <dt className="text-xs font-medium uppercase tracking-wide text-neutral-500">
             Email
           </dt>
-          <dd className="mt-1 truncate text-sm font-medium text-foreground">
+          <dd className="mt-1 truncate text-sm font-medium text-neutral-900">
             {user?.email || '—'}
           </dd>
         </div>
-        <div className="rounded-2xl border border-border bg-card p-5">
-          <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        <div className={`${CARD} p-5`}>
+          <dt className="text-xs font-medium uppercase tracking-wide text-neutral-500">
             Role
           </dt>
-          <dd className="mt-1 text-sm font-medium text-foreground">{role}</dd>
+          <dd className="mt-1 text-sm font-medium text-neutral-900">{role}</dd>
         </div>
       </dl>
     </DashboardShell>

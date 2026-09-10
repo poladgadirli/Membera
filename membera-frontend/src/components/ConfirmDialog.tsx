@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Modal } from '@/components/Modal'
 import { Spinner } from '@/components/Spinner'
 import { ApiError } from '@/lib/apiClient'
+import { BTN_DESTRUCTIVE, BTN_PRIMARY, BTN_SECONDARY, ERROR_BANNER } from '@/lib/ui'
 
 interface ConfirmDialogProps {
   open: boolean
@@ -43,9 +44,7 @@ export function ConfirmDialog({
     }
   }
 
-  const confirmClass = destructive
-    ? 'inline-flex items-center gap-2 rounded-lg bg-destructive px-4 py-2 text-sm font-semibold text-destructive-foreground transition-colors hover:bg-destructive/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-60'
-    : 'inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-60'
+  const confirmClass = destructive ? BTN_DESTRUCTIVE : BTN_PRIMARY
 
   return (
     <Modal
@@ -59,7 +58,7 @@ export function ConfirmDialog({
             type="button"
             onClick={onClose}
             disabled={busy}
-            className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-60"
+            className={BTN_SECONDARY}
           >
             Cancel
           </button>
@@ -75,11 +74,7 @@ export function ConfirmDialog({
         </>
       }
     >
-      {error && (
-        <div className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          {error}
-        </div>
-      )}
+      {error && <div className={ERROR_BANNER}>{error}</div>}
     </Modal>
   )
 }

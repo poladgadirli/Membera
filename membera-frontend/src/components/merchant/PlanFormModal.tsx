@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { Modal } from '@/components/Modal'
 import { Spinner } from '@/components/Spinner'
 import { ApiError } from '@/lib/apiClient'
+import { BTN_PRIMARY, BTN_SECONDARY, ERROR_BANNER, INPUT, LABEL } from '@/lib/ui'
 import {
   toApiTime,
   toInputTime,
@@ -9,9 +10,8 @@ import {
   type SubscriptionPlan,
 } from '@/lib/merchant'
 
-const fieldClass =
-  'mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring'
-const labelClass = 'block text-sm font-medium text-foreground'
+const fieldClass = INPUT
+const labelClass = LABEL
 
 interface FormValues {
   name: string
@@ -115,18 +115,14 @@ export function PlanFormModal({ plan, onClose, onSubmit }: PlanFormModalProps) {
       }
       footer={
         <>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-          >
+          <button type="button" onClick={onClose} className={BTN_SECONDARY}>
             Cancel
           </button>
           <button
             type="submit"
             form="plan-form"
             disabled={submitting}
-            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-60"
+            className={BTN_PRIMARY}
           >
             {submitting && <Spinner className="h-4 w-4" />}
             {isEdit ? 'Save changes' : 'Create plan'}
@@ -135,11 +131,7 @@ export function PlanFormModal({ plan, onClose, onSubmit }: PlanFormModalProps) {
       }
     >
       <form id="plan-form" onSubmit={handleSubmit} className="space-y-4">
-        {error && (
-          <div className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-            {error}
-          </div>
-        )}
+        {error && <div className={ERROR_BANNER}>{error}</div>}
 
         <div>
           <label htmlFor="plan-name" className={labelClass}>
@@ -158,7 +150,7 @@ export function PlanFormModal({ plan, onClose, onSubmit }: PlanFormModalProps) {
         <div>
           <label htmlFor="plan-description" className={labelClass}>
             Description{' '}
-            <span className="font-normal text-muted-foreground">(optional)</span>
+            <span className="font-normal text-neutral-500">(optional)</span>
           </label>
           <textarea
             id="plan-description"
@@ -207,7 +199,7 @@ export function PlanFormModal({ plan, onClose, onSubmit }: PlanFormModalProps) {
 
         <div>
           <span className={labelClass}>Usage limit</span>
-          <label className="mt-2 flex items-center gap-2 text-sm text-foreground">
+          <label className="mt-2 flex items-center gap-2 text-sm text-neutral-900">
             <input
               type="checkbox"
               className="custom-checkbox"
