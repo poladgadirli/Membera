@@ -87,11 +87,13 @@ public class GetMySubscriptionsHandlerTests
         Assert.Equal(subA.ExpiresAt, summaryA.ExpiresAt);
         Assert.Equal(subA.UsagesRemaining, summaryA.UsagesRemaining);
         Assert.Equal("Active", summaryA.Status);
+        Assert.Equal("sess_a", summaryA.StripeSessionId);
 
         var summaryB = result.Subscriptions[1];
         Assert.Equal(subB.Id, summaryB.Id);
         Assert.Equal(planIdB, summaryB.SubscriptionPlanId);
         Assert.Equal("Silver", summaryB.PlanName);
         Assert.Equal("Pending", summaryB.Status);
+        Assert.Equal("sess_b", summaryB.StripeSessionId);
     }
 }
