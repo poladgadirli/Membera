@@ -2,6 +2,7 @@ import { DashboardShell } from '@/components/DashboardShell'
 import { PageHeading } from '@/components/PageHeading'
 import { MerchantProfileSection } from '@/components/merchant/MerchantProfileSection'
 import { PlansSection } from '@/components/merchant/PlansSection'
+import { RedemptionSection } from '@/components/merchant/RedemptionSection'
 import { useAuth } from '@/hooks/useAuth'
 
 export default function MerchantDashboardPage() {
@@ -19,6 +20,7 @@ export default function MerchantDashboardPage() {
       <div className="mt-10">
         <MerchantProfileSection />
         <PlansSection />
+        <RedemptionSection />
       </div>
     </DashboardShell>
   )
