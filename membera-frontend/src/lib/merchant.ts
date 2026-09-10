@@ -7,6 +7,7 @@ import { ApiError, api } from '@/lib/apiClient'
 export interface MerchantProfile {
   businessName: string
   description: string | null
+  logoUrl: string | null
   isActive: boolean
 }
 
@@ -21,6 +22,7 @@ export interface SubscriptionPlan {
   activeFrom: string | null
   /** "HH:mm:ss" */
   activeUntil: string | null
+  imageUrl: string | null
   isActive: boolean
 }
 
@@ -51,6 +53,17 @@ export function updateMerchant(input: {
   description: string
 }): Promise<MerchantProfile> {
   return api.put<MerchantProfile>('/Merchant', input)
+}
+
+/**
+ * Uploads a new merchant logo (multipart/form-data) and returns its public URL.
+ * The API stores the URL on the merchant, so callers should refetch the profile
+ * afterwards to pick up the change.
+ */
+export function uploadMerchantLogo(file: File): Promise<string> {
+  const form = new FormData()
+  form.append('file', file)
+  return api.postForm<string>('/merchant/logo', form)
 }
 
 /** The API answers a missing profile with a 400 + "Merchant profile not found." */
@@ -86,6 +99,19 @@ export function updatePlan(
 
 export function deactivatePlan(planId: string): Promise<void> {
   return api.post<void>(`/subscription-plans/${planId}/deactivate`)
+}
+
+/**
+ * Uploads an image for a single subscription plan (multipart/form-data) and
+ * returns its public URL. Callers should refetch the plans list afterwards.
+ */
+export function uploadSubscriptionPlanImage(
+  planId: string,
+  file: File,
+): Promise<string> {
+  const form = new FormData()
+  form.append('file', file)
+  return api.postForm<string>(`/subscription-plans/${planId}/image`, form)
 }
 
 // --- Formatting helpers ---

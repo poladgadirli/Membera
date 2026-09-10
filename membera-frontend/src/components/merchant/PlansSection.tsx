@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ChangeEvent,
+} from 'react'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { Spinner } from '@/components/Spinner'
 import { StatusBadge } from '@/components/StatusBadge'
@@ -20,6 +26,7 @@ import {
   formatUsageLimit,
   getMyPlans,
   updatePlan,
+  uploadSubscriptionPlanImage,
   type PlanInput,
   type SubscriptionPlan,
 } from '@/lib/merchant'
@@ -148,36 +155,49 @@ export function PlansSection() {
             {plans.map((plan) => (
               <li key={plan.id} className={`${CARD} p-5`}>
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="text-base font-semibold tracking-tight text-neutral-900">
-                        {plan.name}
-                      </h3>
-                      <StatusBadge active={plan.isActive} />
-                    </div>
-                    {plan.description?.trim() && (
-                      <p className="mt-1 max-w-prose text-sm text-neutral-500">
-                        {plan.description}
-                      </p>
+                  <div className="flex min-w-0 gap-4">
+                    {plan.imageUrl && (
+                      <img
+                        src={plan.imageUrl}
+                        alt=""
+                        className="h-14 w-14 shrink-0 rounded-lg border border-neutral-200 object-cover"
+                      />
                     )}
-                    <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-sm">
-                      <Detail label="Price" value={formatPrice(plan.price)} />
-                      <Detail
-                        label="Duration"
-                        value={formatDuration(plan.durationInDays)}
-                      />
-                      <Detail
-                        label="Usage"
-                        value={formatUsageLimit(plan.usageLimit)}
-                      />
-                      <Detail
-                        label="Active hours"
-                        value={formatTimeRange(plan.activeFrom, plan.activeUntil)}
-                      />
-                    </dl>
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="text-base font-semibold tracking-tight text-neutral-900">
+                          {plan.name}
+                        </h3>
+                        <StatusBadge active={plan.isActive} />
+                      </div>
+                      {plan.description?.trim() && (
+                        <p className="mt-1 max-w-prose text-sm text-neutral-500">
+                          {plan.description}
+                        </p>
+                      )}
+                      <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-sm">
+                        <Detail label="Price" value={formatPrice(plan.price)} />
+                        <Detail
+                          label="Duration"
+                          value={formatDuration(plan.durationInDays)}
+                        />
+                        <Detail
+                          label="Usage"
+                          value={formatUsageLimit(plan.usageLimit)}
+                        />
+                        <Detail
+                          label="Active hours"
+                          value={formatTimeRange(
+                            plan.activeFrom,
+                            plan.activeUntil,
+                          )}
+                        />
+                      </dl>
+                    </div>
                   </div>
 
-                  <div className="flex shrink-0 items-center gap-2">
+                  <div className="flex shrink-0 items-start gap-2">
+                    <PlanImageButton plan={plan} onUploaded={load} />
                     <button
                       type="button"
                       onClick={() => setFormTarget({ mode: 'edit', plan })}
@@ -224,6 +244,63 @@ export function PlansSection() {
         />
       )}
     </section>
+  )
+}
+
+function PlanImageButton({
+  plan,
+  onUploaded,
+}: {
+  plan: SubscriptionPlan
+  onUploaded: () => Promise<void> | void
+}) {
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [uploading, setUploading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    event.target.value = '' // let the same file be re-picked later
+    if (!file) return
+
+    setError(null)
+    setUploading(true)
+    try {
+      await uploadSubscriptionPlanImage(plan.id, file)
+      await onUploaded()
+    } catch (err) {
+      setError(
+        err instanceof ApiError ? err.message : 'Could not upload the image.',
+      )
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  return (
+    <div className="flex flex-col items-end gap-1">
+      <button
+        type="button"
+        onClick={() => inputRef.current?.click()}
+        disabled={uploading}
+        className={secondaryButton}
+      >
+        {uploading && <Spinner className="h-3.5 w-3.5" />}
+        {uploading
+          ? 'Uploading…'
+          : plan.imageUrl
+            ? 'Change image'
+            : 'Add image'}
+      </button>
+      {error && <p className="text-xs text-red-600">{error}</p>}
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleChange}
+      />
+    </div>
   )
 }
 
