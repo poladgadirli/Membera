@@ -13,7 +13,6 @@ import {
 import { BTN_PRIMARY, CARD, ERROR_BANNER, SECTION_LABEL } from '@/lib/ui'
 import {
   ApiError,
-  BROWSE_PLANS_USES_PLACEHOLDER,
   browseActivePlans,
   checkoutSubscription,
   type BrowsePlan,
@@ -56,16 +55,6 @@ export default function BrowsePlansPage() {
         title="Find a plan to subscribe to"
         description="Buy a subscription once, then redeem it at the counter with a single scan — no app, no card, just your code."
       />
-
-      {BROWSE_PLANS_USES_PLACEHOLDER && (
-        <div className="mt-6 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-800">
-          <strong className="font-semibold">Preview data.</strong> There is no
-          backend endpoint yet to list active plans across all merchants, so
-          these cards are sample data. The page is wired to swap in the real
-          call (<code className="font-mono text-xs">browseActivePlans()</code> in{' '}
-          <code className="font-mono text-xs">src/lib/subscriptions.ts</code>).
-        </div>
-      )}
 
       <section aria-labelledby="browse-plans-heading" className="mt-10">
         <h2 id="browse-plans-heading" className={SECTION_LABEL}>

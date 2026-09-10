@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { DashboardShell } from '@/components/DashboardShell'
 import { CheckIcon } from '@/components/icons'
 import { SubscriptionStatusBadge } from '@/components/SubscriptionStatusBadge'
@@ -18,7 +18,27 @@ function newestActive(subs: UserSubscription[]): UserSubscription | null {
   return active[0] ?? null
 }
 
+/**
+ * The subscription to show, once it's activated. With a Stripe session id (from
+ * the ?session_id= Stripe appends to the redirect) we match it exactly and wait
+ * for that one row to flip Active — no guessing. Without one (direct navigation,
+ * or an older backend) we fall back to the newest-Active heuristic.
+ */
+function pickActivated(
+  subs: UserSubscription[],
+  sessionId: string | null,
+): UserSubscription | null {
+  if (sessionId) {
+    const match = subs.find((s) => s.stripeSessionId === sessionId)
+    return match?.status === 'Active' ? match : null
+  }
+  return newestActive(subs)
+}
+
 export default function SubscriptionSuccessPage() {
+  const [searchParams] = useSearchParams()
+  const sessionId = searchParams.get('session_id')
+
   const [activated, setActivated] = useState<UserSubscription | null>(null)
   // `round` re-arms the polling effect; bumping it (via "Check again") restarts.
   const [round, setRound] = useState(0)
@@ -35,7 +55,7 @@ export default function SubscriptionSuccessPage() {
       if (cancelled) return
       attempts += 1
       try {
-        const found = newestActive(await getMySubscriptions())
+        const found = pickActivated(await getMySubscriptions(), sessionId)
         if (found && !cancelled) {
           setActivated(found)
           setPolling(false)
@@ -57,7 +77,7 @@ export default function SubscriptionSuccessPage() {
       cancelled = true
       clearTimeout(timer)
     }
-  }, [round])
+  }, [round, sessionId])
 
   return (
     <DashboardShell>

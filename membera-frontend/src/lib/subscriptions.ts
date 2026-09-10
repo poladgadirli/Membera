@@ -3,6 +3,7 @@
 // BaseResponse<T> and throws ApiError.
 //
 // Backend routes (through the gateway, prefix /api):
+//   GET  /subscription-plans       -> { plans: [...] }   (all active, all merchants)
 //   POST /subscriptions/checkout   { subscriptionPlanId } -> { checkoutUrl }
 //   GET  /subscriptions/mine       -> { subscriptions: [...] }
 //   POST /subscriptions/redeem     { redemptionCode }      -> { subscriptionId, usagesRemaining, planName }
@@ -33,6 +34,8 @@ export interface UserSubscription {
   /** null = unlimited redemptions. */
   usagesRemaining: number | null
   status: SubscriptionStatus | string
+  /** Stripe Checkout session id — lets the success page match ?session_id=. Null on legacy rows. */
+  stripeSessionId: string | null
 }
 
 export async function getMySubscriptions(): Promise<UserSubscription[]> {
@@ -57,12 +60,9 @@ export interface CheckoutResult {
  * Creates a Stripe Checkout session for a plan and returns the hosted checkout
  * URL. The caller redirects the browser to it (window.location.href = ...).
  *
- * NOTE: the backend currently hardcodes the Stripe success/cancel URLs to
- * `https://localhost:7241/api/subscriptions/success|cancel` (placeholder API
- * routes that don't exist). Until the backend is changed to point at the
- * frontend routes /subscription-success and /subscription-cancel (or to accept
- * them from this request body), the post-payment redirect will not land the user
- * back in the app. See the report / SubscriptionController.Checkout.
+ * The backend builds the Stripe success/cancel URLs from FRONTEND_BASE_URL and
+ * points them at /subscription-success?session_id={CHECKOUT_SESSION_ID} and
+ * /subscription-cancel, so the post-payment redirect lands back in the app.
  */
 export function checkoutSubscription(
   subscriptionPlanId: string,
@@ -91,16 +91,9 @@ export function redeemSubscription(
   return api.post<RedeemResult>('/subscriptions/redeem', { redemptionCode })
 }
 
-// --- Browse ALL active plans across ALL merchants ---
-// ⚠️ BACKEND GAP: there is no endpoint that lists active plans across merchants,
-// and no endpoint that joins the merchant business name onto a plan. The
-// SubscriptionPlanController only exposes GET /subscription-plans/mine (the
-// current merchant's own plans). Everything below is a PLACEHOLDER shaped like
-// what such an endpoint SHOULD return, so BrowsePlansPage is ready to wire up.
-//
-// Expected real endpoint (to be added by the backend team), e.g.:
-//   GET /subscription-plans            (public or [Authorize], paged/filterable)
-//   -> { plans: BrowsePlan[] }
+// --- Browse ALL active plans across ALL merchants (GET /subscription-plans) ---
+// Backed by BrowseActivePlansHandler: every active plan, joined with its owning
+// merchant's business name / logo.
 
 export interface BrowsePlan {
   id: string
@@ -115,77 +108,17 @@ export interface BrowsePlan {
   activeUntil: string | null
   imageUrl: string | null
   isActive: boolean
-  /** The owning merchant — NOT currently returned by any endpoint. */
   merchantId: string
   merchantBusinessName: string
   merchantLogoUrl: string | null
 }
 
-/** Flip to false and delete the mock branch once the real endpoint exists. */
-export const BROWSE_PLANS_USES_PLACEHOLDER = true
-
-const PLACEHOLDER_BROWSE_PLANS: BrowsePlan[] = [
-  {
-    id: '00000000-0000-0000-0000-000000000001',
-    name: 'Daily Espresso Club',
-    description:
-      'One specialty espresso or filter coffee every day, redeemed with a quick scan at the counter.',
-    price: 29.0,
-    durationInDays: 30,
-    usageLimit: 30,
-    activeFrom: '07:00:00',
-    activeUntil: '18:00:00',
-    imageUrl:
-      'https://images.unsplash.com/photo-1511920170033-f8396924c348?auto=format&fit=crop&w=1200&q=80',
-    isActive: true,
-    merchantId: '00000000-0000-0000-0000-0000000000a1',
-    merchantBusinessName: 'Blue Bottle Coffee',
-    merchantLogoUrl: null,
-  },
-  {
-    id: '00000000-0000-0000-0000-000000000002',
-    name: 'Unlimited Yoga — Monthly',
-    description:
-      'Attend any scheduled class, as often as you like, for a full month. Mat included.',
-    price: 89.0,
-    durationInDays: 30,
-    usageLimit: null,
-    activeFrom: null,
-    activeUntil: null,
-    imageUrl:
-      'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=1200&q=80',
-    isActive: true,
-    merchantId: '00000000-0000-0000-0000-0000000000a2',
-    merchantBusinessName: 'Still Point Studio',
-    merchantLogoUrl: null,
-  },
-  {
-    id: '00000000-0000-0000-0000-000000000003',
-    name: 'Lunch Pass — 10 Visits',
-    description:
-      'Ten weekday lunches from the seasonal set menu. Valid for three months from purchase.',
-    price: 120.0,
-    durationInDays: 90,
-    usageLimit: 10,
-    activeFrom: '11:30:00',
-    activeUntil: '15:00:00',
-    imageUrl:
-      'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=1200&q=80',
-    isActive: true,
-    merchantId: '00000000-0000-0000-0000-0000000000a3',
-    merchantBusinessName: 'Greenhouse Kitchen',
-    merchantLogoUrl: null,
-  },
-]
-
-/**
- * PLACEHOLDER. Replace the body with a real call once the backend endpoint
- * exists, e.g.:
- *   const data = await api.get<{ plans?: BrowsePlan[] }>('/subscription-plans')
- *   return Array.isArray(data) ? data : (data.plans ?? [])
- */
 export async function browseActivePlans(): Promise<BrowsePlan[]> {
-  // Simulate a network round-trip so loading states are exercised.
-  await new Promise((resolve) => setTimeout(resolve, 400))
-  return PLACEHOLDER_BROWSE_PLANS.filter((plan) => plan.isActive)
+  // BaseResponse<BrowseActivePlansResult> -> client strips the envelope ->
+  // { plans: [...] }. Accept a bare array too, defensively.
+  const data = await api.get<BrowsePlan[] | { plans?: BrowsePlan[] }>(
+    '/subscription-plans',
+  )
+  if (Array.isArray(data)) return data
+  return data.plans ?? []
 }
