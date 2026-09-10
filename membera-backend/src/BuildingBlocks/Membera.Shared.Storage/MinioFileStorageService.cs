@@ -39,6 +39,39 @@ public class MinioFileStorageService : IFileStorageService
             {
                 await _minioClient.MakeBucketAsync(new MakeBucketArgs().WithBucket(bucketName));
                 _logger.LogInformation("Created MinIO bucket: {BucketName}", bucketName);
+
+                // Make the freshly-created bucket world-readable so the direct URLs
+                // returned by GetFileUrl load in the browser without auth.
+                //
+                // NOTE: a public-read bucket is deliberately NOT how you'd serve
+                // sensitive data in production - there you'd keep the bucket private
+                // and hand out short-lived presigned URLs, or front it with a CDN
+                // using signed URLs. It's fine (and much simpler) for this local dev
+                // / portfolio project because the objects here are business logos and
+                // subscription-plan photos, which aren't sensitive.
+                //
+                // Only done once, right after creation - if the bucket already
+                // exists we assume the policy was set when it was created and skip
+                // the extra API call.
+                var publicReadPolicy = $$"""
+                {
+                  "Version": "2012-10-17",
+                  "Statement": [
+                    {
+                      "Effect": "Allow",
+                      "Principal": { "AWS": ["*"] },
+                      "Action": ["s3:GetObject"],
+                      "Resource": ["arn:aws:s3:::{{bucketName}}/*"]
+                    }
+                  ]
+                }
+                """;
+
+                await _minioClient.SetPolicyAsync(new SetPolicyArgs()
+                    .WithBucket(bucketName)
+                    .WithPolicy(publicReadPolicy));
+
+                _logger.LogInformation("Set public-read policy on MinIO bucket: {BucketName}", bucketName);
             }
 
             await _minioClient.PutObjectAsync(new PutObjectArgs()
