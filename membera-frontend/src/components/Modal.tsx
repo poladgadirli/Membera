@@ -1,5 +1,7 @@
 import { useEffect, useId, useRef, type ReactNode } from 'react'
+import { AnimatePresence, motion } from 'motion/react'
 import { MODAL_BACKDROP, MODAL_PANEL } from '@/lib/ui'
+import { SPRING_UI, motionSafe, usePrefersReducedMotion } from '@/lib/motion'
 
 interface ModalProps {
   open: boolean
@@ -29,6 +31,8 @@ export function Modal({
   const onCloseRef = useRef(onClose)
   const titleId = useId()
   const descId = useId()
+  const reduced = usePrefersReducedMotion()
+  const transition = motionSafe(SPRING_UI, reduced)
 
   useEffect(() => {
     onCloseRef.current = onClose
@@ -59,64 +63,74 @@ export function Modal({
     }
   }, [open])
 
-  if (!open) return null
-
   return (
-    <div
-      className={MODAL_BACKDROP}
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget) onClose()
-      }}
-    >
-      <div
-        ref={panelRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-        aria-describedby={description ? descId : undefined}
-        className={MODAL_PANEL}
-      >
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h2
-              id={titleId}
-              className="text-lg font-semibold tracking-tight text-neutral-900"
-            >
-              {title}
-            </h2>
-            {description && (
-              <p id={descId} className="mt-1 text-sm text-neutral-500">
-                {description}
-              </p>
-            )}
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            className="-mr-1 -mt-1 rounded-lg p-1.5 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          className={MODAL_BACKDROP}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={transition}
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) onClose()
+          }}
+        >
+          <motion.div
+            ref={panelRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={titleId}
+            aria-describedby={description ? descId : undefined}
+            className={MODAL_PANEL}
+            initial={{ opacity: 0, scale: 0.96, y: 12 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: 12 }}
+            transition={transition}
           >
-            <svg
-              viewBox="0 0 20 20"
-              className="h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            >
-              <path d="M5 5l10 10M15 5L5 15" />
-            </svg>
-          </button>
-        </div>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2
+                  id={titleId}
+                  className="text-lg font-semibold tracking-tight text-neutral-900"
+                >
+                  {title}
+                </h2>
+                {description && (
+                  <p id={descId} className="mt-1 text-sm text-neutral-500">
+                    {description}
+                  </p>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label="Close"
+                className="-mr-1 -mt-1 rounded-lg p-1.5 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+              >
+                <svg
+                  viewBox="0 0 20 20"
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                >
+                  <path d="M5 5l10 10M15 5L5 15" />
+                </svg>
+              </button>
+            </div>
 
-        {children != null && children !== false && (
-          <div className="mt-5">{children}</div>
-        )}
+            {children != null && children !== false && (
+              <div className="mt-5">{children}</div>
+            )}
 
-        {footer && (
-          <div className="mt-6 flex items-center justify-end gap-3">{footer}</div>
-        )}
-      </div>
-    </div>
+            {footer && (
+              <div className="mt-6 flex items-center justify-end gap-3">{footer}</div>
+            )}
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   )
 }

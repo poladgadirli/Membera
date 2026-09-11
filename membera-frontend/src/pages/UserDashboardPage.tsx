@@ -1,11 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { AnimatePresence, motion } from 'motion/react'
 import { DashboardShell } from '@/components/DashboardShell'
 import { PageHeading } from '@/components/PageHeading'
 import { Spinner } from '@/components/Spinner'
 import { SubscriptionStatusBadge } from '@/components/SubscriptionStatusBadge'
+import { TimelineAnimation } from '@/components/ui/hero-financial-utils/timeline-animation'
 import { useAuth } from '@/hooks/useAuth'
 import { formatUsageLimit } from '@/lib/merchant'
+import { SPRING_SNAPPY, motionSafe, usePrefersReducedMotion } from '@/lib/motion'
 import { BTN_PRIMARY, CARD, ERROR_BANNER, SECTION_LABEL } from '@/lib/ui'
 import {
   ApiError,
@@ -32,6 +35,7 @@ function formatDate(iso: string): string {
 export default function UserDashboardPage() {
   const { user } = useAuth()
   const firstName = user?.firstName?.trim()
+  const sectionRef = useRef<HTMLElement>(null)
 
   const [status, setStatus] = useState<Status>('loading')
   const [subscriptions, setSubscriptions] = useState<UserSubscription[]>([])
@@ -68,7 +72,11 @@ export default function UserDashboardPage() {
         description="Your subscriptions and the redemption codes you show at the counter."
       />
 
-      <section aria-labelledby="my-subscriptions-heading" className="mt-10">
+      <section
+        ref={sectionRef}
+        aria-labelledby="my-subscriptions-heading"
+        className="mt-10"
+      >
         <div className="flex items-center justify-between gap-4">
           <h2 id="my-subscriptions-heading" className={SECTION_LABEL}>
             My subscriptions
@@ -112,11 +120,15 @@ export default function UserDashboardPage() {
 
           {status === 'ready' && subscriptions.length > 0 && (
             <ul className="grid gap-5 sm:grid-cols-2">
-              {subscriptions.map((subscription) => (
-                <SubscriptionCard
+              {subscriptions.map((subscription, index) => (
+                <TimelineAnimation
+                  as="li"
                   key={subscription.id}
-                  subscription={subscription}
-                />
+                  animationNum={index}
+                  timelineRef={sectionRef}
+                >
+                  <SubscriptionCard subscription={subscription} />
+                </TimelineAnimation>
               ))}
             </ul>
           )}
@@ -132,6 +144,7 @@ function SubscriptionCard({
   subscription: UserSubscription
 }) {
   const [copied, setCopied] = useState(false)
+  const reduced = usePrefersReducedMotion()
 
   const isActive = subscription.status === 'Active'
   const showCode = subscription.status === 'Active' || subscription.status === 'Pending'
@@ -147,7 +160,7 @@ function SubscriptionCard({
   }
 
   return (
-    <li className={`${CARD} flex flex-col p-5`}>
+    <div className={`${CARD} flex flex-col p-5`}>
       <div className="flex items-start justify-between gap-3">
         <h3 className="text-base font-semibold tracking-tight text-neutral-900">
           {subscription.planName || 'Subscription'}
@@ -168,9 +181,20 @@ function SubscriptionCard({
             <button
               type="button"
               onClick={copyCode}
-              className="shrink-0 rounded-md px-2 py-1 text-xs font-medium text-blue-600 transition-colors hover:bg-blue-50 hover:text-blue-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+              className="shrink-0 overflow-hidden rounded-md px-2 py-1 text-xs font-medium text-blue-600 transition-colors hover:bg-blue-50 hover:text-blue-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
             >
-              {copied ? 'Copied' : 'Copy'}
+              <AnimatePresence mode="popLayout" initial={false}>
+                <motion.span
+                  key={copied ? 'copied' : 'copy'}
+                  className="inline-block"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  transition={motionSafe(SPRING_SNAPPY, reduced)}
+                >
+                  {copied ? 'Copied' : 'Copy'}
+                </motion.span>
+              </AnimatePresence>
             </button>
           </div>
         ) : (
@@ -209,6 +233,6 @@ function SubscriptionCard({
           to check.
         </p>
       )}
-    </li>
+    </div>
   )
 }

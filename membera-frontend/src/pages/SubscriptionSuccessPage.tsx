@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
+import { AnimatePresence, motion } from 'motion/react'
 import { DashboardShell } from '@/components/DashboardShell'
 import { CheckIcon } from '@/components/icons'
 import { SubscriptionStatusBadge } from '@/components/SubscriptionStatusBadge'
 import LoaderOne from '@/components/ui/loader-one'
+import { SPRING_UI, materializeVariants, motionSafe, usePrefersReducedMotion } from '@/lib/motion'
 import { BTN_PRIMARY, BTN_SECONDARY, CARD } from '@/lib/ui'
 import { getMySubscriptions, type UserSubscription } from '@/lib/subscriptions'
 
@@ -43,6 +45,7 @@ export default function SubscriptionSuccessPage() {
   // `round` re-arms the polling effect; bumping it (via "Check again") restarts.
   const [round, setRound] = useState(0)
   const [polling, setPolling] = useState(true)
+  const reduced = usePrefersReducedMotion()
 
   useEffect(() => {
     let cancelled = false
@@ -94,44 +97,70 @@ export default function SubscriptionSuccessPage() {
           Stripe on our server, so it can take a moment to show up here.
         </p>
 
-        {activated ? (
-          <div className="mt-6 rounded-xl border border-neutral-200 bg-neutral-50 p-4 text-left">
-            <div className="flex items-center justify-between gap-3">
-              <span className="text-sm font-semibold text-neutral-900">
-                {activated.planName || 'Your subscription'}
-              </span>
-              <SubscriptionStatusBadge status={activated.status} />
-            </div>
-            <p className="mt-3 text-xs font-medium uppercase tracking-wide text-neutral-500">
-              Redemption code
-            </p>
-            <p className="mt-1 font-mono text-lg font-semibold tracking-wider text-neutral-900">
-              {activated.redemptionCode}
-            </p>
-            <p className="mt-2 text-xs text-neutral-500">
-              Show or read this code to the merchant at the counter.
-            </p>
-          </div>
-        ) : polling ? (
-          <div className="mt-6 flex flex-col items-center gap-3 text-sm text-neutral-500">
-            <LoaderOne />
-            Waiting for activation…
-          </div>
-        ) : (
-          <div className="mt-6 space-y-3">
-            <p className="text-sm text-neutral-500">
-              Still processing. You can safely leave this page — your code will
-              appear on your dashboard once it&rsquo;s ready.
-            </p>
-            <button
-              type="button"
-              onClick={() => setRound((r) => r + 1)}
-              className={BTN_SECONDARY}
+        <AnimatePresence mode="wait" initial={false}>
+          {activated ? (
+            <motion.div
+              key="activated"
+              variants={materializeVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={motionSafe(SPRING_UI, reduced)}
+              className="mt-6 rounded-xl border border-neutral-200 bg-neutral-50 p-4 text-left"
             >
-              Check again
-            </button>
-          </div>
-        )}
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-sm font-semibold text-neutral-900">
+                  {activated.planName || 'Your subscription'}
+                </span>
+                <SubscriptionStatusBadge status={activated.status} />
+              </div>
+              <p className="mt-3 text-xs font-medium uppercase tracking-wide text-neutral-500">
+                Redemption code
+              </p>
+              <p className="mt-1 font-mono text-lg font-semibold tracking-wider text-neutral-900">
+                {activated.redemptionCode}
+              </p>
+              <p className="mt-2 text-xs text-neutral-500">
+                Show or read this code to the merchant at the counter.
+              </p>
+            </motion.div>
+          ) : polling ? (
+            <motion.div
+              key="polling"
+              variants={materializeVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={motionSafe(SPRING_UI, reduced)}
+              className="mt-6 flex flex-col items-center gap-3 text-sm text-neutral-500"
+            >
+              <LoaderOne />
+              Waiting for activation…
+            </motion.div>
+          ) : (
+            <motion.div
+              key="timeout"
+              variants={materializeVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={motionSafe(SPRING_UI, reduced)}
+              className="mt-6 space-y-3"
+            >
+              <p className="text-sm text-neutral-500">
+                Still processing. You can safely leave this page — your code will
+                appear on your dashboard once it&rsquo;s ready.
+              </p>
+              <button
+                type="button"
+                onClick={() => setRound((r) => r + 1)}
+                className={BTN_SECONDARY}
+              >
+                Check again
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <Link to="/dashboard" className={BTN_PRIMARY}>

@@ -1,5 +1,6 @@
-import { Route, Routes } from 'react-router-dom'
+import { Route } from 'react-router-dom'
 import { ProtectedRoute } from './components/ProtectedRoute'
+import { RouteTransition } from './components/RouteTransition'
 import BrowsePlansPage from './pages/BrowsePlansPage'
 import DashboardPage from './pages/DashboardPage'
 import LandingPage from './pages/LandingPage'
@@ -13,7 +14,7 @@ import SubscriptionSuccessPage from './pages/SubscriptionSuccessPage'
 
 function App() {
   return (
-    <Routes>
+    <RouteTransition>
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<RegisterPage />} />
@@ -64,7 +65,7 @@ function App() {
 
       {/* Catch-all — must stay last so it only matches unknown routes. */}
       <Route path="*" element={<NotFoundPage />} />
-    </Routes>
+    </RouteTransition>
   )
 }
 

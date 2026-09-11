@@ -18,8 +18,12 @@ export const CARD =
 export const CARD_SOLID =
   'rounded-2xl border border-neutral-200/70 bg-white shadow-sm'
 
+// Tracking is size-specific: Tailwind's flat `tracking-tight` (-0.025em) is
+// fine at 4xl, but reads slightly loose once the same heading grows to 5xl —
+// so the largest reusable heading gets an explicit, tighter step at that
+// breakpoint instead of inheriting one flat value at every size.
 export const HEADING_XL =
-  'text-4xl font-medium tracking-tight text-neutral-900 sm:text-5xl'
+  'text-4xl font-medium tracking-tight text-neutral-900 sm:text-5xl sm:tracking-[-0.03em]'
 export const HEADING_LG = 'text-2xl font-medium tracking-tight text-neutral-900'
 export const HEADING_MD = 'text-lg font-semibold text-neutral-900'
 
@@ -40,8 +44,10 @@ export const LOGO_MARK =
 export const ICON_BADGE =
   'grid shrink-0 place-items-center rounded-xl bg-linear-to-br from-blue-500 via-blue-400 to-blue-200 text-white shadow-sm shadow-blue-500/30'
 
+// active: fires on pointer-down (not click/release), so this is the "respond
+// instantly to a press" feedback the whole app's buttons get for free.
 const BUTTON_BASE =
-  'inline-flex items-center justify-center gap-2 rounded-lg text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-60'
+  'inline-flex items-center justify-center gap-2 rounded-lg text-sm font-semibold transition duration-150 ease-out active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100'
 
 export const BTN_PRIMARY = `${BUTTON_BASE} border border-blue-300 bg-linear-to-br from-blue-500 via-blue-400 to-blue-200 px-4 py-2.5 text-white shadow-sm shadow-blue-500/30 hover:brightness-105 focus-visible:outline-blue-500`
 

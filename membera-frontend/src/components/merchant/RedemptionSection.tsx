@@ -1,6 +1,8 @@
 import { useState, type FormEvent } from 'react'
+import { AnimatePresence, motion } from 'motion/react'
 import { CheckIcon } from '@/components/icons'
 import { Spinner } from '@/components/Spinner'
+import { SPRING_UI, materializeVariants, motionSafe, usePrefersReducedMotion } from '@/lib/motion'
 import { CARD, SECTION_LABEL } from '@/lib/ui'
 import {
   ApiError,
@@ -22,6 +24,7 @@ export function RedemptionSection() {
   const [code, setCode] = useState('')
   const [busy, setBusy] = useState(false)
   const [outcome, setOutcome] = useState<Outcome>({ kind: 'idle' })
+  const reduced = usePrefersReducedMotion()
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -80,51 +83,65 @@ export function RedemptionSection() {
           <button
             type="submit"
             disabled={busy || !code.trim()}
-            className="flex w-full items-center justify-center gap-2 rounded-xl border border-blue-300 bg-linear-to-br from-blue-500 via-blue-400 to-blue-200 py-4 text-base font-semibold text-white shadow-sm shadow-blue-500/30 transition hover:brightness-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
+            className="flex w-full items-center justify-center gap-2 rounded-xl border border-blue-300 bg-linear-to-br from-blue-500 via-blue-400 to-blue-200 py-4 text-base font-semibold text-white shadow-sm shadow-blue-500/30 transition duration-150 ease-out active:scale-[0.98] hover:brightness-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100"
           >
             {busy && <Spinner className="h-5 w-5" />}
             {busy ? 'Redeeming…' : 'Redeem'}
           </button>
         </form>
 
-        {outcome.kind === 'success' && (
-          <div
-            role="status"
-            className="mt-5 rounded-xl border border-blue-200 bg-blue-50 p-5 text-center"
-          >
-            <span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-linear-to-br from-blue-500 via-blue-400 to-blue-200 text-white shadow-sm shadow-blue-500/30">
-              <CheckIcon className="h-6 w-6" />
-            </span>
-            <p className="mt-3 text-lg font-semibold text-neutral-900">
-              Redeemed &mdash; {outcome.result.planName}
-            </p>
-            <p className="mt-1 text-sm text-neutral-600">
-              {outcome.result.usagesRemaining == null
-                ? 'Unlimited redemptions remaining.'
-                : `${outcome.result.usagesRemaining} ${
-                    outcome.result.usagesRemaining === 1 ? 'redemption' : 'redemptions'
-                  } remaining.`}
-            </p>
-          </div>
-        )}
-
-        {outcome.kind === 'error' && (
-          <div
-            role="alert"
-            className="mt-5 rounded-xl border border-red-200 bg-red-50 p-5 text-center"
-          >
-            <span
-              aria-hidden="true"
-              className="mx-auto grid h-12 w-12 place-items-center rounded-full border border-red-200 bg-white text-2xl font-semibold text-red-500"
+        <AnimatePresence mode="wait" initial={false}>
+          {outcome.kind === 'success' && (
+            <motion.div
+              key="success"
+              role="status"
+              variants={materializeVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={motionSafe(SPRING_UI, reduced)}
+              className="mt-5 rounded-xl border border-blue-200 bg-blue-50 p-5 text-center"
             >
-              !
-            </span>
-            <p className="mt-3 text-lg font-semibold text-red-700">
-              Not redeemed
-            </p>
-            <p className="mt-1 text-sm text-red-600">{outcome.message}</p>
-          </div>
-        )}
+              <span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-linear-to-br from-blue-500 via-blue-400 to-blue-200 text-white shadow-sm shadow-blue-500/30">
+                <CheckIcon className="h-6 w-6" />
+              </span>
+              <p className="mt-3 text-lg font-semibold text-neutral-900">
+                Redeemed &mdash; {outcome.result.planName}
+              </p>
+              <p className="mt-1 text-sm text-neutral-600">
+                {outcome.result.usagesRemaining == null
+                  ? 'Unlimited redemptions remaining.'
+                  : `${outcome.result.usagesRemaining} ${
+                      outcome.result.usagesRemaining === 1 ? 'redemption' : 'redemptions'
+                    } remaining.`}
+              </p>
+            </motion.div>
+          )}
+
+          {outcome.kind === 'error' && (
+            <motion.div
+              key="error"
+              role="alert"
+              variants={materializeVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={motionSafe(SPRING_UI, reduced)}
+              className="mt-5 rounded-xl border border-red-200 bg-red-50 p-5 text-center"
+            >
+              <span
+                aria-hidden="true"
+                className="mx-auto grid h-12 w-12 place-items-center rounded-full border border-red-200 bg-white text-2xl font-semibold text-red-500"
+              >
+                !
+              </span>
+              <p className="mt-3 text-lg font-semibold text-red-700">
+                Not redeemed
+              </p>
+              <p className="mt-1 text-sm text-red-600">{outcome.message}</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </section>
   )

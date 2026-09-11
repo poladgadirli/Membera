@@ -1,11 +1,20 @@
 import { Link } from 'react-router-dom'
+import { motion } from 'motion/react'
 import { DashboardShell } from '@/components/DashboardShell'
+import { SPRING_UI, motionSafe, usePrefersReducedMotion } from '@/lib/motion'
 import { BTN_PRIMARY, BTN_SECONDARY, CARD } from '@/lib/ui'
 
 export default function SubscriptionCancelPage() {
+  const reduced = usePrefersReducedMotion()
+
   return (
     <DashboardShell>
-      <div className={`${CARD} mx-auto max-w-xl p-8 text-center`}>
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={motionSafe(SPRING_UI, reduced)}
+        className={`${CARD} mx-auto max-w-xl p-8 text-center`}
+      >
         <span
           aria-hidden="true"
           className="mx-auto grid h-14 w-14 place-items-center rounded-full border border-neutral-200 bg-neutral-50 text-2xl text-neutral-400"
@@ -29,7 +38,7 @@ export default function SubscriptionCancelPage() {
             Go to my dashboard
           </Link>
         </div>
-      </div>
+      </motion.div>
     </DashboardShell>
   )
 }

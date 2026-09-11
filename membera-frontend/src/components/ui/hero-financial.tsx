@@ -235,7 +235,7 @@ export const HeroFinancial = () => {
           as="h1"
           animationNum={2}
           timelineRef={timelineRef}
-          className="sm:text-6xl text-5xl md:text-8xl font-medium tracking-tight text-neutral-900 max-w-6xl"
+          className="sm:text-6xl text-5xl md:text-8xl font-medium tracking-tight md:tracking-[-0.045em] md:leading-[0.95] text-neutral-900 max-w-6xl"
         >
           Subscriptions made simple <br /> for local businesses.
         </TimelineAnimation>

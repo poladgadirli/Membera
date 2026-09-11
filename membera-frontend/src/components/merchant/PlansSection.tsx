@@ -6,6 +6,7 @@ import {
   type ChangeEvent,
   type ReactNode,
 } from 'react'
+import { motion } from 'motion/react'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import {
   CalendarIcon,
@@ -21,6 +22,7 @@ import { Spinner } from '@/components/Spinner'
 import { StatusBadge } from '@/components/StatusBadge'
 import { PlanFormModal } from '@/components/merchant/PlanFormModal'
 import { ApiError } from '@/lib/apiClient'
+import { SPRING_UI } from '@/lib/motion'
 import { BTN_PRIMARY, CARD, ERROR_BANNER, SECTION_LABEL } from '@/lib/ui'
 import {
   createPlan,
@@ -262,8 +264,10 @@ function PlanCard({
   const monogram = plan.name.trim().charAt(0).toUpperCase() || 'P'
 
   return (
-    <li
-      className={`${CARD} group relative flex flex-col transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-md hover:shadow-blue-500/10`}
+    <motion.li
+      className={`${CARD} group relative flex flex-col hover:shadow-md hover:shadow-blue-500/10`}
+      whileHover={{ y: -4 }}
+      transition={SPRING_UI}
     >
       {/* Top ~70%: the plan image (or a placeholder that doubles as an upload target). */}
       <div className="relative aspect-[3/2] overflow-hidden rounded-t-2xl bg-linear-to-br from-blue-100 via-blue-50 to-white">
@@ -304,7 +308,7 @@ function PlanCard({
           aria-haspopup="menu"
           aria-expanded={menuOpen}
           aria-label="Plan actions"
-          className="grid h-8 w-8 place-items-center rounded-full bg-white/85 text-neutral-700 shadow-sm backdrop-blur transition-colors hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+          className="grid h-8 w-8 place-items-center rounded-full bg-white/85 text-neutral-700 shadow-sm backdrop-blur transition duration-150 ease-out active:scale-[0.9] hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
         >
           <MoreVerticalIcon className="h-4 w-4" />
         </button>
@@ -396,7 +400,7 @@ function PlanCard({
         className="hidden"
         onChange={handleFile}
       />
-    </li>
+    </motion.li>
   )
 }
 

@@ -20,3 +20,4 @@ packages/
 /membera-backend/src/Services/Merchant/Membera.Merchant.Api/appsettings.Development.json
 
 **/logs/
+.claude/skills/apple-design/SKILL.md

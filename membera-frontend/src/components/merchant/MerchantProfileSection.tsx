@@ -8,10 +8,12 @@ import {
   type FormEvent,
   type ReactNode,
 } from 'react'
+import { motion } from 'motion/react'
 import { CameraIcon, ChevronDownIcon, PencilIcon } from '@/components/icons'
 import { Spinner } from '@/components/Spinner'
 import { StatusBadge } from '@/components/StatusBadge'
 import { ApiError } from '@/lib/apiClient'
+import { SPRING_UI } from '@/lib/motion'
 import {
   BTN_PRIMARY,
   BTN_SECONDARY,
@@ -283,14 +285,16 @@ export function MerchantProfileSection() {
         )}
 
         {status === 'ready' && profile && !editing && (
-          <div
+          <motion.div
             onClick={(e) => {
               // Mobile: a tap anywhere on the card that isn't a control toggles
               // the description. Desktop reveal is pure CSS (group-hover).
               if ((e.target as HTMLElement).closest('button, a, input')) return
               setExpanded((v) => !v)
             }}
-            className={`${CARD} group relative cursor-default p-6 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-md hover:shadow-blue-500/10`}
+            className={`${CARD} group relative cursor-default p-6 hover:shadow-md hover:shadow-blue-500/10`}
+            whileHover={{ y: -4 }}
+            transition={SPRING_UI}
           >
             <div className="flex items-start gap-5">
               {/* Circular profile avatar */}
@@ -381,7 +385,7 @@ export function MerchantProfileSection() {
               className="hidden"
               onChange={handleLogoChange}
             />
-          </div>
+          </motion.div>
         )}
 
         {status === 'ready' && profile && editing && (

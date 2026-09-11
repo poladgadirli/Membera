@@ -1,6 +1,15 @@
 import React, { useState, type FormEvent } from 'react'
 import { ArrowLeft, Eye, EyeOff } from 'lucide-react'
+import { motion } from 'motion/react'
 import { GoogleSignInButton } from '@/components/GoogleSignInButton'
+import {
+  SPRING_MOMENTUM,
+  elementVariants,
+  motionSafe,
+  slideRightVariants,
+  testimonialVariants,
+  usePrefersReducedMotion,
+} from '@/lib/motion'
 
 // --- TYPE DEFINITIONS ---
 
@@ -39,13 +48,19 @@ const GlassInputWrapper = ({ children }: { children: React.ReactNode }) => (
 
 const TestimonialCard = ({
   testimonial,
-  delay,
+  delayMs,
+  reduced,
 }: {
   testimonial: Testimonial
-  delay: string
+  delayMs: number
+  reduced: boolean
 }) => (
-  <div
-    className={`animate-testimonial ${delay} flex w-64 items-start gap-3 rounded-3xl border border-white/40 bg-white/40 p-5 shadow-sm shadow-blue-500/10 backdrop-blur-xl`}
+  <motion.div
+    variants={testimonialVariants}
+    initial="initial"
+    animate="animate"
+    transition={motionSafe({ ...SPRING_MOMENTUM, delay: delayMs / 1000 }, reduced)}
+    className="flex w-64 items-start gap-3 rounded-3xl border border-white/40 bg-white/40 p-5 shadow-sm shadow-blue-500/10 backdrop-blur-xl"
   >
     <img
       src={testimonial.avatarSrc}
@@ -59,7 +74,7 @@ const TestimonialCard = ({
       <p className="text-muted-foreground">{testimonial.handle}</p>
       <p className="mt-1 text-foreground/80">{testimonial.text}</p>
     </div>
-  </div>
+  </motion.div>
 )
 
 // --- MAIN COMPONENT ---
@@ -81,6 +96,9 @@ export const SignInPage: React.FC<SignInPageProps> = ({
   loading = false,
 }) => {
   const [showPassword, setShowPassword] = useState(false)
+  const reduced = usePrefersReducedMotion()
+  const t = (delayMs: number) =>
+    motionSafe({ ...SPRING_MOMENTUM, delay: delayMs / 1000 }, reduced)
 
   return (
     <div className="flex min-h-[100dvh] w-full flex-col font-geist md:flex-row">
@@ -89,24 +107,45 @@ export const SignInPage: React.FC<SignInPageProps> = ({
         <div className="w-full max-w-md">
           <div className="flex flex-col gap-6">
             {onBackToHome && (
-              <button
+              <motion.button
                 type="button"
                 onClick={onBackToHome}
-                className="animate-element animate-delay-100 -ml-1 flex w-fit items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+                variants={elementVariants}
+                initial="initial"
+                animate="animate"
+                transition={t(100)}
+                className="-ml-1 flex w-fit items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
               >
                 <ArrowLeft className="h-4 w-4" />
                 Back to home
-              </button>
+              </motion.button>
             )}
-            <h1 className="animate-element animate-delay-100 text-4xl font-medium leading-tight tracking-tight text-neutral-900 md:text-5xl">
+            <motion.h1
+              variants={elementVariants}
+              initial="initial"
+              animate="animate"
+              transition={t(100)}
+              className="text-4xl font-medium leading-tight tracking-tight text-neutral-900 md:text-5xl"
+            >
               {title}
-            </h1>
-            <p className="animate-element animate-delay-200 text-muted-foreground">
+            </motion.h1>
+            <motion.p
+              variants={elementVariants}
+              initial="initial"
+              animate="animate"
+              transition={t(200)}
+              className="text-muted-foreground"
+            >
               {description}
-            </p>
+            </motion.p>
 
             <form className="space-y-5" onSubmit={onSignIn}>
-              <div className="animate-element animate-delay-300">
+              <motion.div
+                variants={elementVariants}
+                initial="initial"
+                animate="animate"
+                transition={t(300)}
+              >
                 <label className="text-sm font-medium text-muted-foreground">
                   Email Address
                 </label>
@@ -119,9 +158,14 @@ export const SignInPage: React.FC<SignInPageProps> = ({
                     className="w-full rounded-2xl bg-transparent p-4 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none"
                   />
                 </GlassInputWrapper>
-              </div>
+              </motion.div>
 
-              <div className="animate-element animate-delay-400">
+              <motion.div
+                variants={elementVariants}
+                initial="initial"
+                animate="animate"
+                transition={t(400)}
+              >
                 <label className="text-sm font-medium text-muted-foreground">
                   Password
                 </label>
@@ -148,9 +192,15 @@ export const SignInPage: React.FC<SignInPageProps> = ({
                     </button>
                   </div>
                 </GlassInputWrapper>
-              </div>
+              </motion.div>
 
-              <div className="animate-element animate-delay-500 flex items-center justify-between text-sm">
+              <motion.div
+                variants={elementVariants}
+                initial="initial"
+                animate="animate"
+                transition={t(500)}
+                className="flex items-center justify-between text-sm"
+              >
                 <label className="flex cursor-pointer items-center gap-3">
                   <input
                     type="checkbox"
@@ -169,39 +219,67 @@ export const SignInPage: React.FC<SignInPageProps> = ({
                 >
                   Reset password
                 </a>
-              </div>
+              </motion.div>
 
               {error && (
-                <div className="animate-element rounded-2xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                <motion.div
+                  variants={elementVariants}
+                  initial="initial"
+                  animate="animate"
+                  transition={t(0)}
+                  className="rounded-2xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive"
+                >
                   {error}
-                </div>
+                </motion.div>
               )}
 
-              <button
+              <motion.button
                 type="submit"
                 disabled={loading}
-                className="animate-element animate-delay-600 w-full rounded-2xl border border-blue-300 bg-linear-to-br from-blue-500 via-blue-400 to-blue-200 py-4 font-medium text-white shadow-sm shadow-blue-500/30 transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60"
+                variants={elementVariants}
+                initial="initial"
+                animate="animate"
+                transition={t(600)}
+                whileTap={loading ? undefined : { scale: 0.98 }}
+                className="w-full rounded-2xl border border-blue-300 bg-linear-to-br from-blue-500 via-blue-400 to-blue-200 py-4 font-medium text-white shadow-sm shadow-blue-500/30 transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {loading ? 'Signing in…' : 'Sign In'}
-              </button>
+              </motion.button>
             </form>
 
-            <div className="animate-element animate-delay-700 relative flex items-center justify-center">
+            <motion.div
+              variants={elementVariants}
+              initial="initial"
+              animate="animate"
+              transition={t(700)}
+              className="relative flex items-center justify-center"
+            >
               <span className="w-full border-t border-border"></span>
               <span className="absolute bg-background px-4 text-sm text-muted-foreground">
                 Or continue with
               </span>
-            </div>
+            </motion.div>
 
-            <div className="animate-element animate-delay-800">
+            <motion.div
+              variants={elementVariants}
+              initial="initial"
+              animate="animate"
+              transition={t(800)}
+            >
               <GoogleSignInButton
                 text="signin_with"
                 onCredential={(idToken) => onGoogleSignIn?.(idToken)}
                 onError={onGoogleError}
               />
-            </div>
+            </motion.div>
 
-            <p className="animate-element animate-delay-900 text-center text-sm text-muted-foreground">
+            <motion.p
+              variants={elementVariants}
+              initial="initial"
+              animate="animate"
+              transition={t(900)}
+              className="text-center text-sm text-muted-foreground"
+            >
               New to Membera?{' '}
               <a
                 href="#"
@@ -213,7 +291,7 @@ export const SignInPage: React.FC<SignInPageProps> = ({
               >
                 Create Account
               </a>
-            </p>
+            </motion.p>
           </div>
         </div>
       </section>
@@ -221,21 +299,27 @@ export const SignInPage: React.FC<SignInPageProps> = ({
       {/* Right column: hero image + testimonials */}
       {heroImageSrc && (
         <section className="relative hidden flex-1 p-4 md:block">
-          <div
-            className="animate-slide-right animate-delay-300 absolute inset-4 rounded-3xl bg-cover bg-center"
+          <motion.div
+            variants={slideRightVariants}
+            initial="initial"
+            animate="animate"
+            transition={t(300)}
+            className="absolute inset-4 rounded-3xl bg-cover bg-center"
             style={{ backgroundImage: `url(${heroImageSrc})` }}
-          ></div>
+          ></motion.div>
           {testimonials.length > 0 && (
             <div className="absolute bottom-8 left-1/2 flex w-full -translate-x-1/2 justify-center gap-4 px-8">
               <TestimonialCard
                 testimonial={testimonials[0]}
-                delay="animate-delay-1000"
+                delayMs={1000}
+                reduced={reduced}
               />
               {testimonials[1] && (
                 <div className="hidden xl:flex">
                   <TestimonialCard
                     testimonial={testimonials[1]}
-                    delay="animate-delay-1200"
+                    delayMs={1200}
+                    reduced={reduced}
                   />
                 </div>
               )}
@@ -243,7 +327,8 @@ export const SignInPage: React.FC<SignInPageProps> = ({
                 <div className="hidden 2xl:flex">
                   <TestimonialCard
                     testimonial={testimonials[2]}
-                    delay="animate-delay-1400"
+                    delayMs={1400}
+                    reduced={reduced}
                   />
                 </div>
               )}

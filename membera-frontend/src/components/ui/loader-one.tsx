@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 
 // bg-blue-500 is already the app's primary blue (see src/lib/ui.ts gradients,
 // Spinner's border-t-blue-500, and the StatusBadge dot) — left as-is.

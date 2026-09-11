@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { DashboardShell } from '@/components/DashboardShell'
 import { PageHeading } from '@/components/PageHeading'
+import { PageLoadingOverlay } from '@/components/PageLoadingOverlay'
 import { Pagination } from '@/components/Pagination'
 import { Spinner } from '@/components/Spinner'
 import { useAuth } from '@/hooks/useAuth'
@@ -182,10 +183,7 @@ export default function AdminDashboardPage() {
 
           {status === 'ready' && (
             <div className={`${CARD} overflow-hidden`}>
-              <div className="relative">
-                <div
-                  className={`overflow-x-auto ${pageLoading ? 'opacity-40 transition-opacity' : ''}`}
-                >
+              <PageLoadingOverlay loading={pageLoading} className="overflow-x-auto">
                   <table className="w-full min-w-[40rem] text-left text-sm">
                     <thead>
                       <tr className="border-b border-neutral-200/70 text-xs uppercase tracking-wide text-neutral-500">
@@ -255,8 +253,8 @@ export default function AdminDashboardPage() {
                                       }
                                       className={
                                         ACTION_COPY[kind].destructive
-                                          ? 'rounded-lg border border-red-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-red-600 shadow-sm transition hover:bg-red-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500'
-                                          : 'rounded-lg border border-neutral-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-neutral-900 shadow-sm transition hover:bg-neutral-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500'
+                                          ? 'rounded-lg border border-red-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-red-600 shadow-sm transition duration-150 ease-out active:scale-[0.97] hover:bg-red-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500'
+                                          : 'rounded-lg border border-neutral-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-neutral-900 shadow-sm transition duration-150 ease-out active:scale-[0.97] hover:bg-neutral-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500'
                                       }
                                     >
                                       {ACTION_COPY[kind].verb}
@@ -270,14 +268,7 @@ export default function AdminDashboardPage() {
                       })}
                     </tbody>
                   </table>
-                </div>
-
-                {pageLoading && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <Spinner />
-                  </div>
-                )}
-              </div>
+              </PageLoadingOverlay>
 
               <Pagination
                 page={page}

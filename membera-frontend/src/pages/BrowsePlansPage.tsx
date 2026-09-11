@@ -3,8 +3,11 @@ import { Link } from 'react-router-dom'
 import { DashboardShell } from '@/components/DashboardShell'
 import { CalendarIcon, ClockIcon, ImageIcon, RepeatIcon } from '@/components/icons'
 import { PageHeading } from '@/components/PageHeading'
+import { PageLoadingOverlay } from '@/components/PageLoadingOverlay'
 import { Pagination } from '@/components/Pagination'
 import { Spinner } from '@/components/Spinner'
+import { TimelineAnimation } from '@/components/ui/hero-financial-utils/timeline-animation'
+import { SPRING_UI } from '@/lib/motion'
 import {
   formatDuration,
   formatPrice,
@@ -28,6 +31,7 @@ type Status = 'loading' | 'ready' | 'error'
 const PAGE_SIZE = 9
 
 export default function BrowsePlansPage() {
+  const sectionRef = useRef<HTMLElement>(null)
   const [status, setStatus] = useState<Status>('loading')
   const [plans, setPlans] = useState<BrowsePlan[]>([])
   const [totalCount, setTotalCount] = useState(0)
@@ -75,7 +79,11 @@ export default function BrowsePlansPage() {
         description="Buy a subscription once, then redeem it at the counter with a single scan — no app, no card, just your code."
       />
 
-      <section aria-labelledby="browse-plans-heading" className="mt-10">
+      <section
+        ref={sectionRef}
+        aria-labelledby="browse-plans-heading"
+        className="mt-10"
+      >
         <h2 id="browse-plans-heading" className={SECTION_LABEL}>
           Available plans
         </h2>
@@ -111,21 +119,21 @@ export default function BrowsePlansPage() {
 
           {status === 'ready' && plans.length > 0 && (
             <>
-              <div className="relative">
-                <ul
-                  className={`grid gap-5 sm:grid-cols-2 lg:grid-cols-3 ${pageLoading ? 'opacity-40 transition-opacity' : ''}`}
-                >
-                  {plans.map((plan) => (
-                    <BrowsePlanCard key={plan.id} plan={plan} />
+              <PageLoadingOverlay loading={pageLoading}>
+                <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                  {plans.map((plan, index) => (
+                    <TimelineAnimation
+                      as="li"
+                      key={plan.id}
+                      animationNum={index}
+                      timelineRef={sectionRef}
+                      whileHover={{ y: -4, transition: SPRING_UI }}
+                    >
+                      <BrowsePlanCard plan={plan} />
+                    </TimelineAnimation>
                   ))}
                 </ul>
-
-                {pageLoading && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <Spinner />
-                  </div>
-                )}
-              </div>
+              </PageLoadingOverlay>
 
               <Pagination
                 page={page}
@@ -177,7 +185,7 @@ function BrowsePlanCard({ plan }: { plan: BrowsePlan }) {
   }
 
   return (
-    <li className={`${CARD} flex flex-col`}>
+    <div className={`${CARD} flex flex-col`}>
       {/* Top: plan image (or a gradient placeholder). */}
       <div className="relative aspect-[3/2] overflow-hidden rounded-t-2xl bg-linear-to-br from-blue-100 via-blue-50 to-white">
         {plan.imageUrl ? (
@@ -258,7 +266,7 @@ function BrowsePlanCard({ plan }: { plan: BrowsePlan }) {
           {redirecting ? 'Starting checkout…' : 'Subscribe'}
         </button>
       </div>
-    </li>
+    </div>
   )
 }
 
