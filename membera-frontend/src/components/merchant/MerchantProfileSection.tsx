@@ -15,6 +15,7 @@ import { StatusBadge } from '@/components/StatusBadge'
 import { ApiError } from '@/lib/apiClient'
 import { SPRING_UI, materializeVariants, motionSafe, usePrefersReducedMotion } from '@/lib/motion'
 import {
+  BADGE_NEUTRAL,
   BTN_PRIMARY,
   BTN_SECONDARY,
   CARD,
@@ -25,11 +26,14 @@ import {
   WARNING_BANNER,
 } from '@/lib/ui'
 import {
+  BUSINESS_CATEGORIES,
+  BUSINESS_CATEGORY_LABELS,
   createMerchant,
   getMyMerchant,
   isMerchantNotFound,
   updateMerchant,
   uploadMerchantLogo,
+  type BusinessCategory,
   type MerchantProfile,
 } from '@/lib/merchant'
 
@@ -86,6 +90,7 @@ export function MerchantProfileSection() {
   const [editing, setEditing] = useState(false)
   const [businessName, setBusinessName] = useState('')
   const [description, setDescription] = useState('')
+  const [category, setCategory] = useState<BusinessCategory>('Other')
   const [formError, setFormError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
 
@@ -166,6 +171,7 @@ export function MerchantProfileSection() {
   const startEditing = () => {
     setBusinessName(profile?.businessName ?? '')
     setDescription(profile?.description ?? '')
+    setCategory(profile?.businessCategory ?? 'Other')
     setFormError(null)
     setLogoError(null)
     setProfileSaved(false)
@@ -196,9 +202,10 @@ export function MerchantProfileSection() {
 
     setSaving(true)
     try {
-      await createMerchant(name)
+      await createMerchant(name, category)
       setBusinessName('')
       setDescription('')
+      setCategory('Other')
       await load()
     } catch (err) {
       setFormError(
@@ -222,7 +229,11 @@ export function MerchantProfileSection() {
 
       setSaving(true)
       try {
-        await updateMerchant({ businessName: name, description: description.trim() })
+        await updateMerchant({
+          businessName: name,
+          description: description.trim(),
+          businessCategory: category,
+        })
         setProfileSaved(true)
       } catch (err) {
         setFormError(
@@ -314,6 +325,24 @@ export function MerchantProfileSection() {
                 />
               </div>
 
+              <div>
+                <label htmlFor="setup-business-category" className={labelClass}>
+                  Business category
+                </label>
+                <select
+                  id="setup-business-category"
+                  className={fieldClass}
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value as BusinessCategory)}
+                >
+                  {BUSINESS_CATEGORIES.map((option) => (
+                    <option key={option} value={option}>
+                      {BUSINESS_CATEGORY_LABELS[option]}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <button type="submit" disabled={saving} className={primaryButton}>
                 {saving && <Spinner className="h-4 w-4" />}
                 Create profile
@@ -354,6 +383,9 @@ export function MerchantProfileSection() {
                     {profile.businessName}
                   </h3>
                   <StatusBadge active={profile.isActive} />
+                  <span className={BADGE_NEUTRAL}>
+                    {BUSINESS_CATEGORY_LABELS[profile.businessCategory]}
+                  </span>
                   <button
                     type="button"
                     onClick={() => setExpanded((v) => !v)}
@@ -431,6 +463,24 @@ export function MerchantProfileSection() {
                     onChange={(e) => setBusinessName(e.target.value)}
                     maxLength={120}
                   />
+                </div>
+
+                <div>
+                  <label htmlFor="edit-business-category" className={labelClass}>
+                    Business category
+                  </label>
+                  <select
+                    id="edit-business-category"
+                    className={fieldClass}
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value as BusinessCategory)}
+                  >
+                    {BUSINESS_CATEGORIES.map((option) => (
+                      <option key={option} value={option}>
+                        {BUSINESS_CATEGORY_LABELS[option]}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div>

@@ -9,6 +9,7 @@
 //   POST /subscriptions/redeem     { redemptionCode }      -> { subscriptionId, usagesRemaining, planName }
 
 import { api } from '@/lib/apiClient'
+import type { BusinessCategory } from '@/lib/merchant'
 
 export { ApiError } from '@/lib/apiClient'
 
@@ -111,6 +112,7 @@ export interface BrowsePlan {
   merchantId: string
   merchantBusinessName: string
   merchantLogoUrl: string | null
+  merchantBusinessCategory: BusinessCategory
 }
 
 export interface PagedBrowsePlans {
@@ -121,11 +123,13 @@ export interface PagedBrowsePlans {
 export async function browseActivePlans(
   page: number,
   pageSize: number,
+  category?: BusinessCategory,
 ): Promise<PagedBrowsePlans> {
   // BaseResponse<BrowseActivePlansResult> -> client strips the envelope ->
   // { plans: [...], totalCount }.
+  const categoryParam = category ? `&category=${category}` : ''
   const data = await api.get<{ plans?: BrowsePlan[]; totalCount?: number }>(
-    `/subscription-plans?page=${page}&pageSize=${pageSize}`,
+    `/subscription-plans?page=${page}&pageSize=${pageSize}${categoryParam}`,
   )
   return { plans: data.plans ?? [], totalCount: data.totalCount ?? 0 }
 }

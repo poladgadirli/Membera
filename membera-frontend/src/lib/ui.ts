@@ -77,6 +77,11 @@ export const BADGE_ACTIVE =
 export const BADGE_INACTIVE =
   'inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-neutral-100 px-2.5 py-0.5 text-xs font-medium text-neutral-500'
 
+/** Plain label pill — same shape as the active/inactive badges, no status dot.
+ * Used for category tags and other non-status metadata. */
+export const BADGE_NEUTRAL =
+  'inline-flex items-center rounded-full border border-neutral-200 bg-neutral-100 px-2.5 py-0.5 text-xs font-medium text-neutral-600'
+
 /** Modal backdrop + panel. */
 export const MODAL_BACKDROP =
   'fixed inset-0 z-50 flex items-end justify-center overflow-y-auto bg-neutral-900/40 p-4 backdrop-blur-sm sm:items-center'

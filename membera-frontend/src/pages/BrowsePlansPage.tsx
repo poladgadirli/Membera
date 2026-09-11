@@ -9,12 +9,15 @@ import { Spinner } from '@/components/Spinner'
 import { TimelineAnimation } from '@/components/ui/hero-financial-utils/timeline-animation'
 import { SPRING_UI } from '@/lib/motion'
 import {
+  BUSINESS_CATEGORIES,
+  BUSINESS_CATEGORY_LABELS,
   formatDuration,
   formatPrice,
   formatTimeRange,
   formatUsageLimit,
+  type BusinessCategory,
 } from '@/lib/merchant'
-import { BTN_PRIMARY, CARD, ERROR_BANNER, SECTION_LABEL } from '@/lib/ui'
+import { BADGE_NEUTRAL, BTN_PRIMARY, CARD, ERROR_BANNER, SECTION_LABEL } from '@/lib/ui'
 import {
   ApiError,
   browseActivePlans,
@@ -23,6 +26,7 @@ import {
 } from '@/lib/subscriptions'
 
 type Status = 'loading' | 'ready' | 'error'
+type CategoryFilter = BusinessCategory | 'All'
 
 // Server-side pagination: GET /subscription-plans?page&pageSize returns just
 // this page's plans plus a totalCount, so we ask for one page at a time
@@ -37,11 +41,14 @@ export default function BrowsePlansPage() {
   const [totalCount, setTotalCount] = useState(0)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [page, setPage] = useState(1)
+  const [category, setCategory] = useState<CategoryFilter>('All')
   // The page number whose data `plans`/`totalCount` currently reflect. While
   // it differs from `page` (e.g. right after clicking "Next"), a fetch for
   // the new page is in flight.
   const [loadedPage, setLoadedPage] = useState<number | null>(null)
-  const pageLoading = status === 'ready' && loadedPage !== page
+  const [loadedCategory, setLoadedCategory] = useState<CategoryFilter | null>(null)
+  const pageLoading =
+    status === 'ready' && (loadedPage !== page || loadedCategory !== category)
 
   // Guards against a slower, earlier request clobbering a faster, later one
   // when the user changes pages quickly.
@@ -49,12 +56,14 @@ export default function BrowsePlansPage() {
 
   useEffect(() => {
     const requestId = ++latestRequestRef.current
-    browseActivePlans(page, PAGE_SIZE).then(
+    const categoryFilter = category === 'All' ? undefined : category
+    browseActivePlans(page, PAGE_SIZE, categoryFilter).then(
       (data) => {
         if (requestId !== latestRequestRef.current) return
         setPlans(data.plans)
         setTotalCount(data.totalCount)
         setLoadedPage(page)
+        setLoadedCategory(category)
         setStatus('ready')
       },
       (err) => {
@@ -67,7 +76,13 @@ export default function BrowsePlansPage() {
         setStatus('error')
       },
     )
-  }, [page])
+  }, [page, category])
+
+  const handleCategoryChange = (next: CategoryFilter) => {
+    if (next === category) return
+    setCategory(next)
+    setPage(1)
+  }
 
   const pageCount = Math.max(1, Math.ceil(totalCount / PAGE_SIZE))
 
@@ -88,7 +103,23 @@ export default function BrowsePlansPage() {
           Available plans
         </h2>
 
-        <div className="mt-3">
+        <div className="mt-3 flex flex-wrap gap-2">
+          <CategoryChip
+            label="All"
+            active={category === 'All'}
+            onClick={() => handleCategoryChange('All')}
+          />
+          {BUSINESS_CATEGORIES.map((option) => (
+            <CategoryChip
+              key={option}
+              label={BUSINESS_CATEGORY_LABELS[option]}
+              active={category === option}
+              onClick={() => handleCategoryChange(option)}
+            />
+          ))}
+        </div>
+
+        <div className="mt-4">
           {status === 'loading' && (
             <div className={`${CARD} p-6`}>
               <div className="flex items-center gap-3 text-sm text-neutral-500">
@@ -218,6 +249,9 @@ function BrowsePlanCard({ plan }: { plan: BrowsePlan }) {
           <span className="truncate font-medium text-neutral-700">
             {plan.merchantBusinessName}
           </span>
+          <span className={`${BADGE_NEUTRAL} ml-auto shrink-0`}>
+            {BUSINESS_CATEGORY_LABELS[plan.merchantBusinessCategory]}
+          </span>
         </div>
 
         <div className="mt-2 flex items-baseline justify-between gap-2">
@@ -267,6 +301,31 @@ function BrowsePlanCard({ plan }: { plan: BrowsePlan }) {
         </button>
       </div>
     </div>
+  )
+}
+
+function CategoryChip({
+  label,
+  active,
+  onClick,
+}: {
+  label: string
+  active: boolean
+  onClick: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={
+        active
+          ? 'rounded-full border border-blue-300 bg-linear-to-br from-blue-500 via-blue-400 to-blue-200 px-3 py-1.5 text-sm font-medium text-white shadow-sm shadow-blue-500/30 transition'
+          : 'rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-sm font-medium text-neutral-600 shadow-sm transition hover:bg-neutral-50'
+      }
+    >
+      {label}
+    </button>
   )
 }
 
