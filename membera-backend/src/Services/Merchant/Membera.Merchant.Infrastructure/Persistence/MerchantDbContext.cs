@@ -1,0 +1,22 @@
+﻿using Membera.Merchant.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
+using MerchantEntity = Membera.Merchant.Domain.Entities.Merchant;
+
+namespace Membera.Merchant.Infrastructure.Persistence;
+
+public class MerchantDbContext : DbContext
+{
+    public MerchantDbContext(DbContextOptions<MerchantDbContext> options) : base(options)
+    {
+    }
+
+    public DbSet<MerchantEntity> Merchants => Set<MerchantEntity>();
+    public DbSet<SubscriptionPlan> SubscriptionPlans => Set<SubscriptionPlan>();
+    public DbSet<UserSubscription> UserSubscriptions => Set<UserSubscription>();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(MerchantDbContext).Assembly);
+        base.OnModelCreating(modelBuilder);
+    }
+}

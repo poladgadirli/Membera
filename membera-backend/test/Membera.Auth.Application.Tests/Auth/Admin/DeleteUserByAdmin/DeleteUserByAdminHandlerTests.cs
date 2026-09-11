@@ -1,0 +1,141 @@
+using Membera.Auth.Application.Abstractions;
+using Membera.Auth.Application.Auth.Admin.DeleteUserByAdmin;
+using Membera.Auth.Domain.Entities;
+using Membera.Auth.Domain.Enums;
+using Microsoft.Extensions.Logging;
+using Moq;
+using Xunit;
+
+namespace Membera.Auth.Application.Tests.Auth.Admin.DeleteUserByAdmin;
+
+public class DeleteUserByAdminHandlerTests
+{
+    private readonly Mock<IUserRepository> _userRepositoryMock;
+    private readonly Mock<IRefreshTokenRepository> _refreshTokenRepositoryMock;
+    private readonly Mock<ILogger<DeleteUserByAdminHandler>> _loggerMock;
+    private readonly DeleteUserByAdminHandler _handler;
+
+    public DeleteUserByAdminHandlerTests()
+    {
+        _userRepositoryMock = new Mock<IUserRepository>();
+        _refreshTokenRepositoryMock = new Mock<IRefreshTokenRepository>();
+        _loggerMock = new Mock<ILogger<DeleteUserByAdminHandler>>();
+
+        _handler = new DeleteUserByAdminHandler(
+            _userRepositoryMock.Object,
+            _refreshTokenRepositoryMock.Object,
+            _loggerMock.Object);
+    }
+
+    [Fact]
+    public async Task HandleAsync_WhenTargetIsRequestingUser_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var sharedId = Guid.NewGuid();
+        var command = new DeleteUserByAdminCommand(sharedId, sharedId);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _handler.HandleAsync(command));
+
+        _userRepositoryMock.Verify(r => r.GetByIdAsync(It.IsAny<Guid>()), Times.Never);
+        _userRepositoryMock.Verify(r => r.UpdateAsync(It.IsAny<User>()), Times.Never);
+        _refreshTokenRepositoryMock.Verify(r => r.RevokeAllByUserIdAsync(It.IsAny<Guid>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task HandleAsync_WhenUserNotFound_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var command = new DeleteUserByAdminCommand(Guid.NewGuid(), Guid.NewGuid());
+
+        _userRepositoryMock
+            .Setup(r => r.GetByIdAsync(command.TargetUserId))
+            .ReturnsAsync((User?)null);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _handler.HandleAsync(command));
+
+        _userRepositoryMock.Verify(r => r.UpdateAsync(It.IsAny<User>()), Times.Never);
+        _refreshTokenRepositoryMock.Verify(r => r.RevokeAllByUserIdAsync(It.IsAny<Guid>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task HandleAsync_WhenUserAlreadyDeleted_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var command = new DeleteUserByAdminCommand(Guid.NewGuid(), Guid.NewGuid());
+
+        var deletedUser = new User("Polad", "Test", "polad@test.com", "hash-in-db", UserRole.User);
+        deletedUser.MarkAsDeleted();
+
+        _userRepositoryMock
+            .Setup(r => r.GetByIdAsync(command.TargetUserId))
+            .ReturnsAsync(deletedUser);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _handler.HandleAsync(command));
+
+        _userRepositoryMock.Verify(r => r.UpdateAsync(It.IsAny<User>()), Times.Never);
+        _refreshTokenRepositoryMock.Verify(r => r.RevokeAllByUserIdAsync(It.IsAny<Guid>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task HandleAsync_WhenTargetIsAdmin_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var command = new DeleteUserByAdminCommand(Guid.NewGuid(), Guid.NewGuid());
+
+        var adminUser = new User("Admin", "User", "admin@test.com", "hash-in-db", UserRole.Admin);
+
+        _userRepositoryMock
+            .Setup(r => r.GetByIdAsync(command.TargetUserId))
+            .ReturnsAsync(adminUser);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _handler.HandleAsync(command));
+
+        _userRepositoryMock.Verify(r => r.UpdateAsync(It.IsAny<User>()), Times.Never);
+        _refreshTokenRepositoryMock.Verify(r => r.RevokeAllByUserIdAsync(It.IsAny<Guid>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task HandleAsync_WhenTargetIsSuperAdmin_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var command = new DeleteUserByAdminCommand(Guid.NewGuid(), Guid.NewGuid());
+
+        var superAdminUser = new User("Super", "Admin", "superadmin@test.com", "hash-in-db", UserRole.SuperAdmin);
+
+        _userRepositoryMock
+            .Setup(r => r.GetByIdAsync(command.TargetUserId))
+            .ReturnsAsync(superAdminUser);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _handler.HandleAsync(command));
+
+        _userRepositoryMock.Verify(r => r.UpdateAsync(It.IsAny<User>()), Times.Never);
+        _refreshTokenRepositoryMock.Verify(r => r.RevokeAllByUserIdAsync(It.IsAny<Guid>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task HandleAsync_WithRegularUserTarget_MarksUserDeletedAndRevokesAllRefreshTokens()
+    {
+        // Arrange
+        var command = new DeleteUserByAdminCommand(Guid.NewGuid(), Guid.NewGuid());
+
+        var user = new User("Polad", "Test", "polad@test.com", "hash-in-db", UserRole.User);
+
+        _userRepositoryMock
+            .Setup(r => r.GetByIdAsync(command.TargetUserId))
+            .ReturnsAsync(user);
+
+        // Act
+        await _handler.HandleAsync(command);
+
+        // Assert
+        Assert.True(user.IsDeleted);
+        Assert.NotNull(user.DeletedAt);
+        _userRepositoryMock.Verify(r => r.UpdateAsync(user), Times.Once);
+        _refreshTokenRepositoryMock.Verify(r => r.RevokeAllByUserIdAsync(user.Id), Times.Once);
+    }
+}

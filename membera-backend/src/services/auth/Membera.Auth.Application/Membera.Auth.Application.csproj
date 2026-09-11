@@ -7,7 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\BuildingBlocks\Membera.Shared.Contracts\Membera.Shared.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\Membera.Shared.Messaging\Membera.Shared.Messaging.csproj" />
     <ProjectReference Include="..\Membera.Auth.Domain\Membera.Auth.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="12.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.2" />
   </ItemGroup>
 
 </Project>

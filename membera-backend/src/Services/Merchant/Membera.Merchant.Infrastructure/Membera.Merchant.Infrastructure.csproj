@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.30" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.30">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.30">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.11" />
+    <PackageReference Include="StackExchange.Redis" Version="3.1.31" />
+    <PackageReference Include="Stripe.net" Version="52.4.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\BuildingBlocks\Membera.Shared.Caching\Membera.Shared.Caching.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\Membera.Shared.Storage\Membera.Shared.Storage.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\Membera.Shared.Messaging\Membera.Shared.Messaging.csproj" />
+    <ProjectReference Include="..\..\Auth\Membera.Auth.Application\Membera.Auth.Application.csproj" />
+    <ProjectReference Include="..\Membera.Merchant.Application\Membera.Merchant.Application.csproj" />
+  </ItemGroup>
+
+</Project>
