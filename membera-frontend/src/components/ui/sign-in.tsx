@@ -209,16 +209,18 @@ export const SignInPage: React.FC<SignInPageProps> = ({
                   />
                   <span className="text-foreground/90">Keep me signed in</span>
                 </label>
-                <a
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault()
-                    onResetPassword?.()
-                  }}
-                  className="text-blue-600 transition-colors hover:text-blue-500 hover:underline"
-                >
-                  Reset password
-                </a>
+                {onResetPassword && (
+                  <a
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      onResetPassword()
+                    }}
+                    className="text-blue-600 transition-colors hover:text-blue-500 hover:underline"
+                  >
+                    Reset password
+                  </a>
+                )}
               </motion.div>
 
               {error && (

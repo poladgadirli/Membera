@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
+import { SettingsIcon } from '@/components/icons'
 import { useAuth } from '@/hooks/useAuth'
 import { BTN_SECONDARY_SM, PAGE_BG } from '@/lib/ui'
 
@@ -43,6 +44,15 @@ export function DashboardShell({ children }: { children: ReactNode }) {
                 {name}
               </span>
             )}
+            <Link
+              to="/account"
+              aria-label="Account settings"
+              title="Account settings"
+              className="flex items-center gap-1.5 rounded-md px-1.5 py-1 text-sm font-medium text-neutral-500 transition-colors hover:text-neutral-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+            >
+              <SettingsIcon className="h-4 w-4" />
+              <span className="hidden sm:inline">Account settings</span>
+            </Link>
             <button type="button" onClick={logout} className={BTN_SECONDARY_SM}>
               Log out
             </button>

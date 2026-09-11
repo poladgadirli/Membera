@@ -1,6 +1,7 @@
 import { Route } from 'react-router-dom'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { RouteTransition } from './components/RouteTransition'
+import AccountSettingsPage from './pages/AccountSettingsPage'
 import BrowsePlansPage from './pages/BrowsePlansPage'
 import DashboardPage from './pages/DashboardPage'
 import LandingPage from './pages/LandingPage'
@@ -27,6 +28,16 @@ function App() {
         element={
           <ProtectedRoute>
             <DashboardPage />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Any signed-in role manages their own password/email here. */}
+      <Route
+        path="/account"
+        element={
+          <ProtectedRoute>
+            <AccountSettingsPage />
           </ProtectedRoute>
         }
       />
