@@ -67,6 +67,10 @@ export const LABEL = 'block text-sm font-medium text-neutral-900'
 export const ERROR_BANNER =
   'rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-700'
 
+/** Partial-success notice — e.g. "the rest saved, but this one part failed." */
+export const WARNING_BANNER =
+  'rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-800'
+
 /** Active / inactive status pills. */
 export const BADGE_ACTIVE =
   'inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700'
