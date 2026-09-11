@@ -1,5 +1,5 @@
 import React, { useState, type FormEvent } from 'react'
-import { ArrowLeft, Eye, EyeOff } from 'lucide-react'
+import { ArrowLeft, Eye, EyeOff, Store, User } from 'lucide-react'
 import { motion } from 'motion/react'
 import type { Testimonial } from '@/components/ui/sign-in'
 import { GoogleSignInButton } from '@/components/GoogleSignInButton'
@@ -39,6 +39,47 @@ const GlassInputWrapper = ({ children }: { children: React.ReactNode }) => (
   <div className="mt-1 rounded-2xl border border-border bg-foreground/5 backdrop-blur-sm transition-colors focus-within:border-blue-400/70 focus-within:bg-blue-500/10">
     {children}
   </div>
+)
+
+export type SignUpRole = 'customer' | 'merchant'
+
+const RoleOptionCard = ({
+  active,
+  icon,
+  title,
+  description,
+  onSelect,
+}: {
+  active: boolean
+  icon: React.ReactNode
+  title: string
+  description: string
+  onSelect: () => void
+}) => (
+  <button
+    type="button"
+    onClick={onSelect}
+    aria-pressed={active}
+    className={`flex flex-col items-start gap-2 rounded-2xl border p-4 text-left backdrop-blur-sm transition-colors ${
+      active
+        ? 'border-blue-400/70 bg-blue-500/10'
+        : 'border-border bg-foreground/5 hover:bg-foreground/10'
+    }`}
+  >
+    <span
+      className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl ${
+        active
+          ? 'bg-linear-to-br from-blue-500 via-blue-400 to-blue-200 text-white shadow-sm shadow-blue-500/30'
+          : 'bg-foreground/10 text-muted-foreground'
+      }`}
+    >
+      {icon}
+    </span>
+    <span className="text-sm font-medium text-neutral-900">{title}</span>
+    <span className="text-xs leading-snug text-muted-foreground">
+      {description}
+    </span>
+  </button>
 )
 
 const TestimonialCard = ({
@@ -93,6 +134,7 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
 }) => {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [role, setRole] = useState<SignUpRole>('customer')
   const reduced = usePrefersReducedMotion()
   const t = (delayMs: number) =>
     motionSafe({ ...SPRING_MOMENTUM, delay: delayMs / 1000 }, reduced)
@@ -137,11 +179,40 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
             </motion.p>
 
             <form className="space-y-5" onSubmit={onSignUp}>
+              <input type="hidden" name="role" value={role} />
+
               <motion.div
                 variants={elementVariants}
                 initial="initial"
                 animate="animate"
                 transition={t(300)}
+              >
+                <label className="text-sm font-medium text-muted-foreground">
+                  I'm signing up as
+                </label>
+                <div className="mt-1 grid grid-cols-2 gap-3">
+                  <RoleOptionCard
+                    active={role === 'customer'}
+                    icon={<User className="h-4.5 w-4.5" />}
+                    title="A customer"
+                    description="Browse and subscribe to plans"
+                    onSelect={() => setRole('customer')}
+                  />
+                  <RoleOptionCard
+                    active={role === 'merchant'}
+                    icon={<Store className="h-4.5 w-4.5" />}
+                    title="A business"
+                    description="List my business and sell plans"
+                    onSelect={() => setRole('merchant')}
+                  />
+                </div>
+              </motion.div>
+
+              <motion.div
+                variants={elementVariants}
+                initial="initial"
+                animate="animate"
+                transition={t(400)}
                 className="grid grid-cols-2 gap-4"
               >
                 <div>
@@ -178,7 +249,7 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
                 variants={elementVariants}
                 initial="initial"
                 animate="animate"
-                transition={t(400)}
+                transition={t(500)}
               >
                 <label className="text-sm font-medium text-muted-foreground">
                   Email Address
@@ -198,7 +269,7 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
                 variants={elementVariants}
                 initial="initial"
                 animate="animate"
-                transition={t(500)}
+                transition={t(600)}
               >
                 <label className="text-sm font-medium text-muted-foreground">
                   Password
@@ -232,7 +303,7 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
                 variants={elementVariants}
                 initial="initial"
                 animate="animate"
-                transition={t(600)}
+                transition={t(700)}
               >
                 <label className="text-sm font-medium text-muted-foreground">
                   Confirm Password
@@ -280,7 +351,7 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
                 variants={elementVariants}
                 initial="initial"
                 animate="animate"
-                transition={t(700)}
+                transition={t(800)}
                 className="flex cursor-pointer items-center gap-3 text-sm"
               >
                 <input
@@ -300,7 +371,7 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
                 variants={elementVariants}
                 initial="initial"
                 animate="animate"
-                transition={t(800)}
+                transition={t(900)}
                 whileTap={loading ? undefined : { scale: 0.98 }}
                 className="w-full rounded-2xl border border-blue-300 bg-linear-to-br from-blue-500 via-blue-400 to-blue-200 py-4 font-medium text-white shadow-sm shadow-blue-500/30 transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60"
               >
@@ -312,7 +383,7 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
               variants={elementVariants}
               initial="initial"
               animate="animate"
-              transition={t(800)}
+              transition={t(900)}
               className="relative flex items-center justify-center"
             >
               <span className="w-full border-t border-border"></span>
@@ -325,7 +396,7 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
               variants={elementVariants}
               initial="initial"
               animate="animate"
-              transition={t(900)}
+              transition={t(1000)}
             >
               <GoogleSignInButton
                 text="signup_with"
@@ -338,7 +409,7 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
               variants={elementVariants}
               initial="initial"
               animate="animate"
-              transition={t(1000)}
+              transition={t(1100)}
               className="text-center text-sm text-muted-foreground"
             >
               Already have an account?{' '}
