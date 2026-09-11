@@ -263,7 +263,7 @@ export function MerchantProfileSection() {
   const updateSubmitLabel = isRetryingLogo ? 'Retry logo upload' : 'Save changes'
 
   return (
-    <section aria-labelledby="business-profile-heading">
+    <section aria-labelledby="business-profile-heading" className="mt-10">
       <h2 id="business-profile-heading" className={SECTION_LABEL}>
         Business profile
       </h2>

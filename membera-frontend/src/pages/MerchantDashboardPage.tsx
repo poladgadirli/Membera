@@ -18,9 +18,9 @@ export default function MerchantDashboardPage() {
       />
 
       <div className="mt-10">
+        <RedemptionSection />
         <MerchantProfileSection />
         <PlansSection />
-        <RedemptionSection />
       </div>
     </DashboardShell>
   )
