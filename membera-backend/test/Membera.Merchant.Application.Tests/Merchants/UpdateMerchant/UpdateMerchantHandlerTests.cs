@@ -61,7 +61,7 @@ public class UpdateMerchantHandlerTests
         // Assert
         Assert.Equal(command.BusinessName, merchant.BusinessName);
         Assert.Equal(command.Description, merchant.Description);
-        Assert.Equal(command.Category, merchant.Category);
+        Assert.Equal(command.Category, merchant.BusinessCategory);
         _merchantRepositoryMock.Verify(r => r.UpdateAsync(merchant), Times.Once);
         _cacheServiceMock.Verify(c => c.RemoveAsync($"merchant:owner:{ownerId}"), Times.Once);
     }

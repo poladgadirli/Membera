@@ -9,7 +9,7 @@ public class Merchant : BaseEntity
     public string BusinessName { get; private set; }
     public string? Description { get; private set; }
     public string? LogoUrl { get; private set; }
-    public BusinessCategory Category { get; private set; }
+    public BusinessCategory BusinessCategory { get; private set; }
     public bool IsActive { get; private set; }
 
     private Merchant() { }
@@ -18,7 +18,7 @@ public class Merchant : BaseEntity
     {
         OwnerId = ownerId;
         BusinessName = businessName;
-        Category = category;
+        BusinessCategory = category;
         IsActive = true;
     }
 
@@ -26,7 +26,7 @@ public class Merchant : BaseEntity
     {
         BusinessName = businessName;
         Description = description;
-        Category = category;
+        BusinessCategory = category;
         MarkAsUpdated();
     }
 

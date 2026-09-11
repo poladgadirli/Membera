@@ -43,7 +43,7 @@ public class BrowseActivePlansHandler
                 plan.MerchantId,
                 merchant?.BusinessName ?? string.Empty,
                 merchant?.LogoUrl,
-                merchant?.Category ?? BusinessCategory.Other,
+                merchant?.BusinessCategory ?? BusinessCategory.Other,
                 plan.Name,
                 plan.Description,
                 plan.Price,

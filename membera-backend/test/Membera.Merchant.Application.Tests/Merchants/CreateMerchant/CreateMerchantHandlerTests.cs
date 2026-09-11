@@ -64,7 +64,7 @@ public class CreateMerchantHandlerTests
         Assert.NotNull(capturedMerchant);
         Assert.Equal(command.OwnerId, capturedMerchant!.OwnerId);
         Assert.Equal(command.BusinessName, capturedMerchant.BusinessName);
-        Assert.Equal(BusinessCategory.Other, capturedMerchant.Category);
+        Assert.Equal(BusinessCategory.Other, capturedMerchant.BusinessCategory);
 
         Assert.Equal(capturedMerchant.Id, result.Id);
         Assert.Equal(command.BusinessName, result.BusinessName);
@@ -90,6 +90,6 @@ public class CreateMerchantHandlerTests
         await _handler.HandleAsync(command);
 
         // Assert
-        Assert.Equal(BusinessCategory.Gym, capturedMerchant!.Category);
+        Assert.Equal(BusinessCategory.Gym, capturedMerchant!.BusinessCategory);
     }
 }

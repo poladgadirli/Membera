@@ -8,6 +8,6 @@ public record GetMerchantByOwnerIdResult(
     string BusinessName,
     string? Description,
     string? LogoUrl,
-    BusinessCategory Category,
+    BusinessCategory BusinessCategory,
     bool IsActive
 );

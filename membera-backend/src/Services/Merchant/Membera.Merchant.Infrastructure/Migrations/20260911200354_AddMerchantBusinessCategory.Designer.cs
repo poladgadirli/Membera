@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Membera.Merchant.Infrastructure.Migrations
 {
     [DbContext(typeof(MerchantDbContext))]
-    [Migration("20260911195917_AddMerchantBusinessCategory")]
+    [Migration("20260911200354_AddMerchantBusinessCategory")]
     partial class AddMerchantBusinessCategory
     {
         /// <inheritdoc />
@@ -31,15 +31,15 @@ namespace Membera.Merchant.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("BusinessCategory")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
                     b.Property<string>("BusinessName")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
-
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");

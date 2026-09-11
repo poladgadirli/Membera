@@ -68,7 +68,7 @@ public class GetMerchantByOwnerIdHandlerTests
         Assert.Equal(merchant.OwnerId, result.OwnerId);
         Assert.Equal(merchant.BusinessName, result.BusinessName);
         Assert.Equal(merchant.Description, result.Description);
-        Assert.Equal(merchant.Category, result.Category);
+        Assert.Equal(merchant.BusinessCategory, result.BusinessCategory);
         Assert.Equal(merchant.IsActive, result.IsActive);
     }
 
@@ -122,7 +122,7 @@ public class GetMerchantByOwnerIdHandlerTests
                     r.OwnerId == merchant.OwnerId &&
                     r.BusinessName == merchant.BusinessName &&
                     r.Description == merchant.Description &&
-                    r.Category == merchant.Category &&
+                    r.BusinessCategory == merchant.BusinessCategory &&
                     r.IsActive == merchant.IsActive),
                 It.IsAny<TimeSpan?>()),
             Times.Once);

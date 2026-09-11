@@ -33,7 +33,7 @@ public class SubscriptionPlanRepository : ISubscriptionPlanRepository
         if (category is not null)
         {
             var merchantIdsInCategory = _context.Merchants
-                .Where(m => m.Category == category)
+                .Where(m => m.BusinessCategory == category)
                 .Select(m => m.Id);
 
             activePlans = activePlans.Where(p => merchantIdsInCategory.Contains(p.MerchantId));
