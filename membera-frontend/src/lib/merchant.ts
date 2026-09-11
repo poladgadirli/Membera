@@ -4,10 +4,38 @@
 
 import { ApiError, api } from '@/lib/apiClient'
 
+/** Matches the backend BusinessCategory enum (Membera.Merchant.Domain.Enums). */
+export type BusinessCategory =
+  | 'Restaurant'
+  | 'Cafe'
+  | 'Barbershop'
+  | 'BeautySalon'
+  | 'Gym'
+  | 'Other'
+
+export const BUSINESS_CATEGORIES: BusinessCategory[] = [
+  'Restaurant',
+  'Cafe',
+  'Barbershop',
+  'BeautySalon',
+  'Gym',
+  'Other',
+]
+
+export const BUSINESS_CATEGORY_LABELS: Record<BusinessCategory, string> = {
+  Restaurant: 'Restaurant',
+  Cafe: 'Café',
+  Barbershop: 'Barbershop',
+  BeautySalon: 'Beauty Salon',
+  Gym: 'Gym',
+  Other: 'Other',
+}
+
 export interface MerchantProfile {
   businessName: string
   description: string | null
   logoUrl: string | null
+  businessCategory: BusinessCategory
   isActive: boolean
 }
 
@@ -44,15 +72,26 @@ export function getMyMerchant(): Promise<MerchantProfile> {
   return api.get<MerchantProfile>('/Merchant/me')
 }
 
-export function createMerchant(businessName: string): Promise<MerchantProfile> {
-  return api.post<MerchantProfile>('/Merchant', { businessName })
+export function createMerchant(
+  businessName: string,
+  businessCategory: BusinessCategory,
+): Promise<MerchantProfile> {
+  return api.post<MerchantProfile>('/Merchant', {
+    businessName,
+    category: businessCategory,
+  })
 }
 
 export function updateMerchant(input: {
   businessName: string
   description: string
+  businessCategory: BusinessCategory
 }): Promise<MerchantProfile> {
-  return api.put<MerchantProfile>('/Merchant', input)
+  return api.put<MerchantProfile>('/Merchant', {
+    businessName: input.businessName,
+    description: input.description,
+    category: input.businessCategory,
+  })
 }
 
 /**

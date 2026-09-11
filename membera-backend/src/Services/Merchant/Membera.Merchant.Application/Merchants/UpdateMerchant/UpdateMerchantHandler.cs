@@ -29,7 +29,7 @@ public class UpdateMerchantHandler
             throw new InvalidOperationException("Merchant profile not found.");
         }
 
-        merchant.UpdateProfile(command.BusinessName, command.Description);
+        merchant.UpdateProfile(command.BusinessName, command.Description, command.Category);
 
         await _merchantRepository.UpdateAsync(merchant);
 

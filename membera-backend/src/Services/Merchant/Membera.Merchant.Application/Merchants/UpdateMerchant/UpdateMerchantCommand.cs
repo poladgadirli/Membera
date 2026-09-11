@@ -1,3 +1,5 @@
-﻿namespace Membera.Merchant.Application.Merchants.UpdateMerchant;
+using Membera.Merchant.Domain.Enums;
 
-public record UpdateMerchantCommand(Guid OwnerId, string BusinessName, string? Description);
+namespace Membera.Merchant.Application.Merchants.UpdateMerchant;
+
+public record UpdateMerchantCommand(Guid OwnerId, string BusinessName, string? Description, BusinessCategory Category);

@@ -44,6 +44,7 @@ export default function RegisterPage() {
     const email = String(data.email ?? '').trim()
     const password = String(data.password ?? '')
     const confirmPassword = String(data.confirmPassword ?? '')
+    const isMerchantOwner = String(data.role ?? 'customer') === 'merchant'
 
     if (!firstName || !lastName || !email || !password) {
       setError('Please fill in every field.')
@@ -66,7 +67,7 @@ export default function RegisterPage() {
         email,
         password,
         confirmPassword,
-        isMerchantOwner: true,
+        isMerchantOwner,
       })
       // Registration succeeded — sign the new user straight in.
       const session = await login(email, password)

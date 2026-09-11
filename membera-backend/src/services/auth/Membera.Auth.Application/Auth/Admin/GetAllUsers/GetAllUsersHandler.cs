@@ -14,9 +14,9 @@ public class GetAllUsersHandler
         _logger = logger;
     }
 
-    public async Task<GetAllUsersResult> HandleAsync()
+    public async Task<GetAllUsersResult> HandleAsync(GetAllUsersQuery query)
     {
-        var users = await _userRepository.GetAllAsync();
+        var (users, totalCount) = await _userRepository.GetPagedAsync(query.Page, query.PageSize);
 
         var summaries = users
             .Select(user => new GetAllUsersResult.UserSummary(
@@ -29,8 +29,10 @@ public class GetAllUsersHandler
                 user.CreatedAt))
             .ToList();
 
-        _logger.LogInformation("Admin retrieved all users. Count: {Count}", summaries.Count);
+        _logger.LogInformation(
+            "Admin retrieved users page {Page} (size {PageSize}). Count: {Count}, TotalCount: {TotalCount}",
+            query.Page, query.PageSize, summaries.Count, totalCount);
 
-        return new GetAllUsersResult(summaries);
+        return new GetAllUsersResult(summaries, totalCount, query.Page, query.PageSize);
     }
 }

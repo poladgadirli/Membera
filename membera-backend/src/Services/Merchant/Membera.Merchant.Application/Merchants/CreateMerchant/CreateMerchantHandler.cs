@@ -24,7 +24,7 @@ public class CreateMerchantHandler
             throw new InvalidOperationException("This user already has a merchant profile.");
         }
 
-        var merchant = new MerchantEntity(command.OwnerId, command.BusinessName);
+        var merchant = new MerchantEntity(command.OwnerId, command.BusinessName, command.Category);
 
         await _merchantRepository.AddAsync(merchant);
 

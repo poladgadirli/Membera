@@ -1,4 +1,6 @@
-﻿namespace Membera.Merchant.Application.Merchants.GetMerchantByOwnerId;
+using Membera.Merchant.Domain.Enums;
+
+namespace Membera.Merchant.Application.Merchants.GetMerchantByOwnerId;
 
 public record GetMerchantByOwnerIdResult(
     Guid Id,
@@ -6,5 +8,6 @@ public record GetMerchantByOwnerIdResult(
     string BusinessName,
     string? Description,
     string? LogoUrl,
+    BusinessCategory BusinessCategory,
     bool IsActive
 );

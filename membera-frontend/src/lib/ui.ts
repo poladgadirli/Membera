@@ -18,8 +18,12 @@ export const CARD =
 export const CARD_SOLID =
   'rounded-2xl border border-neutral-200/70 bg-white shadow-sm'
 
+// Tracking is size-specific: Tailwind's flat `tracking-tight` (-0.025em) is
+// fine at 4xl, but reads slightly loose once the same heading grows to 5xl —
+// so the largest reusable heading gets an explicit, tighter step at that
+// breakpoint instead of inheriting one flat value at every size.
 export const HEADING_XL =
-  'text-4xl font-medium tracking-tight text-neutral-900 sm:text-5xl'
+  'text-4xl font-medium tracking-tight text-neutral-900 sm:text-5xl sm:tracking-[-0.03em]'
 export const HEADING_LG = 'text-2xl font-medium tracking-tight text-neutral-900'
 export const HEADING_MD = 'text-lg font-semibold text-neutral-900'
 
@@ -40,8 +44,10 @@ export const LOGO_MARK =
 export const ICON_BADGE =
   'grid shrink-0 place-items-center rounded-xl bg-linear-to-br from-blue-500 via-blue-400 to-blue-200 text-white shadow-sm shadow-blue-500/30'
 
+// active: fires on pointer-down (not click/release), so this is the "respond
+// instantly to a press" feedback the whole app's buttons get for free.
 const BUTTON_BASE =
-  'inline-flex items-center justify-center gap-2 rounded-lg text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-60'
+  'inline-flex items-center justify-center gap-2 rounded-lg text-sm font-semibold transition duration-150 ease-out active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100'
 
 export const BTN_PRIMARY = `${BUTTON_BASE} border border-blue-300 bg-linear-to-br from-blue-500 via-blue-400 to-blue-200 px-4 py-2.5 text-white shadow-sm shadow-blue-500/30 hover:brightness-105 focus-visible:outline-blue-500`
 
@@ -61,11 +67,25 @@ export const LABEL = 'block text-sm font-medium text-neutral-900'
 export const ERROR_BANNER =
   'rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-700'
 
+/** Partial-success notice — e.g. "the rest saved, but this one part failed." */
+export const WARNING_BANNER =
+  'rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-800'
+
+/** Neutral heads-up notice, and confirmation of a successful action — same
+ * blue tone as the app's other success states (e.g. RedemptionSection). */
+export const INFO_BANNER =
+  'rounded-lg border border-blue-200 bg-blue-50 px-3 py-2.5 text-sm text-blue-800'
+
 /** Active / inactive status pills. */
 export const BADGE_ACTIVE =
   'inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700'
 export const BADGE_INACTIVE =
   'inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-neutral-100 px-2.5 py-0.5 text-xs font-medium text-neutral-500'
+
+/** Plain label pill — same shape as the active/inactive badges, no status dot.
+ * Used for category tags and other non-status metadata. */
+export const BADGE_NEUTRAL =
+  'inline-flex items-center rounded-full border border-neutral-200 bg-neutral-100 px-2.5 py-0.5 text-xs font-medium text-neutral-600'
 
 /** Modal backdrop + panel. */
 export const MODAL_BACKDROP =

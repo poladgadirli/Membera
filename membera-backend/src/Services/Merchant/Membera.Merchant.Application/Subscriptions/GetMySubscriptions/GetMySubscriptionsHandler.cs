@@ -38,7 +38,8 @@ public class GetMySubscriptionsHandler
                 subscription.StartedAt,
                 subscription.ExpiresAt,
                 subscription.UsagesRemaining,
-                subscription.Status.ToString()));
+                subscription.Status.ToString(),
+                subscription.StripeSessionId));
         }
 
         _logger.LogInformation(

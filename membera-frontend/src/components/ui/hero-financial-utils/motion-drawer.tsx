@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { Menu, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { SPRING_SHEET } from '@/lib/motion'
 
 interface MotionDrawerProps {
   children: ReactNode
@@ -72,7 +73,7 @@ export default function MotionDrawer({
               initial={{ x: offscreen }}
               animate={{ x: 0 }}
               exit={{ x: offscreen }}
-              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              transition={SPRING_SHEET}
             >
               <button
                 type="button"

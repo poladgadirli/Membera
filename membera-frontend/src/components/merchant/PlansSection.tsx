@@ -1,15 +1,8 @@
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type ChangeEvent,
-  type ReactNode,
-} from 'react'
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
+import { motion } from 'motion/react'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import {
   CalendarIcon,
-  CameraIcon,
   ClockIcon,
   ImageIcon,
   MoreVerticalIcon,
@@ -21,6 +14,7 @@ import { Spinner } from '@/components/Spinner'
 import { StatusBadge } from '@/components/StatusBadge'
 import { PlanFormModal } from '@/components/merchant/PlanFormModal'
 import { ApiError } from '@/lib/apiClient'
+import { SPRING_UI } from '@/lib/motion'
 import { BTN_PRIMARY, CARD, ERROR_BANNER, SECTION_LABEL } from '@/lib/ui'
 import {
   createPlan,
@@ -31,7 +25,6 @@ import {
   formatUsageLimit,
   getMyPlans,
   updatePlan,
-  uploadSubscriptionPlanImage,
   type PlanInput,
   type SubscriptionPlan,
 } from '@/lib/merchant'
@@ -95,13 +88,10 @@ export function PlansSection() {
     void load()
   }
 
-  const handleSubmit = async (input: PlanInput) => {
-    if (formTarget?.mode === 'edit') {
-      await updatePlan(formTarget.plan.id, input)
-    } else {
-      await createPlan(input)
-    }
-    await load()
+  const handleSubmit = (input: PlanInput): Promise<SubscriptionPlan> => {
+    return formTarget?.mode === 'edit'
+      ? updatePlan(formTarget.plan.id, input)
+      : createPlan(input)
   }
 
   return (
@@ -164,7 +154,6 @@ export function PlansSection() {
               <PlanCard
                 key={plan.id}
                 plan={plan}
-                onReload={load}
                 onEdit={() => setFormTarget({ mode: 'edit', plan })}
                 onDeactivate={() => setPlanToDeactivate(plan)}
               />
@@ -178,6 +167,7 @@ export function PlansSection() {
           plan={formTarget.mode === 'edit' ? formTarget.plan : null}
           onClose={() => setFormTarget(null)}
           onSubmit={handleSubmit}
+          onSaved={load}
         />
       )}
 
@@ -201,21 +191,15 @@ export function PlansSection() {
 
 function PlanCard({
   plan,
-  onReload,
   onEdit,
   onDeactivate,
 }: {
   plan: SubscriptionPlan
-  onReload: () => Promise<void> | void
   onEdit: () => void
   onDeactivate: () => void
 }) {
   const [menuOpen, setMenuOpen] = useState(false)
-  const [uploading, setUploading] = useState(false)
-  const [uploadError, setUploadError] = useState<string | null>(null)
-
   const menuRef = useRef<HTMLDivElement>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (!menuOpen) return
@@ -235,37 +219,16 @@ function PlanCard({
     }
   }, [menuOpen])
 
-  const triggerUpload = () => {
-    setMenuOpen(false)
-    fileInputRef.current?.click()
-  }
-
-  const handleFile = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    event.target.value = '' // let the same file be re-picked later
-    if (!file) return
-
-    setUploadError(null)
-    setUploading(true)
-    try {
-      await uploadSubscriptionPlanImage(plan.id, file)
-      await onReload()
-    } catch (err) {
-      setUploadError(
-        err instanceof ApiError ? err.message : 'Could not upload the image.',
-      )
-    } finally {
-      setUploading(false)
-    }
-  }
-
   const monogram = plan.name.trim().charAt(0).toUpperCase() || 'P'
 
   return (
-    <li
-      className={`${CARD} group relative flex flex-col transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-md hover:shadow-blue-500/10`}
+    <motion.li
+      className={`${CARD} group relative flex flex-col hover:shadow-md hover:shadow-blue-500/10`}
+      whileHover={{ y: -4 }}
+      transition={SPRING_UI}
     >
-      {/* Top ~70%: the plan image (or a placeholder that doubles as an upload target). */}
+      {/* Top ~70%: the plan image, or a placeholder. Image management now
+          lives entirely in the Edit form (PlanFormModal) — this is display-only. */}
       <div className="relative aspect-[3/2] overflow-hidden rounded-t-2xl bg-linear-to-br from-blue-100 via-blue-50 to-white">
         {plan.imageUrl ? (
           <img
@@ -274,21 +237,9 @@ function PlanCard({
             className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
           />
         ) : (
-          <button
-            type="button"
-            onClick={triggerUpload}
-            disabled={uploading}
-            className="flex h-full w-full flex-col items-center justify-center gap-2 text-blue-400 transition-colors hover:text-blue-500 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-blue-500 disabled:opacity-60"
-          >
-            {uploading ? (
-              <Spinner className="h-6 w-6" />
-            ) : (
-              <ImageIcon className="h-8 w-8" />
-            )}
-            <span className="text-sm font-medium">
-              {uploading ? 'Uploading…' : 'Add an image'}
-            </span>
-          </button>
+          <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-blue-300">
+            <ImageIcon className="h-8 w-8" />
+          </div>
         )}
 
         <span className="absolute left-3 top-3 z-10 drop-shadow-sm">
@@ -304,7 +255,7 @@ function PlanCard({
           aria-haspopup="menu"
           aria-expanded={menuOpen}
           aria-label="Plan actions"
-          className="grid h-8 w-8 place-items-center rounded-full bg-white/85 text-neutral-700 shadow-sm backdrop-blur transition-colors hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+          className="grid h-8 w-8 place-items-center rounded-full bg-white/85 text-neutral-700 shadow-sm backdrop-blur transition duration-150 ease-out active:scale-[0.9] hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
         >
           <MoreVerticalIcon className="h-4 w-4" />
         </button>
@@ -314,9 +265,6 @@ function PlanCard({
             role="menu"
             className="absolute right-0 top-full mt-1.5 w-48 overflow-hidden rounded-xl border border-neutral-200 bg-white py-1 text-sm shadow-lg shadow-blue-500/10"
           >
-            <MenuItem icon={<CameraIcon className="h-4 w-4" />} onClick={triggerUpload}>
-              {plan.imageUrl ? 'Change image' : 'Add image'}
-            </MenuItem>
             <MenuItem
               icon={<PencilIcon className="h-4 w-4" />}
               onClick={() => {
@@ -380,23 +328,9 @@ function PlanCard({
               value={formatTimeRange(plan.activeFrom, plan.activeUntil)}
             />
           </div>
-
-          {uploadError && (
-            <p className="mt-2 text-xs text-red-600" role="alert">
-              {uploadError}
-            </p>
-          )}
         </div>
       </div>
-
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={handleFile}
-      />
-    </li>
+    </motion.li>
   )
 }
 

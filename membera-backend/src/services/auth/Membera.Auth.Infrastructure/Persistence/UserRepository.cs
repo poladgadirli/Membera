@@ -30,9 +30,17 @@ public class UserRepository : IUserRepository
         return await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
     }
 
-    public async Task<List<User>> GetAllAsync()
+    public async Task<(List<User> Users, int TotalCount)> GetPagedAsync(int page, int pageSize)
     {
-        return await _context.Users.ToListAsync();
+        var totalCount = await _context.Users.CountAsync();
+
+        var users = await _context.Users
+            .OrderBy(u => u.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return (users, totalCount);
     }
     public async Task UpdateAsync(User user)
     {

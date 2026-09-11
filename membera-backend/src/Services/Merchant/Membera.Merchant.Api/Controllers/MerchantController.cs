@@ -4,6 +4,7 @@ using Membera.Merchant.Application.Merchants.CreateMerchant;
 using Membera.Merchant.Application.Merchants.GetMerchantByOwnerId;
 using Membera.Merchant.Application.Merchants.UpdateMerchant;
 using Membera.Merchant.Application.Merchants.UploadMerchantLogo;
+using Membera.Merchant.Domain.Enums;
 using Membera.Shared.Contracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -53,7 +54,7 @@ public class MerchantController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create(CreateMerchantRequest request)
     {
-        var command = new CreateMerchantCommand(GetOwnerId(), request.BusinessName);
+        var command = new CreateMerchantCommand(GetOwnerId(), request.BusinessName, request.Category);
         var result = await _createMerchantHandler.HandleAsync(command);
         return Ok(BaseResponse<CreateMerchantResult>.SuccessResponse(result));
     }
@@ -68,7 +69,7 @@ public class MerchantController : ControllerBase
     [HttpPut]
     public async Task<IActionResult> Update(UpdateMerchantRequest request)
     {
-        var command = new UpdateMerchantCommand(GetOwnerId(), request.BusinessName, request.Description);
+        var command = new UpdateMerchantCommand(GetOwnerId(), request.BusinessName, request.Description, request.Category);
         await _updateMerchantHandler.HandleAsync(command);
         return NoContent();
     }
@@ -90,5 +91,5 @@ public class MerchantController : ControllerBase
     }
 }
 
-public record CreateMerchantRequest(string BusinessName);
-public record UpdateMerchantRequest(string BusinessName, string? Description);
+public record CreateMerchantRequest(string BusinessName, BusinessCategory Category = BusinessCategory.Other);
+public record UpdateMerchantRequest(string BusinessName, string? Description, BusinessCategory Category = BusinessCategory.Other);

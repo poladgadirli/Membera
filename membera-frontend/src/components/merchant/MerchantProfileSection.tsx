@@ -8,11 +8,14 @@ import {
   type FormEvent,
   type ReactNode,
 } from 'react'
+import { AnimatePresence, motion } from 'motion/react'
 import { CameraIcon, ChevronDownIcon, PencilIcon } from '@/components/icons'
 import { Spinner } from '@/components/Spinner'
 import { StatusBadge } from '@/components/StatusBadge'
 import { ApiError } from '@/lib/apiClient'
+import { SPRING_UI, materializeVariants, motionSafe, usePrefersReducedMotion } from '@/lib/motion'
 import {
+  BADGE_NEUTRAL,
   BTN_PRIMARY,
   BTN_SECONDARY,
   CARD,
@@ -20,13 +23,17 @@ import {
   INPUT,
   LABEL,
   SECTION_LABEL,
+  WARNING_BANNER,
 } from '@/lib/ui'
 import {
+  BUSINESS_CATEGORIES,
+  BUSINESS_CATEGORY_LABELS,
   createMerchant,
   getMyMerchant,
   isMerchantNotFound,
   updateMerchant,
   uploadMerchantLogo,
+  type BusinessCategory,
   type MerchantProfile,
 } from '@/lib/merchant'
 
@@ -35,7 +42,8 @@ const labelClass = LABEL
 const primaryButton = BTN_PRIMARY
 const secondaryButton = BTN_SECONDARY
 
-type Status = 'loading' | 'setup' | 'ready' | 'error'
+export type MerchantProfileStatus = 'loading' | 'setup' | 'ready' | 'error'
+type Status = MerchantProfileStatus
 
 function ErrorNote({ message }: { message: string }) {
   return <div className={ERROR_BANNER}>{message}</div>
@@ -75,7 +83,16 @@ function IconAction({
   )
 }
 
-export function MerchantProfileSection() {
+interface MerchantProfileSectionProps {
+  /** Fires whenever the profile-existence status changes, so a parent (e.g.
+   * the dashboard) can decide whether other profile-dependent sections should
+   * render at all. */
+  onStatusChange?: (status: MerchantProfileStatus) => void
+}
+
+export function MerchantProfileSection({
+  onStatusChange,
+}: MerchantProfileSectionProps = {}) {
   const [status, setStatus] = useState<Status>('loading')
   const [profile, setProfile] = useState<MerchantProfile | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -83,11 +100,16 @@ export function MerchantProfileSection() {
   const [editing, setEditing] = useState(false)
   const [businessName, setBusinessName] = useState('')
   const [description, setDescription] = useState('')
+  const [category, setCategory] = useState<BusinessCategory>('Other')
   const [formError, setFormError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
 
-  const logoInputRef = useRef<HTMLInputElement>(null)
-  const [logoUploading, setLogoUploading] = useState(false)
+  // Logo, as part of the edit form: a picked-but-not-yet-uploaded file, its
+  // preview, and whether the profile fields have already been saved this
+  // submit (so a failed logo upload can be retried without re-saving them).
+  const [logoFile, setLogoFile] = useState<File | null>(null)
+  const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>(null)
+  const [profileSaved, setProfileSaved] = useState(false)
   const [logoError, setLogoError] = useState<string | null>(null)
 
   // The description is hidden until the card is hovered (desktop) or the card /
@@ -95,6 +117,15 @@ export function MerchantProfileSection() {
   // handled with group-* variants so they need no state.
   const [expanded, setExpanded] = useState(false)
   const detailsId = useId()
+
+  useEffect(() => {
+    if (!logoPreviewUrl) return
+    return () => URL.revokeObjectURL(logoPreviewUrl)
+  }, [logoPreviewUrl])
+
+  useEffect(() => {
+    onStatusChange?.(status)
+  }, [status, onStatusChange])
 
   // All setState happens after `await`, so this is safe to call from an effect.
   const load = useCallback(async () => {
@@ -154,8 +185,27 @@ export function MerchantProfileSection() {
   const startEditing = () => {
     setBusinessName(profile?.businessName ?? '')
     setDescription(profile?.description ?? '')
+    setCategory(profile?.businessCategory ?? 'Other')
     setFormError(null)
+    setLogoError(null)
+    setProfileSaved(false)
+    setLogoFile(null)
+    setLogoPreviewUrl(null)
     setEditing(true)
+  }
+
+  const cancelEditing = () => {
+    setEditing(false)
+    setFormError(null)
+    setLogoError(null)
+    setProfileSaved(false)
+    setLogoFile(null)
+    setLogoPreviewUrl(null)
+  }
+
+  const pickLogo = (file: File) => {
+    setLogoFile(file)
+    setLogoPreviewUrl(URL.createObjectURL(file))
   }
 
   const handleCreate = async (event: FormEvent<HTMLFormElement>) => {
@@ -166,9 +216,10 @@ export function MerchantProfileSection() {
 
     setSaving(true)
     try {
-      await createMerchant(name)
+      await createMerchant(name, category)
       setBusinessName('')
       setDescription('')
+      setCategory('Other')
       await load()
     } catch (err) {
       setFormError(
@@ -181,49 +232,63 @@ export function MerchantProfileSection() {
     }
   }
 
-  const handleLogoChange = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    event.target.value = '' // let the same file be re-picked later
-    if (!file) return
-
-    setLogoError(null)
-    setLogoUploading(true)
-    try {
-      await uploadMerchantLogo(file)
-      await load()
-    } catch (err) {
-      setLogoError(
-        err instanceof ApiError ? err.message : 'Could not upload the logo.',
-      )
-    } finally {
-      setLogoUploading(false)
-    }
-  }
-
   const handleUpdate = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setFormError(null)
-    const name = businessName.trim()
-    if (!name) return setFormError('Business name cannot be empty.')
+    setLogoError(null)
 
-    setSaving(true)
-    try {
-      await updateMerchant({ businessName: name, description: description.trim() })
-      setEditing(false)
-      await load()
-    } catch (err) {
-      setFormError(
-        err instanceof ApiError
-          ? err.message
-          : 'Could not save your changes.',
-      )
-    } finally {
-      setSaving(false)
+    if (!profileSaved) {
+      const name = businessName.trim()
+      if (!name) return setFormError('Business name cannot be empty.')
+
+      setSaving(true)
+      try {
+        await updateMerchant({
+          businessName: name,
+          description: description.trim(),
+          businessCategory: category,
+        })
+        setProfileSaved(true)
+      } catch (err) {
+        setFormError(
+          err instanceof ApiError
+            ? err.message
+            : 'Could not save your changes.',
+        )
+        setSaving(false)
+        return
+      }
+    } else {
+      setSaving(true)
     }
+
+    if (logoFile) {
+      try {
+        await uploadMerchantLogo(logoFile)
+      } catch (err) {
+        setLogoError(
+          err instanceof ApiError
+            ? err.message
+            : 'Could not upload the logo. Please try again.',
+        )
+        setSaving(false)
+        return
+      }
+    }
+
+    await load()
+    setSaving(false)
+    setEditing(false)
+    setProfileSaved(false)
+    setLogoFile(null)
+    setLogoPreviewUrl(null)
   }
 
+  const isRetryingLogo = profileSaved
+  const updateSubmitLabel = isRetryingLogo ? 'Retry logo upload' : 'Save changes'
+
   return (
-    <section aria-labelledby="business-profile-heading">
+    <section aria-labelledby="business-profile-heading" className="mt-10">
       <h2 id="business-profile-heading" className={SECTION_LABEL}>
         Business profile
       </h2>
@@ -274,6 +339,24 @@ export function MerchantProfileSection() {
                 />
               </div>
 
+              <div>
+                <label htmlFor="setup-business-category" className={labelClass}>
+                  Business category
+                </label>
+                <select
+                  id="setup-business-category"
+                  className={fieldClass}
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value as BusinessCategory)}
+                >
+                  {BUSINESS_CATEGORIES.map((option) => (
+                    <option key={option} value={option}>
+                      {BUSINESS_CATEGORY_LABELS[option]}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <button type="submit" disabled={saving} className={primaryButton}>
                 {saving && <Spinner className="h-4 w-4" />}
                 Create profile
@@ -283,14 +366,16 @@ export function MerchantProfileSection() {
         )}
 
         {status === 'ready' && profile && !editing && (
-          <div
+          <motion.div
             onClick={(e) => {
               // Mobile: a tap anywhere on the card that isn't a control toggles
               // the description. Desktop reveal is pure CSS (group-hover).
               if ((e.target as HTMLElement).closest('button, a, input')) return
               setExpanded((v) => !v)
             }}
-            className={`${CARD} group relative cursor-default p-6 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-md hover:shadow-blue-500/10`}
+            className={`${CARD} group relative cursor-default p-6 hover:shadow-md hover:shadow-blue-500/10`}
+            whileHover={{ y: -4 }}
+            transition={SPRING_UI}
           >
             <div className="flex items-start gap-5">
               {/* Circular profile avatar */}
@@ -312,6 +397,9 @@ export function MerchantProfileSection() {
                     {profile.businessName}
                   </h3>
                   <StatusBadge active={profile.isActive} />
+                  <span className={BADGE_NEUTRAL}>
+                    {BUSINESS_CATEGORY_LABELS[profile.businessCategory]}
+                  </span>
                   <button
                     type="button"
                     onClick={() => setExpanded((v) => !v)}
@@ -343,45 +431,16 @@ export function MerchantProfileSection() {
                     </p>
                   </div>
                 </div>
-
-                {logoError && (
-                  <p className="mt-2 text-xs text-red-600">{logoError}</p>
-                )}
               </div>
 
               {/* Secondary actions — deliberately quiet next to the name. */}
               <div className="flex shrink-0 items-center gap-0.5">
-                <IconAction
-                  label={
-                    logoUploading
-                      ? 'Uploading logo…'
-                      : profile.logoUrl
-                        ? 'Change logo'
-                        : 'Upload logo'
-                  }
-                  onClick={() => logoInputRef.current?.click()}
-                  disabled={logoUploading}
-                >
-                  {logoUploading ? (
-                    <Spinner className="h-4 w-4" />
-                  ) : (
-                    <CameraIcon className="h-4 w-4" />
-                  )}
-                </IconAction>
                 <IconAction label="Edit profile" onClick={startEditing}>
                   <PencilIcon className="h-4 w-4" />
                 </IconAction>
               </div>
             </div>
-
-            <input
-              ref={logoInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleLogoChange}
-            />
-          </div>
+          </motion.div>
         )}
 
         {status === 'ready' && profile && editing && (
@@ -392,48 +451,81 @@ export function MerchantProfileSection() {
               </h3>
 
               {formError && <ErrorNote message={formError} />}
+              {logoError && (
+                <div className={WARNING_BANNER}>
+                  Your profile was saved, but the logo didn&rsquo;t upload:{' '}
+                  {logoError}
+                </div>
+              )}
 
-              <div>
-                <label htmlFor="edit-business-name" className={labelClass}>
-                  Business name
-                </label>
-                <input
-                  id="edit-business-name"
-                  className={fieldClass}
-                  value={businessName}
-                  onChange={(e) => setBusinessName(e.target.value)}
-                  maxLength={120}
-                />
-              </div>
+              <LogoPicker
+                previewUrl={logoPreviewUrl ?? profile.logoUrl}
+                fallbackInitials={initials(businessName)}
+                disabled={saving}
+                onPick={pickLogo}
+              />
 
-              <div>
-                <label htmlFor="edit-business-description" className={labelClass}>
-                  Description{' '}
-                  <span className="font-normal text-neutral-500">
-                    (optional)
-                  </span>
-                </label>
-                <textarea
-                  id="edit-business-description"
-                  className={`${fieldClass} min-h-20 resize-y`}
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  maxLength={500}
-                />
-              </div>
+              <fieldset disabled={saving || isRetryingLogo} className="space-y-4">
+                <div>
+                  <label htmlFor="edit-business-name" className={labelClass}>
+                    Business name
+                  </label>
+                  <input
+                    id="edit-business-name"
+                    className={fieldClass}
+                    value={businessName}
+                    onChange={(e) => setBusinessName(e.target.value)}
+                    maxLength={120}
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="edit-business-category" className={labelClass}>
+                    Business category
+                  </label>
+                  <select
+                    id="edit-business-category"
+                    className={fieldClass}
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value as BusinessCategory)}
+                  >
+                    {BUSINESS_CATEGORIES.map((option) => (
+                      <option key={option} value={option}>
+                        {BUSINESS_CATEGORY_LABELS[option]}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label htmlFor="edit-business-description" className={labelClass}>
+                    Description{' '}
+                    <span className="font-normal text-neutral-500">
+                      (optional)
+                    </span>
+                  </label>
+                  <textarea
+                    id="edit-business-description"
+                    className={`${fieldClass} min-h-20 resize-y`}
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    maxLength={500}
+                  />
+                </div>
+              </fieldset>
 
               <div className="flex items-center gap-3">
                 <button type="submit" disabled={saving} className={primaryButton}>
                   {saving && <Spinner className="h-4 w-4" />}
-                  Save changes
+                  {updateSubmitLabel}
                 </button>
                 <button
                   type="button"
-                  onClick={() => setEditing(false)}
+                  onClick={cancelEditing}
                   disabled={saving}
                   className={secondaryButton}
                 >
-                  Cancel
+                  {isRetryingLogo ? 'Close' : 'Cancel'}
                 </button>
               </div>
             </form>
@@ -441,5 +533,79 @@ export function MerchantProfileSection() {
         )}
       </div>
     </section>
+  )
+}
+
+function LogoPicker({
+  previewUrl,
+  fallbackInitials,
+  disabled,
+  onPick,
+}: {
+  previewUrl: string | null
+  fallbackInitials: string
+  disabled?: boolean
+  onPick: (file: File) => void
+}) {
+  const inputRef = useRef<HTMLInputElement>(null)
+  const reduced = usePrefersReducedMotion()
+
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    event.target.value = '' // let the same file be re-picked later
+    if (file) onPick(file)
+  }
+
+  return (
+    <div>
+      <span className={labelClass}>
+        Logo <span className="font-normal text-neutral-500">(optional)</span>
+      </span>
+      <button
+        type="button"
+        onClick={() => inputRef.current?.click()}
+        disabled={disabled}
+        className="group relative mt-1.5 grid h-20 w-20 place-items-center overflow-hidden rounded-full shadow-sm ring-4 ring-white transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        <AnimatePresence mode="wait" initial={false}>
+          {previewUrl ? (
+            <motion.img
+              key={previewUrl}
+              src={previewUrl}
+              alt=""
+              variants={materializeVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={motionSafe(SPRING_UI, reduced)}
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+          ) : (
+            <motion.div
+              key="empty"
+              variants={materializeVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={motionSafe(SPRING_UI, reduced)}
+              className="absolute inset-0 grid place-items-center bg-linear-to-br from-blue-500 via-blue-400 to-blue-200 text-xl font-semibold text-white"
+            >
+              {fallbackInitials}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <div className="absolute inset-0 flex items-center justify-center bg-neutral-900/0 opacity-0 transition group-hover:bg-neutral-900/40 group-hover:opacity-100">
+          <CameraIcon className="h-5 w-5 text-white" />
+        </div>
+      </button>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleChange}
+      />
+    </div>
   )
 }

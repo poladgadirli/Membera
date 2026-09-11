@@ -61,10 +61,17 @@ public class SubscriptionController : ControllerBase
     {
         var userId = GetOwnerId();
 
-        // Placeholder URLs. These should eventually point to the frontend so the
-        // customer lands on a proper confirmation / cancellation page.
-        const string successUrl = "https://localhost:7241/api/subscriptions/success";
-        const string cancelUrl = "https://localhost:7241/api/subscriptions/cancel";
+        // Stripe redirects the customer back to the SPA after checkout. FRONTEND_BASE_URL
+        // follows the same Environment.GetEnvironmentVariable + fallback pattern as
+        // JWT_SECRET_KEY / POSTGRES_PASSWORD (see Program.cs); it defaults to the Vite
+        // dev server. "{CHECKOUT_SESSION_ID}" is a literal template token that Stripe
+        // substitutes server-side before redirecting, so the success page can read
+        // ?session_id=... and correlate the exact subscription.
+        var frontendBaseUrl =
+            (Environment.GetEnvironmentVariable("FRONTEND_BASE_URL") ?? "http://localhost:5173")
+            .TrimEnd('/');
+        var successUrl = $"{frontendBaseUrl}/subscription-success?session_id={{CHECKOUT_SESSION_ID}}";
+        var cancelUrl = $"{frontendBaseUrl}/subscription-cancel";
 
         var command = new CreateCheckoutSessionCommand(
             userId, request.SubscriptionPlanId, successUrl, cancelUrl);

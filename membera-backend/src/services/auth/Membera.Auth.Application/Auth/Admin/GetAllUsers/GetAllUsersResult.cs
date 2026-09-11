@@ -1,6 +1,6 @@
 namespace Membera.Auth.Application.Auth.Admin.GetAllUsers;
 
-public record GetAllUsersResult(List<GetAllUsersResult.UserSummary> Users)
+public record GetAllUsersResult(List<GetAllUsersResult.UserSummary> Users, int TotalCount, int Page, int PageSize)
 {
     public record UserSummary(
         Guid Id,

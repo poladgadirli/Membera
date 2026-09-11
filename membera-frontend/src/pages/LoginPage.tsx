@@ -101,7 +101,6 @@ export default function LoginPage() {
       loading={loading}
       onGoogleSignIn={handleGoogleSignIn}
       onGoogleError={setError}
-      onResetPassword={() => navigate('/contact')}
       onCreateAccount={() => navigate('/signup')}
       onBackToHome={() => navigate('/')}
     />

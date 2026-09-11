@@ -1,5 +1,6 @@
 using Membera.Merchant.Application.Abstractions;
 using Membera.Merchant.Application.Merchants.UpdateMerchant;
+using Membera.Merchant.Domain.Enums;
 using Membera.Shared.Caching;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -28,7 +29,7 @@ public class UpdateMerchantHandlerTests
     public async Task HandleAsync_WhenMerchantNotFound_ThrowsInvalidOperationException()
     {
         // Arrange
-        var command = new UpdateMerchantCommand(Guid.NewGuid(), "Updated Business", "Updated description");
+        var command = new UpdateMerchantCommand(Guid.NewGuid(), "Updated Business", "Updated description", BusinessCategory.Gym);
 
         _merchantRepositoryMock
             .Setup(r => r.GetByOwnerIdAsync(command.OwnerId))
@@ -46,7 +47,7 @@ public class UpdateMerchantHandlerTests
     {
         // Arrange
         var ownerId = Guid.NewGuid();
-        var command = new UpdateMerchantCommand(ownerId, "Polad's New Business", "A fresh description");
+        var command = new UpdateMerchantCommand(ownerId, "Polad's New Business", "A fresh description", BusinessCategory.Barbershop);
 
         var merchant = new MerchantEntity(ownerId, "Polad's Old Business");
 
@@ -60,6 +61,7 @@ public class UpdateMerchantHandlerTests
         // Assert
         Assert.Equal(command.BusinessName, merchant.BusinessName);
         Assert.Equal(command.Description, merchant.Description);
+        Assert.Equal(command.Category, merchant.BusinessCategory);
         _merchantRepositoryMock.Verify(r => r.UpdateAsync(merchant), Times.Once);
         _cacheServiceMock.Verify(c => c.RemoveAsync($"merchant:owner:{ownerId}"), Times.Once);
     }
