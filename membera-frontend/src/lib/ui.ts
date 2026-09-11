@@ -71,6 +71,11 @@ export const ERROR_BANNER =
 export const WARNING_BANNER =
   'rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-800'
 
+/** Neutral heads-up notice, and confirmation of a successful action — same
+ * blue tone as the app's other success states (e.g. RedemptionSection). */
+export const INFO_BANNER =
+  'rounded-lg border border-blue-200 bg-blue-50 px-3 py-2.5 text-sm text-blue-800'
+
 /** Active / inactive status pills. */
 export const BADGE_ACTIVE =
   'inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700'

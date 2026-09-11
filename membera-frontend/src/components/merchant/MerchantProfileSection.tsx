@@ -42,7 +42,8 @@ const labelClass = LABEL
 const primaryButton = BTN_PRIMARY
 const secondaryButton = BTN_SECONDARY
 
-type Status = 'loading' | 'setup' | 'ready' | 'error'
+export type MerchantProfileStatus = 'loading' | 'setup' | 'ready' | 'error'
+type Status = MerchantProfileStatus
 
 function ErrorNote({ message }: { message: string }) {
   return <div className={ERROR_BANNER}>{message}</div>
@@ -82,7 +83,16 @@ function IconAction({
   )
 }
 
-export function MerchantProfileSection() {
+interface MerchantProfileSectionProps {
+  /** Fires whenever the profile-existence status changes, so a parent (e.g.
+   * the dashboard) can decide whether other profile-dependent sections should
+   * render at all. */
+  onStatusChange?: (status: MerchantProfileStatus) => void
+}
+
+export function MerchantProfileSection({
+  onStatusChange,
+}: MerchantProfileSectionProps = {}) {
   const [status, setStatus] = useState<Status>('loading')
   const [profile, setProfile] = useState<MerchantProfile | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -112,6 +122,10 @@ export function MerchantProfileSection() {
     if (!logoPreviewUrl) return
     return () => URL.revokeObjectURL(logoPreviewUrl)
   }, [logoPreviewUrl])
+
+  useEffect(() => {
+    onStatusChange?.(status)
+  }, [status, onStatusChange])
 
   // All setState happens after `await`, so this is safe to call from an effect.
   const load = useCallback(async () => {
