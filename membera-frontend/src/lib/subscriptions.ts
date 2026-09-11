@@ -3,7 +3,7 @@
 // BaseResponse<T> and throws ApiError.
 //
 // Backend routes (through the gateway, prefix /api):
-//   GET  /subscription-plans       -> { plans: [...] }   (all active, all merchants)
+//   GET  /subscription-plans?page&pageSize -> { plans: [...], totalCount }   (active, all merchants)
 //   POST /subscriptions/checkout   { subscriptionPlanId } -> { checkoutUrl }
 //   GET  /subscriptions/mine       -> { subscriptions: [...] }
 //   POST /subscriptions/redeem     { redemptionCode }      -> { subscriptionId, usagesRemaining, planName }
@@ -113,12 +113,19 @@ export interface BrowsePlan {
   merchantLogoUrl: string | null
 }
 
-export async function browseActivePlans(): Promise<BrowsePlan[]> {
+export interface PagedBrowsePlans {
+  plans: BrowsePlan[]
+  totalCount: number
+}
+
+export async function browseActivePlans(
+  page: number,
+  pageSize: number,
+): Promise<PagedBrowsePlans> {
   // BaseResponse<BrowseActivePlansResult> -> client strips the envelope ->
-  // { plans: [...] }. Accept a bare array too, defensively.
-  const data = await api.get<BrowsePlan[] | { plans?: BrowsePlan[] }>(
-    '/subscription-plans',
+  // { plans: [...], totalCount }.
+  const data = await api.get<{ plans?: BrowsePlan[]; totalCount?: number }>(
+    `/subscription-plans?page=${page}&pageSize=${pageSize}`,
   )
-  if (Array.isArray(data)) return data
-  return data.plans ?? []
+  return { plans: data.plans ?? [], totalCount: data.totalCount ?? 0 }
 }

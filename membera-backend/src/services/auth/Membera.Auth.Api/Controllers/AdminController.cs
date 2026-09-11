@@ -42,9 +42,9 @@ public class AdminController : ControllerBase
     }
 
     [HttpGet("users")]
-    public async Task<IActionResult> GetAllUsers()
+    public async Task<IActionResult> GetAllUsers(int page = 1, int pageSize = 10)
     {
-        var result = await _getAllUsersHandler.HandleAsync();
+        var result = await _getAllUsersHandler.HandleAsync(new GetAllUsersQuery(page, pageSize));
         return Ok(BaseResponse<GetAllUsersResult>.SuccessResponse(result));
     }
 

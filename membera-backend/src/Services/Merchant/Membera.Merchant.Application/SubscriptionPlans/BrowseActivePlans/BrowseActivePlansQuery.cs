@@ -1,5 +1,4 @@
 namespace Membera.Merchant.Application.SubscriptionPlans.BrowseActivePlans;
 
-/// <summary>Lists every active plan across all merchants. No parameters — this
-/// project's scale doesn't warrant pagination yet.</summary>
-public record BrowseActivePlansQuery();
+/// <summary>Lists active plans across all merchants, one page at a time.</summary>
+public record BrowseActivePlansQuery(int Page = 1, int PageSize = 9);

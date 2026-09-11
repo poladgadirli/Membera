@@ -1,8 +1,9 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { DashboardShell } from '@/components/DashboardShell'
 import { CalendarIcon, ClockIcon, ImageIcon, RepeatIcon } from '@/components/icons'
 import { PageHeading } from '@/components/PageHeading'
+import { Pagination } from '@/components/Pagination'
 import { Spinner } from '@/components/Spinner'
 import {
   formatDuration,
@@ -20,21 +21,40 @@ import {
 
 type Status = 'loading' | 'ready' | 'error'
 
+// Server-side pagination: GET /subscription-plans?page&pageSize returns just
+// this page's plans plus a totalCount, so we ask for one page at a time
+// instead of fetching every active plan up front.
+// 9 = 3 full rows at the grid's widest (lg:grid-cols-3).
+const PAGE_SIZE = 9
+
 export default function BrowsePlansPage() {
   const [status, setStatus] = useState<Status>('loading')
   const [plans, setPlans] = useState<BrowsePlan[]>([])
+  const [totalCount, setTotalCount] = useState(0)
   const [loadError, setLoadError] = useState<string | null>(null)
+  const [page, setPage] = useState(1)
+  // The page number whose data `plans`/`totalCount` currently reflect. While
+  // it differs from `page` (e.g. right after clicking "Next"), a fetch for
+  // the new page is in flight.
+  const [loadedPage, setLoadedPage] = useState<number | null>(null)
+  const pageLoading = status === 'ready' && loadedPage !== page
+
+  // Guards against a slower, earlier request clobbering a faster, later one
+  // when the user changes pages quickly.
+  const latestRequestRef = useRef(0)
 
   useEffect(() => {
-    let active = true
-    browseActivePlans().then(
+    const requestId = ++latestRequestRef.current
+    browseActivePlans(page, PAGE_SIZE).then(
       (data) => {
-        if (!active) return
-        setPlans(data)
+        if (requestId !== latestRequestRef.current) return
+        setPlans(data.plans)
+        setTotalCount(data.totalCount)
+        setLoadedPage(page)
         setStatus('ready')
       },
       (err) => {
-        if (!active) return
+        if (requestId !== latestRequestRef.current) return
         setLoadError(
           err instanceof ApiError
             ? err.message
@@ -43,10 +63,9 @@ export default function BrowsePlansPage() {
         setStatus('error')
       },
     )
-    return () => {
-      active = false
-    }
-  }, [])
+  }, [page])
+
+  const pageCount = Math.max(1, Math.ceil(totalCount / PAGE_SIZE))
 
   return (
     <DashboardShell>
@@ -91,11 +110,30 @@ export default function BrowsePlansPage() {
           )}
 
           {status === 'ready' && plans.length > 0 && (
-            <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {plans.map((plan) => (
-                <BrowsePlanCard key={plan.id} plan={plan} />
-              ))}
-            </ul>
+            <>
+              <div className="relative">
+                <ul
+                  className={`grid gap-5 sm:grid-cols-2 lg:grid-cols-3 ${pageLoading ? 'opacity-40 transition-opacity' : ''}`}
+                >
+                  {plans.map((plan) => (
+                    <BrowsePlanCard key={plan.id} plan={plan} />
+                  ))}
+                </ul>
+
+                {pageLoading && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Spinner />
+                  </div>
+                )}
+              </div>
+
+              <Pagination
+                page={page}
+                pageCount={pageCount}
+                onPageChange={setPage}
+                className="mt-6"
+              />
+            </>
           )}
         </div>
       </section>

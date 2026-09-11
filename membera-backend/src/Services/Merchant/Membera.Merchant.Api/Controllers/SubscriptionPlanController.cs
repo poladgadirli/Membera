@@ -84,9 +84,9 @@ public class SubscriptionPlanController : ControllerBase
     // any signed-in user (including the "User" role) can call it; it just needs a
     // valid token, which the SPA always attaches. Distinct from "mine" above.
     [HttpGet]
-    public async Task<IActionResult> BrowseActive()
+    public async Task<IActionResult> BrowseActive(int page = 1, int pageSize = 9)
     {
-        var result = await _browseActivePlansHandler.HandleAsync(new BrowseActivePlansQuery());
+        var result = await _browseActivePlansHandler.HandleAsync(new BrowseActivePlansQuery(page, pageSize));
         return Ok(BaseResponse<BrowseActivePlansResult>.SuccessResponse(result));
     }
 

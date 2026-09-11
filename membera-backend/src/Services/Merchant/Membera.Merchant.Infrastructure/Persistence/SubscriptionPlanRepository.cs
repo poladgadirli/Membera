@@ -25,11 +25,19 @@ public class SubscriptionPlanRepository : ISubscriptionPlanRepository
             .ToListAsync();
     }
 
-    public async Task<List<SubscriptionPlan>> GetAllActiveAsync()
+    public async Task<(List<SubscriptionPlan> Plans, int TotalCount)> GetPagedActiveAsync(int page, int pageSize)
     {
-        return await _context.SubscriptionPlans
-            .Where(p => p.IsActive)
+        var activePlans = _context.SubscriptionPlans.Where(p => p.IsActive);
+
+        var totalCount = await activePlans.CountAsync();
+
+        var plans = await activePlans
+            .OrderBy(p => p.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync();
+
+        return (plans, totalCount);
     }
 
     public async Task AddAsync(SubscriptionPlan plan)

@@ -21,4 +21,4 @@ public record BrowsePlanSummary(
     bool IsActive
 );
 
-public record BrowseActivePlansResult(List<BrowsePlanSummary> Plans);
+public record BrowseActivePlansResult(List<BrowsePlanSummary> Plans, int TotalCount);

@@ -35,8 +35,8 @@ public class BrowseActivePlansHandlerTests
     {
         // Arrange
         _subscriptionPlanRepositoryMock
-            .Setup(r => r.GetAllActiveAsync())
-            .ReturnsAsync(new List<SubscriptionPlan>());
+            .Setup(r => r.GetPagedActiveAsync(1, 9))
+            .ReturnsAsync((new List<SubscriptionPlan>(), 0));
 
         // Act
         var result = await _handler.HandleAsync(new BrowseActivePlansQuery());
@@ -44,6 +44,7 @@ public class BrowseActivePlansHandlerTests
         // Assert
         Assert.NotNull(result.Plans);
         Assert.Empty(result.Plans);
+        Assert.Equal(0, result.TotalCount);
         _merchantRepositoryMock.Verify(r => r.GetByIdAsync(It.IsAny<Guid>()), Times.Never);
     }
 
@@ -66,8 +67,8 @@ public class BrowseActivePlansHandlerTests
             new TimeOnly(6, 0), new TimeOnly(22, 0));
 
         _subscriptionPlanRepositoryMock
-            .Setup(r => r.GetAllActiveAsync())
-            .ReturnsAsync(new List<SubscriptionPlan> { planA, planB });
+            .Setup(r => r.GetPagedActiveAsync(1, 9))
+            .ReturnsAsync((new List<SubscriptionPlan> { planA, planB }, 2));
         _merchantRepositoryMock.Setup(r => r.GetByIdAsync(merchantAId)).ReturnsAsync(merchantA);
         _merchantRepositoryMock.Setup(r => r.GetByIdAsync(merchantBId)).ReturnsAsync(merchantB);
 
@@ -76,6 +77,7 @@ public class BrowseActivePlansHandlerTests
 
         // Assert
         Assert.Equal(2, result.Plans.Count);
+        Assert.Equal(2, result.TotalCount);
 
         var summaryA = result.Plans.Single(p => p.Id == planA.Id);
         Assert.Equal(merchantAId, summaryA.MerchantId);
@@ -113,8 +115,8 @@ public class BrowseActivePlansHandlerTests
         inactivePlan.Deactivate();
 
         _subscriptionPlanRepositoryMock
-            .Setup(r => r.GetAllActiveAsync())
-            .ReturnsAsync(new List<SubscriptionPlan> { activePlan, inactivePlan });
+            .Setup(r => r.GetPagedActiveAsync(1, 9))
+            .ReturnsAsync((new List<SubscriptionPlan> { activePlan, inactivePlan }, 2));
         _merchantRepositoryMock.Setup(r => r.GetByIdAsync(merchantId)).ReturnsAsync(merchant);
 
         // Act
@@ -135,8 +137,8 @@ public class BrowseActivePlansHandlerTests
         var plan = BuildPlan(merchantId);
 
         _subscriptionPlanRepositoryMock
-            .Setup(r => r.GetAllActiveAsync())
-            .ReturnsAsync(new List<SubscriptionPlan> { plan });
+            .Setup(r => r.GetPagedActiveAsync(1, 9))
+            .ReturnsAsync((new List<SubscriptionPlan> { plan }, 1));
         _merchantRepositoryMock
             .Setup(r => r.GetByIdAsync(merchantId))
             .ReturnsAsync((MerchantEntity?)null);
@@ -158,12 +160,12 @@ public class BrowseActivePlansHandlerTests
         var merchant = new MerchantEntity(Guid.NewGuid(), "Blue Bottle Coffee");
 
         _subscriptionPlanRepositoryMock
-            .Setup(r => r.GetAllActiveAsync())
-            .ReturnsAsync(new List<SubscriptionPlan>
+            .Setup(r => r.GetPagedActiveAsync(1, 9))
+            .ReturnsAsync((new List<SubscriptionPlan>
             {
                 BuildPlan(merchantId, "Plan One"),
                 BuildPlan(merchantId, "Plan Two"),
-            });
+            }, 2));
         _merchantRepositoryMock.Setup(r => r.GetByIdAsync(merchantId)).ReturnsAsync(merchant);
 
         // Act
@@ -172,5 +174,30 @@ public class BrowseActivePlansHandlerTests
         // Assert
         Assert.Equal(2, result.Plans.Count);
         _merchantRepositoryMock.Verify(r => r.GetByIdAsync(merchantId), Times.Once);
+    }
+
+    [Fact]
+    public async Task HandleAsync_WhenTotalCountExceedsPageSize_ReturnsFullTotalCountWithOnlyThatPagesPlans()
+    {
+        // Arrange — 12 total active plans, but the repository only hands back the
+        // 9 belonging to page 1; TotalCount still reflects all 12.
+        var merchantId = Guid.NewGuid();
+        var merchant = new MerchantEntity(Guid.NewGuid(), "Greenhouse Kitchen");
+
+        var pageOfPlans = Enumerable.Range(1, 9)
+            .Select(i => BuildPlan(merchantId, $"Plan {i}"))
+            .ToList();
+
+        _subscriptionPlanRepositoryMock
+            .Setup(r => r.GetPagedActiveAsync(1, 9))
+            .ReturnsAsync((pageOfPlans, 12));
+        _merchantRepositoryMock.Setup(r => r.GetByIdAsync(merchantId)).ReturnsAsync(merchant);
+
+        // Act
+        var result = await _handler.HandleAsync(new BrowseActivePlansQuery());
+
+        // Assert
+        Assert.Equal(9, result.Plans.Count);
+        Assert.Equal(12, result.TotalCount);
     }
 }

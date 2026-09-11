@@ -22,7 +22,7 @@ public class BrowseActivePlansHandler
 
     public async Task<BrowseActivePlansResult> HandleAsync(BrowseActivePlansQuery query)
     {
-        var plans = await _subscriptionPlanRepository.GetAllActiveAsync();
+        var (plans, totalCount) = await _subscriptionPlanRepository.GetPagedActiveAsync(query.Page, query.PageSize);
 
         // One merchant lookup per distinct merchant, cached so several plans from
         // the same business don't each hit the repository.
@@ -54,8 +54,9 @@ public class BrowseActivePlansHandler
         }
 
         _logger.LogInformation(
-            "Retrieved {Count} active subscription plans across all merchants", summaries.Count);
+            "Retrieved page {Page} (size {PageSize}) of active subscription plans. Count: {Count}, TotalCount: {TotalCount}",
+            query.Page, query.PageSize, summaries.Count, totalCount);
 
-        return new BrowseActivePlansResult(summaries);
+        return new BrowseActivePlansResult(summaries, totalCount);
     }
 }

@@ -5,7 +5,7 @@
 // authoritative).
 //
 // Backend routes (through the gateway, prefix /api):
-//   GET    /admin/users          -> { users: [...] }
+//   GET    /admin/users?page&pageSize -> { users: [...], totalCount, page, pageSize }
 //   DELETE /admin/users/{id}     -> 204   (delete a non-admin user)
 //   POST   /admin/promote/{id}   -> 204   (SuperAdmin only — User -> Admin)
 //   POST   /admin/demote/{id}    -> 204   (SuperAdmin only — Admin -> User)
@@ -27,15 +27,21 @@ export interface AdminUser {
   createdAt: string
 }
 
-export async function getAllUsers(): Promise<AdminUser[]> {
+export interface PagedUsers {
+  users: AdminUser[]
+  totalCount: number
+}
+
+export async function getAllUsers(
+  page: number,
+  pageSize: number,
+): Promise<PagedUsers> {
   // BaseResponse<GetAllUsersResult> -> client strips the envelope ->
-  // { users: [...] }. Accept a bare array too, defensively.
-  const data = await api.get<AdminUser[] | { users?: AdminUser[] }>(
-    '/admin/users',
+  // { users: [...], totalCount, page, pageSize }.
+  const data = await api.get<{ users?: AdminUser[]; totalCount?: number }>(
+    `/admin/users?page=${page}&pageSize=${pageSize}`,
   )
-  if (Array.isArray(data)) return data
-  if (data && Array.isArray(data.users)) return data.users
-  return []
+  return { users: data.users ?? [], totalCount: data.totalCount ?? 0 }
 }
 
 /** Delete a non-admin user account. */
