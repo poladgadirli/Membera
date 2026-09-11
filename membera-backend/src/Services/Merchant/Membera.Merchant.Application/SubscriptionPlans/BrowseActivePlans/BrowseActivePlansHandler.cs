@@ -1,4 +1,5 @@
 using Membera.Merchant.Application.Abstractions;
+using Membera.Merchant.Domain.Enums;
 using Microsoft.Extensions.Logging;
 using MerchantEntity = Membera.Merchant.Domain.Entities.Merchant;
 
@@ -22,7 +23,7 @@ public class BrowseActivePlansHandler
 
     public async Task<BrowseActivePlansResult> HandleAsync(BrowseActivePlansQuery query)
     {
-        var (plans, totalCount) = await _subscriptionPlanRepository.GetPagedActiveAsync(query.Page, query.PageSize);
+        var (plans, totalCount) = await _subscriptionPlanRepository.GetPagedActiveAsync(query.Page, query.PageSize, query.Category);
 
         // One merchant lookup per distinct merchant, cached so several plans from
         // the same business don't each hit the repository.
@@ -42,6 +43,7 @@ public class BrowseActivePlansHandler
                 plan.MerchantId,
                 merchant?.BusinessName ?? string.Empty,
                 merchant?.LogoUrl,
+                merchant?.Category ?? BusinessCategory.Other,
                 plan.Name,
                 plan.Description,
                 plan.Price,

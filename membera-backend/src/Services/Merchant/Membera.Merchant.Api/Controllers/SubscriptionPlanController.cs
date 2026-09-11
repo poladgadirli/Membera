@@ -6,6 +6,7 @@ using Membera.Merchant.Application.SubscriptionPlans.DeactivateSubscriptionPlan;
 using Membera.Merchant.Application.SubscriptionPlans.GetPlansByMerchantId;
 using Membera.Merchant.Application.SubscriptionPlans.UpdateSubscriptionPlan;
 using Membera.Merchant.Application.SubscriptionPlans.UploadSubscriptionPlanImage;
+using Membera.Merchant.Domain.Enums;
 using Membera.Shared.Contracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -84,9 +85,9 @@ public class SubscriptionPlanController : ControllerBase
     // any signed-in user (including the "User" role) can call it; it just needs a
     // valid token, which the SPA always attaches. Distinct from "mine" above.
     [HttpGet]
-    public async Task<IActionResult> BrowseActive(int page = 1, int pageSize = 9)
+    public async Task<IActionResult> BrowseActive(int page = 1, int pageSize = 9, BusinessCategory? category = null)
     {
-        var result = await _browseActivePlansHandler.HandleAsync(new BrowseActivePlansQuery(page, pageSize));
+        var result = await _browseActivePlansHandler.HandleAsync(new BrowseActivePlansQuery(page, pageSize, category));
         return Ok(BaseResponse<BrowseActivePlansResult>.SuccessResponse(result));
     }
 

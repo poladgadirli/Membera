@@ -1,5 +1,6 @@
 ﻿using Membera.Merchant.Application.Abstractions;
 using Membera.Merchant.Domain.Entities;
+using Membera.Merchant.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Membera.Merchant.Infrastructure.Persistence;
@@ -25,9 +26,18 @@ public class SubscriptionPlanRepository : ISubscriptionPlanRepository
             .ToListAsync();
     }
 
-    public async Task<(List<SubscriptionPlan> Plans, int TotalCount)> GetPagedActiveAsync(int page, int pageSize)
+    public async Task<(List<SubscriptionPlan> Plans, int TotalCount)> GetPagedActiveAsync(int page, int pageSize, BusinessCategory? category = null)
     {
         var activePlans = _context.SubscriptionPlans.Where(p => p.IsActive);
+
+        if (category is not null)
+        {
+            var merchantIdsInCategory = _context.Merchants
+                .Where(m => m.Category == category)
+                .Select(m => m.Id);
+
+            activePlans = activePlans.Where(p => merchantIdsInCategory.Contains(p.MerchantId));
+        }
 
         var totalCount = await activePlans.CountAsync();
 

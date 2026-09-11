@@ -1,3 +1,5 @@
+using Membera.Merchant.Domain.Enums;
+
 namespace Membera.Merchant.Application.SubscriptionPlans.BrowseActivePlans;
 
 /// <summary>
@@ -10,6 +12,7 @@ public record BrowsePlanSummary(
     Guid MerchantId,
     string MerchantBusinessName,
     string? MerchantLogoUrl,
+    BusinessCategory MerchantBusinessCategory,
     string Name,
     string? Description,
     decimal Price,

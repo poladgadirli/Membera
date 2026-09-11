@@ -1,3 +1,5 @@
-﻿namespace Membera.Merchant.Application.Merchants.CreateMerchant;
+using Membera.Merchant.Domain.Enums;
 
-public record CreateMerchantCommand(Guid OwnerId, string BusinessName);
+namespace Membera.Merchant.Application.Merchants.CreateMerchant;
+
+public record CreateMerchantCommand(Guid OwnerId, string BusinessName, BusinessCategory Category = BusinessCategory.Other);

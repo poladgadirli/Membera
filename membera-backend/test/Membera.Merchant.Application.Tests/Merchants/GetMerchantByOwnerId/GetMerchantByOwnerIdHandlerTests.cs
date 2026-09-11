@@ -1,5 +1,6 @@
 using Membera.Merchant.Application.Abstractions;
 using Membera.Merchant.Application.Merchants.GetMerchantByOwnerId;
+using Membera.Merchant.Domain.Enums;
 using Membera.Shared.Caching;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -52,7 +53,7 @@ public class GetMerchantByOwnerIdHandlerTests
         var query = new GetMerchantByOwnerIdQuery(ownerId);
 
         var merchant = new MerchantEntity(ownerId, "Polad's Coffee");
-        merchant.UpdateProfile("Polad's Coffee", "Best coffee in town");
+        merchant.UpdateProfile("Polad's Coffee", "Best coffee in town", BusinessCategory.Cafe);
         merchant.Deactivate();
 
         _merchantRepositoryMock
@@ -67,6 +68,7 @@ public class GetMerchantByOwnerIdHandlerTests
         Assert.Equal(merchant.OwnerId, result.OwnerId);
         Assert.Equal(merchant.BusinessName, result.BusinessName);
         Assert.Equal(merchant.Description, result.Description);
+        Assert.Equal(merchant.Category, result.Category);
         Assert.Equal(merchant.IsActive, result.IsActive);
     }
 
@@ -79,7 +81,7 @@ public class GetMerchantByOwnerIdHandlerTests
         var cacheKey = $"merchant:owner:{ownerId}";
 
         var cachedResult = new GetMerchantByOwnerIdResult(
-            Guid.NewGuid(), ownerId, "Cached Business", "Cached description", null, true);
+            Guid.NewGuid(), ownerId, "Cached Business", "Cached description", null, BusinessCategory.Restaurant, true);
 
         _cacheServiceMock
             .Setup(c => c.GetAsync<GetMerchantByOwnerIdResult>(cacheKey))
@@ -102,7 +104,7 @@ public class GetMerchantByOwnerIdHandlerTests
         var cacheKey = $"merchant:owner:{ownerId}";
 
         var merchant = new MerchantEntity(ownerId, "Polad's Coffee");
-        merchant.UpdateProfile("Polad's Coffee", "Best coffee in town");
+        merchant.UpdateProfile("Polad's Coffee", "Best coffee in town", BusinessCategory.Cafe);
 
         _merchantRepositoryMock
             .Setup(r => r.GetByOwnerIdAsync(ownerId))
@@ -120,6 +122,7 @@ public class GetMerchantByOwnerIdHandlerTests
                     r.OwnerId == merchant.OwnerId &&
                     r.BusinessName == merchant.BusinessName &&
                     r.Description == merchant.Description &&
+                    r.Category == merchant.Category &&
                     r.IsActive == merchant.IsActive),
                 It.IsAny<TimeSpan?>()),
             Times.Once);

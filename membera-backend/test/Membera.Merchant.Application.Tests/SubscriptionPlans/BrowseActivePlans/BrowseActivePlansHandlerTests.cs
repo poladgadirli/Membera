@@ -1,6 +1,7 @@
 using Membera.Merchant.Application.Abstractions;
 using Membera.Merchant.Application.SubscriptionPlans.BrowseActivePlans;
 using Membera.Merchant.Domain.Entities;
+using Membera.Merchant.Domain.Enums;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
@@ -35,7 +36,7 @@ public class BrowseActivePlansHandlerTests
     {
         // Arrange
         _subscriptionPlanRepositoryMock
-            .Setup(r => r.GetPagedActiveAsync(1, 9))
+            .Setup(r => r.GetPagedActiveAsync(1, 9, null))
             .ReturnsAsync((new List<SubscriptionPlan>(), 0));
 
         // Act
@@ -55,7 +56,7 @@ public class BrowseActivePlansHandlerTests
         var merchantAId = Guid.NewGuid();
         var merchantBId = Guid.NewGuid();
 
-        var merchantA = new MerchantEntity(Guid.NewGuid(), "Blue Bottle Coffee");
+        var merchantA = new MerchantEntity(Guid.NewGuid(), "Blue Bottle Coffee", BusinessCategory.Cafe);
         merchantA.UpdateLogo("https://cdn.membera.test/logos/blue-bottle.png");
         var merchantB = new MerchantEntity(Guid.NewGuid(), "Still Point Studio");
         // merchantB has no logo.
@@ -67,7 +68,7 @@ public class BrowseActivePlansHandlerTests
             new TimeOnly(6, 0), new TimeOnly(22, 0));
 
         _subscriptionPlanRepositoryMock
-            .Setup(r => r.GetPagedActiveAsync(1, 9))
+            .Setup(r => r.GetPagedActiveAsync(1, 9, null))
             .ReturnsAsync((new List<SubscriptionPlan> { planA, planB }, 2));
         _merchantRepositoryMock.Setup(r => r.GetByIdAsync(merchantAId)).ReturnsAsync(merchantA);
         _merchantRepositoryMock.Setup(r => r.GetByIdAsync(merchantBId)).ReturnsAsync(merchantB);
@@ -83,6 +84,7 @@ public class BrowseActivePlansHandlerTests
         Assert.Equal(merchantAId, summaryA.MerchantId);
         Assert.Equal("Blue Bottle Coffee", summaryA.MerchantBusinessName);
         Assert.Equal("https://cdn.membera.test/logos/blue-bottle.png", summaryA.MerchantLogoUrl);
+        Assert.Equal(BusinessCategory.Cafe, summaryA.MerchantBusinessCategory);
         Assert.Equal(planA.Name, summaryA.Name);
         Assert.Equal(planA.Description, summaryA.Description);
         Assert.Equal(planA.Price, summaryA.Price);
@@ -97,6 +99,7 @@ public class BrowseActivePlansHandlerTests
         Assert.Equal(merchantBId, summaryB.MerchantId);
         Assert.Equal("Still Point Studio", summaryB.MerchantBusinessName);
         Assert.Null(summaryB.MerchantLogoUrl);
+        Assert.Equal(BusinessCategory.Other, summaryB.MerchantBusinessCategory);
         Assert.Null(summaryB.Description);
         Assert.Null(summaryB.UsageLimit);
         Assert.Null(summaryB.ImageUrl);
@@ -115,7 +118,7 @@ public class BrowseActivePlansHandlerTests
         inactivePlan.Deactivate();
 
         _subscriptionPlanRepositoryMock
-            .Setup(r => r.GetPagedActiveAsync(1, 9))
+            .Setup(r => r.GetPagedActiveAsync(1, 9, null))
             .ReturnsAsync((new List<SubscriptionPlan> { activePlan, inactivePlan }, 2));
         _merchantRepositoryMock.Setup(r => r.GetByIdAsync(merchantId)).ReturnsAsync(merchant);
 
@@ -137,7 +140,7 @@ public class BrowseActivePlansHandlerTests
         var plan = BuildPlan(merchantId);
 
         _subscriptionPlanRepositoryMock
-            .Setup(r => r.GetPagedActiveAsync(1, 9))
+            .Setup(r => r.GetPagedActiveAsync(1, 9, null))
             .ReturnsAsync((new List<SubscriptionPlan> { plan }, 1));
         _merchantRepositoryMock
             .Setup(r => r.GetByIdAsync(merchantId))
@@ -160,7 +163,7 @@ public class BrowseActivePlansHandlerTests
         var merchant = new MerchantEntity(Guid.NewGuid(), "Blue Bottle Coffee");
 
         _subscriptionPlanRepositoryMock
-            .Setup(r => r.GetPagedActiveAsync(1, 9))
+            .Setup(r => r.GetPagedActiveAsync(1, 9, null))
             .ReturnsAsync((new List<SubscriptionPlan>
             {
                 BuildPlan(merchantId, "Plan One"),
@@ -189,7 +192,7 @@ public class BrowseActivePlansHandlerTests
             .ToList();
 
         _subscriptionPlanRepositoryMock
-            .Setup(r => r.GetPagedActiveAsync(1, 9))
+            .Setup(r => r.GetPagedActiveAsync(1, 9, null))
             .ReturnsAsync((pageOfPlans, 12));
         _merchantRepositoryMock.Setup(r => r.GetByIdAsync(merchantId)).ReturnsAsync(merchant);
 
@@ -199,5 +202,27 @@ public class BrowseActivePlansHandlerTests
         // Assert
         Assert.Equal(9, result.Plans.Count);
         Assert.Equal(12, result.TotalCount);
+    }
+
+    [Fact]
+    public async Task HandleAsync_WhenCategoryFilterProvided_PassesItThroughToTheRepository()
+    {
+        // Arrange — the repository owns the actual filtering (it can join against
+        // Merchants), so the handler's job is just to forward the query's category.
+        var merchantId = Guid.NewGuid();
+        var merchant = new MerchantEntity(Guid.NewGuid(), "Iron Yard Gym", BusinessCategory.Gym);
+
+        _subscriptionPlanRepositoryMock
+            .Setup(r => r.GetPagedActiveAsync(1, 9, BusinessCategory.Gym))
+            .ReturnsAsync((new List<SubscriptionPlan> { BuildPlan(merchantId, "Monthly Membership") }, 1));
+        _merchantRepositoryMock.Setup(r => r.GetByIdAsync(merchantId)).ReturnsAsync(merchant);
+
+        // Act
+        var result = await _handler.HandleAsync(new BrowseActivePlansQuery(Category: BusinessCategory.Gym));
+
+        // Assert
+        var summary = Assert.Single(result.Plans);
+        Assert.Equal(BusinessCategory.Gym, summary.MerchantBusinessCategory);
+        _subscriptionPlanRepositoryMock.Verify(r => r.GetPagedActiveAsync(1, 9, BusinessCategory.Gym), Times.Once);
     }
 }

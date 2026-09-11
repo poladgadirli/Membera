@@ -1,5 +1,6 @@
 using Membera.Merchant.Application.Abstractions;
 using Membera.Merchant.Application.Merchants.CreateMerchant;
+using Membera.Merchant.Domain.Enums;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
@@ -63,8 +64,32 @@ public class CreateMerchantHandlerTests
         Assert.NotNull(capturedMerchant);
         Assert.Equal(command.OwnerId, capturedMerchant!.OwnerId);
         Assert.Equal(command.BusinessName, capturedMerchant.BusinessName);
+        Assert.Equal(BusinessCategory.Other, capturedMerchant.Category);
 
         Assert.Equal(capturedMerchant.Id, result.Id);
         Assert.Equal(command.BusinessName, result.BusinessName);
+    }
+
+    [Fact]
+    public async Task HandleAsync_WhenCategoryProvided_CreatesMerchantWithThatCategory()
+    {
+        // Arrange
+        var command = new CreateMerchantCommand(Guid.NewGuid(), "Polad's Gym", BusinessCategory.Gym);
+
+        _merchantRepositoryMock
+            .Setup(r => r.GetByOwnerIdAsync(command.OwnerId))
+            .ReturnsAsync((MerchantEntity?)null);
+
+        MerchantEntity? capturedMerchant = null;
+        _merchantRepositoryMock
+            .Setup(r => r.AddAsync(It.IsAny<MerchantEntity>()))
+            .Callback<MerchantEntity>(m => capturedMerchant = m)
+            .Returns(Task.CompletedTask);
+
+        // Act
+        await _handler.HandleAsync(command);
+
+        // Assert
+        Assert.Equal(BusinessCategory.Gym, capturedMerchant!.Category);
     }
 }

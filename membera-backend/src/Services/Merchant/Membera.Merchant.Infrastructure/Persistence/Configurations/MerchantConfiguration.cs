@@ -25,6 +25,11 @@ public class MerchantConfiguration : IEntityTypeConfiguration<MerchantEntity>
         builder.Property(m => m.LogoUrl)
             .HasMaxLength(500);
 
+        builder.Property(m => m.Category)
+            .IsRequired()
+            .HasConversion<string>()
+            .HasMaxLength(20);
+
         builder.Property(m => m.IsActive)
             .IsRequired();
     }
