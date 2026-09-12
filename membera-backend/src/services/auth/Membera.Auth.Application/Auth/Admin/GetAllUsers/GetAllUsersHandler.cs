@@ -1,4 +1,5 @@
 using Membera.Auth.Application.Abstractions;
+using Membera.Auth.Domain.Enums;
 using Microsoft.Extensions.Logging;
 
 namespace Membera.Auth.Application.Auth.Admin.GetAllUsers;
@@ -16,7 +17,15 @@ public class GetAllUsersHandler
 
     public async Task<GetAllUsersResult> HandleAsync(GetAllUsersQuery query)
     {
-        var (users, totalCount) = await _userRepository.GetPagedAsync(query.Page, query.PageSize);
+        // An unrecognized role string (shouldn't happen — the frontend only
+        // sends the fixed set of role names) is treated as "no role filter"
+        // rather than an error.
+        UserRole? role = Enum.TryParse<UserRole>(query.Role, out var parsedRole)
+            ? parsedRole
+            : null;
+
+        var (users, totalCount) = await _userRepository.GetPagedAsync(
+            query.Page, query.PageSize, query.Search, role);
 
         var summaries = users
             .Select(user => new GetAllUsersResult.UserSummary(

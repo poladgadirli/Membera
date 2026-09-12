@@ -1,5 +1,6 @@
 ﻿using Membera.Auth.Application.Abstractions;
 using Membera.Auth.Domain.Entities;
+using Membera.Auth.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Membera.Auth.Infrastructure.Persistence;
@@ -30,11 +31,28 @@ public class UserRepository : IUserRepository
         return await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
     }
 
-    public async Task<(List<User> Users, int TotalCount)> GetPagedAsync(int page, int pageSize)
+    public async Task<(List<User> Users, int TotalCount)> GetPagedAsync(
+        int page, int pageSize, string? search = null, UserRole? role = null)
     {
-        var totalCount = await _context.Users.CountAsync();
+        var query = _context.Users.AsQueryable();
 
-        var users = await _context.Users
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var pattern = $"%{search.Trim()}%";
+            query = query.Where(u =>
+                EF.Functions.ILike(u.FirstName, pattern) ||
+                EF.Functions.ILike(u.LastName, pattern) ||
+                EF.Functions.ILike(u.Email, pattern));
+        }
+
+        if (role is not null)
+        {
+            query = query.Where(u => u.Role == role);
+        }
+
+        var totalCount = await query.CountAsync();
+
+        var users = await query
             .OrderBy(u => u.CreatedAt)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
