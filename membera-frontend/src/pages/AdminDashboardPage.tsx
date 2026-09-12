@@ -15,14 +15,21 @@ import {
   promoteToAdmin,
   type AdminUser,
 } from '@/lib/admin'
-import { CARD, ERROR_BANNER, SECTION_LABEL } from '@/lib/ui'
+import { CARD, ERROR_BANNER, INPUT, LABEL, SECTION_LABEL } from '@/lib/ui'
 
 type Status = 'loading' | 'ready' | 'error'
+type RoleFilter = 'All' | 'User' | 'MerchantOwner' | 'Admin' | 'SuperAdmin'
+
+const ROLE_FILTERS: RoleFilter[] = ['All', 'User', 'MerchantOwner', 'Admin', 'SuperAdmin']
 
 // Server-side pagination: GET /admin/users?page&pageSize returns just this
 // page's rows plus a totalCount, so we ask for one page at a time instead of
 // fetching every user up front.
 const PAGE_SIZE = 10
+
+// How long to wait after the user stops typing before searching, so a fast
+// typist doesn't fire an API call on every keystroke.
+const SEARCH_DEBOUNCE_MS = 350
 
 type PendingAction = {
   user: AdminUser
@@ -70,42 +77,83 @@ export default function AdminDashboardPage() {
   const [loadError, setLoadError] = useState<string | null>(null)
   const [pending, setPending] = useState<PendingAction | null>(null)
   const [page, setPage] = useState(1)
-  // The page number whose data `users`/`totalCount` currently reflect. While
-  // it differs from `page` (e.g. right after clicking "Next"), a fetch for
-  // the new page is in flight.
+
+  // `searchInput` tracks every keystroke (for the controlled input); `search`
+  // is the debounced value that actually drives the fetch below.
+  const [searchInput, setSearchInput] = useState('')
+  const [search, setSearch] = useState('')
+  const [role, setRole] = useState<RoleFilter>('All')
+
+  // The page/search/role whose data `users`/`totalCount` currently reflect.
+  // While any of them differ from the current filters (e.g. right after
+  // clicking "Next" or changing a filter), a fetch is in flight.
   const [loadedPage, setLoadedPage] = useState<number | null>(null)
-  const pageLoading = status === 'ready' && loadedPage !== page
+  const [loadedSearch, setLoadedSearch] = useState<string | null>(null)
+  const [loadedRole, setLoadedRole] = useState<RoleFilter | null>(null)
+  const pageLoading =
+    status === 'ready' &&
+    (loadedPage !== page || loadedSearch !== search || loadedRole !== role)
 
   // Guards against a slower, earlier request clobbering a faster, later one
-  // when the user changes pages quickly.
+  // when the user changes pages/filters quickly.
   const latestRequestRef = useRef(0)
 
-  const load = useCallback(async (targetPage: number) => {
-    const requestId = ++latestRequestRef.current
-    try {
-      const data = await getAllUsers(targetPage, PAGE_SIZE)
-      if (requestId !== latestRequestRef.current) return
-      setUsers(data.users)
-      setTotalCount(data.totalCount)
-      setLoadedPage(targetPage)
-      setStatus('ready')
-    } catch (err) {
-      if (requestId !== latestRequestRef.current) return
-      setLoadError(
-        err instanceof ApiError ? err.message : 'Could not load users.',
-      )
-      setStatus('error')
-    }
-  }, [])
+  const load = useCallback(
+    async (targetPage: number) => {
+      const requestId = ++latestRequestRef.current
+      try {
+        const data = await getAllUsers(targetPage, PAGE_SIZE, {
+          search,
+          role: role === 'All' ? undefined : role,
+        })
+        if (requestId !== latestRequestRef.current) return
+        setUsers(data.users)
+        setTotalCount(data.totalCount)
+        setLoadedPage(targetPage)
+        setLoadedSearch(search)
+        setLoadedRole(role)
+        setStatus('ready')
+      } catch (err) {
+        if (requestId !== latestRequestRef.current) return
+        setLoadError(
+          err instanceof ApiError ? err.message : 'Could not load users.',
+        )
+        setStatus('error')
+      }
+    },
+    [search, role],
+  )
+
+  // Debounce the search box: wait for a pause in typing, then apply it (and
+  // reset to page 1, batched into the same update as the search itself so
+  // the fetch effect below only runs once for the new filter).
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearch(searchInput)
+      setPage(1)
+    }, SEARCH_DEBOUNCE_MS)
+    return () => clearTimeout(timer)
+  }, [searchInput])
+
+  const handleRoleChange = (next: RoleFilter) => {
+    if (next === role) return
+    setRole(next)
+    setPage(1)
+  }
 
   useEffect(() => {
     const requestId = ++latestRequestRef.current
-    getAllUsers(page, PAGE_SIZE).then(
+    getAllUsers(page, PAGE_SIZE, {
+      search,
+      role: role === 'All' ? undefined : role,
+    }).then(
       (data) => {
         if (requestId !== latestRequestRef.current) return
         setUsers(data.users)
         setTotalCount(data.totalCount)
         setLoadedPage(page)
+        setLoadedSearch(search)
+        setLoadedRole(role)
         setStatus('ready')
       },
       (err) => {
@@ -116,7 +164,7 @@ export default function AdminDashboardPage() {
         setStatus('error')
       },
     )
-  }, [page])
+  }, [page, search, role])
 
   const sorted = useMemo(
     () =>
@@ -166,7 +214,34 @@ export default function AdminDashboardPage() {
           All users {status === 'ready' && `(${totalCount})`}
         </h2>
 
-        <div className="mt-3">
+        <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div className="sm:max-w-xs sm:flex-1">
+            <label htmlFor="user-search" className={LABEL}>
+              Search
+            </label>
+            <input
+              id="user-search"
+              type="search"
+              className={INPUT}
+              placeholder="Search by name or email…"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+            />
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            {ROLE_FILTERS.map((option) => (
+              <RoleChip
+                key={option}
+                label={option === 'All' ? 'All' : option}
+                active={role === option}
+                onClick={() => handleRoleChange(option)}
+              />
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-4">
           {status === 'loading' && (
             <div className={`${CARD} p-6`}>
               <div className="flex items-center gap-3 text-sm text-neutral-500">
@@ -181,7 +256,20 @@ export default function AdminDashboardPage() {
             </div>
           )}
 
-          {status === 'ready' && (
+          {status === 'ready' && sorted.length === 0 && (
+            <div
+              className={`${CARD} border-dashed border-neutral-300 p-8 text-center`}
+            >
+              <p className="text-sm font-medium text-neutral-900">
+                No users match your search/filter
+              </p>
+              <p className="mx-auto mt-1 max-w-sm text-sm text-neutral-500">
+                Try a different name or email, or clear the role filter.
+              </p>
+            </div>
+          )}
+
+          {status === 'ready' && sorted.length > 0 && (
             <div className={`${CARD} overflow-hidden`}>
               <PageLoadingOverlay loading={pageLoading} className="overflow-x-auto">
                   <table className="w-full min-w-[40rem] text-left text-sm">
@@ -330,4 +418,30 @@ function formatDate(iso: string): string {
     month: 'short',
     day: 'numeric',
   })
+}
+
+// Same chip treatment as BrowsePlansPage's category filter, for consistency.
+function RoleChip({
+  label,
+  active,
+  onClick,
+}: {
+  label: string
+  active: boolean
+  onClick: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={
+        active
+          ? 'rounded-full border border-blue-300 bg-linear-to-br from-blue-500 via-blue-400 to-blue-200 px-3 py-1.5 text-sm font-medium text-white shadow-sm shadow-blue-500/30 transition'
+          : 'rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-sm font-medium text-neutral-600 shadow-sm transition hover:bg-neutral-50'
+      }
+    >
+      {label}
+    </button>
+  )
 }
