@@ -1,15 +1,14 @@
 // fetch wrapper for the backend API (reached through the Membera.Gateway reverse
 // proxy). Attaches the bearer token, unwraps the BaseResponse<T> envelope, and
-// normalises errors. On 401 it notifies a handler (registered by the AuthContext)
-// which clears the session and sends the user to /login. Automatic refresh-token
-// retry is intentionally not implemented yet.
+// normalises errors. On 401 it attempts one token refresh (see
+// lib/tokenRefresh.ts) and retries the request once with the new token; only
+// if that refresh fails (or a request still 401s right after it) does it
+// notify the unauthorized handler (registered by the AuthContext), which
+// clears the session and sends the user to /login.
 
+import { API_BASE_URL } from '@/lib/apiConfig'
 import { getAccessToken } from '@/lib/authStorage'
-
-const API_BASE_URL = (
-  (import.meta.env.VITE_API_URL as string | undefined) ??
-  'https://localhost:7174/api'
-).replace(/\/$/, '')
+import { forceLogout, refreshSession } from '@/lib/tokenRefresh'
 
 export class ApiError extends Error {
   readonly status: number
@@ -21,13 +20,6 @@ export class ApiError extends Error {
     this.status = status
     this.payload = payload
   }
-}
-
-let unauthorizedHandler: (() => void) | null = null
-
-/** Registered once by the AuthContext. Invoked whenever a request returns 401. */
-export function setUnauthorizedHandler(handler: (() => void) | null): void {
-  unauthorizedHandler = handler
 }
 
 function extractErrorMessage(payload: unknown): string | null {
@@ -62,6 +54,7 @@ async function request<T>(
   baseUrl: string,
   path: string,
   options: RequestOptions = {},
+  isRetry = false,
 ): Promise<T> {
   const headers = new Headers(options.headers)
   const hasBody = options.body !== undefined && options.body !== null
@@ -113,7 +106,25 @@ async function request<T>(
   }
 
   if (response.status === 401) {
-    unauthorizedHandler?.()
+    if (!isRetry) {
+      // One refresh-and-retry attempt. refreshSession() shares a single
+      // in-flight request across concurrent 401s (and the AuthContext's own
+      // proactive refresh), and already clears the session + notifies the
+      // unauthorized handler on failure — nothing more to do in that case.
+      const refreshed = await refreshSession().then(
+        () => true,
+        () => false,
+      )
+      if (refreshed) {
+        return request<T>(baseUrl, path, options, true)
+      }
+    } else {
+      // Retried once already with a freshly refreshed token and still got
+      // 401 (e.g. the account was deactivated mid-session) — no further
+      // refresh to attempt, but the session is unusable either way.
+      forceLogout()
+    }
+
     throw new ApiError(
       extractErrorMessage(payload) ??
         'Your session has expired. Please sign in again.',
