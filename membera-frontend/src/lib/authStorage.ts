@@ -47,3 +47,12 @@ export function getAccessToken(): string | null {
     return null
   }
 }
+
+// Read-only accessor used by the token-refresh coordinator (lib/tokenRefresh.ts).
+export function getRefreshToken(): string | null {
+  try {
+    return localStorage.getItem(REFRESH_TOKEN_KEY)
+  } catch {
+    return null
+  }
+}
