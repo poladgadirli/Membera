@@ -64,6 +64,45 @@ services:
       - postgres
       - rabbitmq
 
+  merchant-api:
+    build:
+      context: ./src
+      dockerfile: Services/Merchant/Membera.Merchant.Api/Dockerfile
+    container_name: membera-merchant-api
+    ports:
+      - "5002:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - JWT_ISSUER=${JWT_ISSUER}
+      - JWT_AUDIENCE=${JWT_AUDIENCE}
+      - ConnectionStrings__MerchantDb=Host=postgres;Port=5432;Database=membera_merchant;Username=postgres;Password=${POSTGRES_PASSWORD}
+      - RABBITMQ_HOST=rabbitmq
+      - REDIS_HOST=redis:6379
+      - MINIO_HOST=minio:9000
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+    depends_on:
+      - postgres
+      - rabbitmq
+      - redis
+      - minio
+
+  gateway:
+    build:
+      context: ./src
+      dockerfile: gateway/Membera.Gateway/Dockerfile
+    container_name: membera-gateway
+    ports:
+      - "7174:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - AUTH_SERVICE_URL=http://auth-api:8080
+      - MERCHANT_SERVICE_URL=http://merchant-api:8080
+    depends_on:
+      - auth-api
+      - merchant-api
+
 volumes:
   membera-postgres-data:
   membera-minio-data:
