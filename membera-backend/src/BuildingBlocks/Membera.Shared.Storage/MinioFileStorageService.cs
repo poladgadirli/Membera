@@ -6,8 +6,9 @@ namespace Membera.Shared.Storage;
 
 public class MinioFileStorageService : IFileStorageService
 {
-    // Local-dev MinIO endpoint. docker-compose.yml exposes the S3 API on 9000.
-    private const string Endpoint = "localhost:9000";
+    // MinIO endpoint. docker-compose.yml exposes the S3 API on 9000; overridden via
+    // MINIO_HOST to "minio:9000" (the compose service name) when running in Docker.
+    private readonly string Endpoint;
 
     private readonly IMinioClient _minioClient;
     private readonly ILogger<MinioFileStorageService> _logger;
@@ -15,6 +16,8 @@ public class MinioFileStorageService : IFileStorageService
     public MinioFileStorageService(ILogger<MinioFileStorageService> logger)
     {
         _logger = logger;
+
+        Endpoint = Environment.GetEnvironmentVariable("MINIO_HOST") ?? "localhost:9000";
 
         var accessKey = Environment.GetEnvironmentVariable("MINIO_ROOT_USER")
                         ?? throw new InvalidOperationException("MINIO_ROOT_USER environment variable is not set.");

@@ -56,7 +56,8 @@ builder.Services.AddScoped<Membera.Auth.Application.Auth.Admin.PromoteToAdmin.Pr
 builder.Services.AddScoped<Membera.Auth.Application.Auth.Admin.DemoteAdmin.DemoteAdminHandler>();
 builder.Services.AddScoped<Membera.Auth.Application.Auth.Admin.DeleteAdminAccount.DeleteAdminAccountHandler>();
 
-var rabbitMqPublisher = await RabbitMqEventPublisher.CreateAsync("localhost");
+var rabbitMqHost = Environment.GetEnvironmentVariable("RABBITMQ_HOST") ?? "localhost";
+var rabbitMqPublisher = await RabbitMqEventPublisher.CreateAsync(rabbitMqHost);
 builder.Services.AddSingleton<IEventPublisher>(rabbitMqPublisher);
 
 // JWT Authentication

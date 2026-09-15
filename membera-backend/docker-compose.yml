@@ -30,7 +30,10 @@ services:
       - "6379:6379"
 
   minio:
-    image: minio/minio:latest
+    # Docker Hub's minio/minio repo now denies anonymous/public pulls
+    # ("pull access denied ... requires docker login"). MinIO still publishes
+    # the same image to quay.io, which allows anonymous pulls.
+    image: quay.io/minio/minio:latest
     container_name: membera-minio
     ports:
       - "9000:9000"
@@ -41,6 +44,25 @@ services:
     volumes:
       - membera-minio-data:/data
     command: server /data --console-address ":9001"
+
+  auth-api:
+    build:
+      context: ./src
+      dockerfile: Services/Auth/Membera.Auth.Api/Dockerfile
+    container_name: membera-auth-api
+    ports:
+      - "5001:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - JWT_ISSUER=${JWT_ISSUER}
+      - JWT_AUDIENCE=${JWT_AUDIENCE}
+      - ConnectionStrings__AuthDb=Host=postgres;Port=5432;Database=membera_auth;Username=postgres;Password=${POSTGRES_PASSWORD}
+      - RABBITMQ_HOST=rabbitmq
+    depends_on:
+      - postgres
+      - rabbitmq
 
 volumes:
   membera-postgres-data:

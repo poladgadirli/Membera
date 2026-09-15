@@ -75,8 +75,9 @@ builder.Services.AddScoped<HandleStripeWebhookHandler>();
 builder.Services.AddScoped<RedeemSubscriptionHandler>();
 builder.Services.AddScoped<GetMySubscriptionsHandler>();
 
+var redisHost = Environment.GetEnvironmentVariable("REDIS_HOST") ?? "localhost:6379";
 builder.Services.AddSingleton<IConnectionMultiplexer>(
-    ConnectionMultiplexer.Connect("localhost:6379"));
+    ConnectionMultiplexer.Connect(redisHost));
 
 builder.Services.AddScoped<ICacheService, RedisCacheService>();
 
