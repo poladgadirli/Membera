@@ -115,6 +115,7 @@ public class AuthController : ControllerBase
                     ?? User.FindFirstValue("email");
         var firstName = User.FindFirstValue("firstName");
         var lastName = User.FindFirstValue("lastName");
+        var emailVerified = User.FindFirstValue("emailVerified");
         var role = User.FindFirstValue(ClaimTypes.Role);
 
         return Ok(BaseResponse<object>.SuccessResponse(new
@@ -123,6 +124,7 @@ public class AuthController : ControllerBase
             email,
             firstName,
             lastName,
+            emailVerified,
             role
         }));
     }
