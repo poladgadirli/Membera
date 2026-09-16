@@ -10,6 +10,13 @@ export interface DecodedUser {
   firstName: string
   lastName: string
   role: UserRole | string
+  /**
+   * Whether the backend considers this user's email verified, as of when
+   * this access token was minted. Defaults to `true` when the claim is
+   * absent (a token issued before this claim existed) so a stale cached
+   * token never falsely flags an already-verified user as unverified.
+   */
+  emailVerified: boolean
   /** Expiry as a UNIX epoch in seconds, when present. */
   exp?: number
 }
@@ -48,6 +55,20 @@ function pickString(
   return ''
 }
 
+// .NET's `bool.ToString()` serializes as "True"/"False", not JSON's
+// lowercase "true"/"false" — compare case-insensitively rather than assuming
+// either casing.
+function pickBoolean(
+  claims: Record<string, unknown>,
+  key: string,
+  fallback: boolean,
+): boolean {
+  const value = claims[key]
+  if (typeof value === 'boolean') return value
+  if (typeof value === 'string') return value.toLowerCase() === 'true'
+  return fallback
+}
+
 export function decodeToken(token: string): DecodedUser | null {
   const parts = token.split('.')
   if (parts.length < 2) return null
@@ -69,6 +90,7 @@ export function decodeToken(token: string): DecodedUser | null {
     firstName: pickString(claims, 'firstName', 'given_name'),
     lastName: pickString(claims, 'lastName', 'family_name'),
     role,
+    emailVerified: pickBoolean(claims, 'emailVerified', true),
     exp: typeof claims.exp === 'number' ? claims.exp : undefined,
   }
 }

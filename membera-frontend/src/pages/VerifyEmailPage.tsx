@@ -10,6 +10,7 @@ import {
   motionSafe,
   usePrefersReducedMotion,
 } from '@/lib/motion'
+import { refreshSession } from '@/lib/tokenRefresh'
 import { INFO_BANNER } from '@/lib/ui'
 
 const RESEND_COOLDOWN_SECONDS = 30
@@ -23,7 +24,7 @@ const RESEND_COOLDOWN_SECONDS = 30
 export default function VerifyEmailPage() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { user, markEmailVerified } = useAuth()
+  const { user } = useAuth()
   const email = (location.state as { email?: string } | null)?.email ?? user?.email ?? ''
 
   const [code, setCode] = useState('')
@@ -55,7 +56,15 @@ export default function VerifyEmailPage() {
     setLoading(true)
     try {
       await verifyEmail(code)
-      markEmailVerified()
+      // The access token still just-verified users are holding has the old
+      // `emailVerified: false` claim baked in — force one refresh so
+      // AuthContext picks up a freshly minted token (the backend re-reads
+      // IsEmailVerified from the database on every refresh) instead of
+      // waiting for the next proactive/reactive refresh cycle. Verification
+      // itself already succeeded above, so a hiccup here shouldn't block
+      // navigation — AuthContext will simply sync on its next scheduled
+      // refresh instead.
+      await refreshSession().catch(() => {})
       navigate('/dashboard', { replace: true })
     } catch (err) {
       setError(

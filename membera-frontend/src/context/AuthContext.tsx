@@ -57,7 +57,6 @@ function refreshDelayMs(accessToken: string): number | null {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate()
   const [session, setSession] = useState<SessionState | null>(loadInitialSession)
-  const [emailVerified, setEmailVerified] = useState<boolean | null>(null)
   const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const clearScheduledRefresh = useCallback(() => {
@@ -96,21 +95,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       saveTokens({ accessToken, refreshToken })
       setSession(next)
-      setEmailVerified(null)
       scheduleRefresh(accessToken)
     },
     [scheduleRefresh],
   )
 
-  const markEmailVerified = useCallback(() => {
-    setEmailVerified(true)
-  }, [])
-
   const logout = useCallback(() => {
     clearScheduledRefresh()
     clearTokens()
     setSession(null)
-    setEmailVerified(null)
     navigate('/', { replace: true })
   }, [navigate, clearScheduledRefresh])
 
@@ -158,12 +151,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       accessToken: session?.accessToken ?? null,
       refreshToken: session?.refreshToken ?? null,
       isAuthenticated: session !== null,
-      emailVerified,
+      emailVerified: session?.user.emailVerified ?? null,
       login,
-      markEmailVerified,
       logout,
     }),
-    [session, emailVerified, login, markEmailVerified, logout],
+    [session, login, logout],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
