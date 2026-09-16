@@ -1,11 +1,15 @@
 ﻿using Membera.Auth.Application.Auth.ChangeEmail;
 using Membera.Auth.Application.Auth.ChangePassword;
 using Membera.Auth.Application.Auth.DeleteAccount;
+using Membera.Auth.Application.Auth.ForgotPassword;
 using Membera.Auth.Application.Auth.GoogleLogin;
 using Membera.Auth.Application.Auth.Login;
 using Membera.Auth.Application.Auth.Logout;
 using Membera.Auth.Application.Auth.RefreshAccessToken;
 using Membera.Auth.Application.Auth.Register;
+using Membera.Auth.Application.Auth.ResetPassword;
+using Membera.Auth.Application.Auth.SendEmailVerificationOtp;
+using Membera.Auth.Application.Auth.VerifyEmail;
 using Membera.Shared.Contracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -25,6 +29,10 @@ public class AuthController : ControllerBase
     private readonly ChangeEmailHandler _changeEmailHandler;
     private readonly DeleteAccountHandler _deleteAccountHandler;
     private readonly GoogleLoginHandler _googleLoginHandler;
+    private readonly VerifyEmailHandler _verifyEmailHandler;
+    private readonly SendEmailVerificationOtpHandler _sendEmailVerificationOtpHandler;
+    private readonly ForgotPasswordHandler _forgotPasswordHandler;
+    private readonly ResetPasswordHandler _resetPasswordHandler;
 
     public AuthController(
         RegisterUserHandler registerUserHandler,
@@ -34,7 +42,11 @@ public class AuthController : ControllerBase
         ChangePasswordHandler changePasswordHandler,
         ChangeEmailHandler changeEmailHandler,
         DeleteAccountHandler deleteAccountHandler,
-        GoogleLoginHandler googleLoginHandler)
+        GoogleLoginHandler googleLoginHandler,
+        VerifyEmailHandler verifyEmailHandler,
+        SendEmailVerificationOtpHandler sendEmailVerificationOtpHandler,
+        ForgotPasswordHandler forgotPasswordHandler,
+        ResetPasswordHandler resetPasswordHandler)
     {
         _registerUserHandler = registerUserHandler;
         _loginHandler = loginHandler;
@@ -44,6 +56,10 @@ public class AuthController : ControllerBase
         _changeEmailHandler = changeEmailHandler;
         _deleteAccountHandler = deleteAccountHandler;
         _googleLoginHandler = googleLoginHandler;
+        _verifyEmailHandler = verifyEmailHandler;
+        _sendEmailVerificationOtpHandler = sendEmailVerificationOtpHandler;
+        _forgotPasswordHandler = forgotPasswordHandler;
+        _resetPasswordHandler = resetPasswordHandler;
     }
 
     [HttpPost("register")]
@@ -153,6 +169,46 @@ public class AuthController : ControllerBase
         var result = await _googleLoginHandler.HandleAsync(command);
         return Ok(BaseResponse<Membera.Auth.Application.Auth.Login.LoginResult>.SuccessResponse(result));
     }
+
+    [Authorize]
+    [HttpPost("verify-email")]
+    public async Task<IActionResult> VerifyEmail(VerifyEmailRequest request)
+    {
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)
+                                ?? User.FindFirstValue("sub")!);
+
+        var command = new VerifyEmailCommand(userId, request.Code);
+        await _verifyEmailHandler.HandleAsync(command);
+        return NoContent();
+    }
+
+    [Authorize]
+    [HttpPost("resend-verification")]
+    public async Task<IActionResult> ResendVerification()
+    {
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)
+                                ?? User.FindFirstValue("sub")!);
+
+        var command = new SendEmailVerificationOtpCommand(userId);
+        await _sendEmailVerificationOtpHandler.HandleAsync(command);
+        return NoContent();
+    }
+
+    [HttpPost("forgot-password")]
+    public async Task<IActionResult> ForgotPassword(ForgotPasswordRequest request)
+    {
+        var command = new ForgotPasswordCommand(request.Email);
+        await _forgotPasswordHandler.HandleAsync(command);
+        return NoContent();
+    }
+
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword(ResetPasswordRequest request)
+    {
+        var command = new ResetPasswordCommand(request.Email, request.Code, request.NewPassword);
+        await _resetPasswordHandler.HandleAsync(command);
+        return NoContent();
+    }
 }
 
 public record ChangePasswordRequest(string CurrentPassword, string NewPassword);
@@ -162,3 +218,9 @@ public record ChangeEmailRequest(string NewEmail, string CurrentPassword);
 public record DeleteAccountRequest(string CurrentPassword);
 
 public record RegisterRequest(string FirstName, string LastName, string Email, string Password, string ConfirmPassword, bool IsMerchantOwner);
+
+public record VerifyEmailRequest(string Code);
+
+public record ForgotPasswordRequest(string Email);
+
+public record ResetPasswordRequest(string Email, string Code, string NewPassword, string ConfirmNewPassword);

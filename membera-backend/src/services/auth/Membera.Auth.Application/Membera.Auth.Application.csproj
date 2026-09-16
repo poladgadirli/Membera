@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\BuildingBlocks\Membera.Shared.Contracts\Membera.Shared.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\Membera.Shared.Email\Membera.Shared.Email.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\Membera.Shared.Messaging\Membera.Shared.Messaging.csproj" />
     <ProjectReference Include="..\Membera.Auth.Domain\Membera.Auth.Domain.csproj" />
   </ItemGroup>
