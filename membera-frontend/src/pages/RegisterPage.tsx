@@ -69,10 +69,12 @@ export default function RegisterPage() {
         confirmPassword,
         isMerchantOwner,
       })
-      // Registration succeeded — sign the new user straight in.
+      // Registration succeeded — sign the new user straight in, then send
+      // them to verify their email (verify-email/resend-verification both
+      // require a session, so this is the earliest point that flow can run).
       const session = await login(email, password)
       startSession(session.accessToken, session.refreshToken)
-      navigate('/dashboard', { replace: true })
+      navigate('/verify-email', { replace: true, state: { email } })
     } catch (err) {
       setError(
         err instanceof ApiError

@@ -4,6 +4,7 @@ import { RouteTransition } from './components/RouteTransition'
 import AccountSettingsPage from './pages/AccountSettingsPage'
 import BrowsePlansPage from './pages/BrowsePlansPage'
 import DashboardPage from './pages/DashboardPage'
+import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import LandingPage from './pages/LandingPage'
 import LoginPage from './pages/LoginPage'
 import NotAuthorizedPage from './pages/NotAuthorizedPage'
@@ -12,6 +13,7 @@ import PlaceholderPage from './pages/PlaceholderPage'
 import RegisterPage from './pages/RegisterPage'
 import SubscriptionCancelPage from './pages/SubscriptionCancelPage'
 import SubscriptionSuccessPage from './pages/SubscriptionSuccessPage'
+import VerifyEmailPage from './pages/VerifyEmailPage'
 
 function App() {
   return (
@@ -20,6 +22,7 @@ function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<RegisterPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
       {/* `/dashboard` renders the role-specific dashboard (User / MerchantOwner /
           Admin) — see DashboardPage. */}
@@ -28,6 +31,17 @@ function App() {
         element={
           <ProtectedRoute>
             <DashboardPage />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* verify-email/resend-verification both require a session, so this
+          step only ever runs while already signed in. */}
+      <Route
+        path="/verify-email"
+        element={
+          <ProtectedRoute>
+            <VerifyEmailPage />
           </ProtectedRoute>
         }
       />

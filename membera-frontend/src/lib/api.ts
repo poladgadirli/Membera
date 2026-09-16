@@ -41,6 +41,36 @@ export function googleLogin(idToken: string): Promise<LoginResult> {
   return api.post<LoginResult>('/auth/google-login', { idToken })
 }
 
+/** Submits the 6-digit code emailed on registration. Requires a session. */
+export function verifyEmail(code: string): Promise<void> {
+  return api.post<void>('/auth/verify-email', { code })
+}
+
+/** Re-sends the verification code to the signed-in user's own email. */
+export function resendVerification(): Promise<void> {
+  return api.post<void>('/auth/resend-verification')
+}
+
+/**
+ * Requests a password-reset code for `email`. Always resolves — the backend
+ * returns 204 whether or not the address has an account, so the caller can't
+ * (and shouldn't) distinguish the two cases.
+ */
+export function forgotPassword(email: string): Promise<void> {
+  return api.post<void>('/auth/forgot-password', { email })
+}
+
+export interface ResetPasswordPayload {
+  email: string
+  code: string
+  newPassword: string
+  confirmNewPassword: string
+}
+
+export function resetPassword(payload: ResetPasswordPayload): Promise<void> {
+  return api.post<void>('/auth/reset-password', payload)
+}
+
 export interface RefreshResult {
   accessToken: string
   refreshToken: string
