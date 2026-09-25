@@ -101,6 +101,7 @@ services:
       - MERCHANT_SERVICE_URL=http://merchant-api:8080
       - GATEWAY_CERT_PATH=/https/gateway.pfx
       - GATEWAY_CERT_PASSWORD=${GATEWAY_CERT_PASSWORD}
+      - FRONTEND_ORIGINS=http://localhost:3000;http://localhost:5173
     volumes:
       # Dev certificate, generated locally - see certs/README.md.
       - ./certs:/https:ro
