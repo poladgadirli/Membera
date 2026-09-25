@@ -37,10 +37,6 @@ export const EYEBROW =
 export const EYEBROW_TAG =
   'rounded-full bg-linear-to-br from-blue-500 to-blue-200 px-2 py-0.5 text-xs font-medium uppercase tracking-widest text-white'
 
-/** The gradient "M" brand mark. Append a size (h-8 w-8, text-sm) at the call site. */
-export const LOGO_MARK =
-  'grid shrink-0 place-items-center rounded-lg bg-linear-to-br from-blue-500 via-blue-400 to-blue-200 font-bold text-white shadow-sm shadow-blue-500/30'
-
 export const ICON_BADGE =
   'grid shrink-0 place-items-center rounded-xl bg-linear-to-br from-blue-500 via-blue-400 to-blue-200 text-white shadow-sm shadow-blue-500/30'
 

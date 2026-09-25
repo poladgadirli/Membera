@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'motion/react'
 import { SPRING_UI, motionSafe, usePrefersReducedMotion } from '@/lib/motion'
-import { BTN_PRIMARY, CARD, LOGO_MARK, PAGE_BG, PAGE_WASH } from '@/lib/ui'
+import { LogoMark } from '@/components/LogoMark'
+import { BTN_PRIMARY, CARD, PAGE_BG, PAGE_WASH } from '@/lib/ui'
 
 type PlaceholderPageProps = {
   title: string
@@ -25,9 +26,7 @@ export default function PlaceholderPage({ title }: PlaceholderPageProps) {
         transition={motionSafe(SPRING_UI, reduced)}
         className={`relative z-10 w-full max-w-md ${CARD} p-8 text-center`}
       >
-        <span aria-hidden="true" className={`mx-auto h-10 w-10 text-base ${LOGO_MARK}`}>
-          M
-        </span>
+        <LogoMark className="mx-auto h-10 w-10" />
         <h1 className="mt-4 text-2xl font-medium tracking-tight text-neutral-900">
           {title}
         </h1>

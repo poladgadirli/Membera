@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { LogoMark } from '@/components/LogoMark'
 
 const links = [
   { label: 'About', to: '/about' },
@@ -11,12 +12,7 @@ export default function Footer() {
     <footer className="border-t border-neutral-200/80 bg-[#f7f9fc]">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 py-10 sm:flex-row sm:px-6 lg:px-8">
         <div className="flex items-center gap-2 text-sm font-semibold text-neutral-900">
-          <span
-            aria-hidden="true"
-            className="grid h-7 w-7 place-items-center rounded-lg bg-linear-to-br from-blue-500 via-blue-400 to-blue-200 text-xs font-bold text-white shadow-sm shadow-blue-500/30"
-          >
-            M
-          </span>
+          <LogoMark className="h-7 w-7" />
           Membera
         </div>
 

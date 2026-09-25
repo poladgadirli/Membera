@@ -1,13 +1,14 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { SettingsIcon } from '@/components/icons'
+import { LogoMark } from '@/components/LogoMark'
 import { useAuth } from '@/hooks/useAuth'
 import { BTN_SECONDARY_SM, PAGE_BG } from '@/lib/ui'
 
 /**
  * Shared chrome for every authenticated page. Matches the landing page: the
  * #f7f9fc canvas with a soft blue wash at the top, a frosted sticky header with
- * the gradient "M" mark, and a centered max-w-6xl column.
+ * the Membera logo mark, and a centered max-w-6xl column.
  */
 export function DashboardShell({ children }: { children: ReactNode }) {
   const { user, logout } = useAuth()
@@ -27,12 +28,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
             to="/dashboard"
             className="flex items-center gap-2 rounded-md focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-500"
           >
-            <span
-              aria-hidden="true"
-              className="grid h-8 w-8 place-items-center rounded-lg bg-linear-to-br from-blue-500 via-blue-400 to-blue-200 text-sm font-bold text-white shadow-sm shadow-blue-500/30"
-            >
-              M
-            </span>
+            <LogoMark className="h-8 w-8" />
             <span className="text-sm font-semibold tracking-tight text-neutral-900">
               Membera
             </span>
