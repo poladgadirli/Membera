@@ -20,4 +20,8 @@ packages/
 /membera-backend/src/Services/Merchant/Membera.Merchant.Api/appsettings.Development.json
 
 **/logs/
+
+# Locally generated dev HTTPS certificates (see membera-backend/certs/README.md)
+/membera-backend/certs/*
+!/membera-backend/certs/README.md
 .claude/skills/apple-design/SKILL.md

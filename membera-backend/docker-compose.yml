@@ -94,11 +94,16 @@ services:
       dockerfile: gateway/Membera.Gateway/Dockerfile
     container_name: membera-gateway
     ports:
-      - "7174:8080"
+      - "7174:8443"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - AUTH_SERVICE_URL=http://auth-api:8080
       - MERCHANT_SERVICE_URL=http://merchant-api:8080
+      - GATEWAY_CERT_PATH=/https/gateway.pfx
+      - GATEWAY_CERT_PASSWORD=${GATEWAY_CERT_PASSWORD}
+    volumes:
+      # Dev certificate, generated locally - see certs/README.md.
+      - ./certs:/https:ro
     depends_on:
       - auth-api
       - merchant-api

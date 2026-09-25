@@ -18,6 +18,20 @@ if (merchantServiceUrl is not null)
     builder.Configuration["ReverseProxy:Clusters:merchant-cluster:Destinations:merchant-destination:Address"] = merchantServiceUrl;
 }
 
+// HTTPS inside Docker. docker-compose.yml mounts certs/ at /https and sets
+// GATEWAY_CERT_PASSWORD, so the gateway serves HTTPS only, on container port 8443
+// (published as https://localhost:7174). Left unset, Kestrel is not touched and
+// the launchSettings.json profiles (ASP.NET Core dev cert) apply as before,
+// preserving normal local (non-Docker) dev.
+const int gatewayHttpsPort = 8443;
+var gatewayCertPassword = Environment.GetEnvironmentVariable("GATEWAY_CERT_PASSWORD");
+if (gatewayCertPassword is not null)
+{
+    var gatewayCertPath = Environment.GetEnvironmentVariable("GATEWAY_CERT_PATH") ?? "/https/gateway.pfx";
+    builder.WebHost.ConfigureKestrel(options =>
+        options.ListenAnyIP(gatewayHttpsPort, listen => listen.UseHttps(gatewayCertPath, gatewayCertPassword)));
+}
+
 builder.Services.AddReverseProxy()
     .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
 
