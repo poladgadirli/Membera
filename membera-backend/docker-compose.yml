@@ -103,6 +103,16 @@ services:
       - auth-api
       - merchant-api
 
+  frontend:
+    build:
+      context: ./../membera-frontend
+      dockerfile: Dockerfile
+    container_name: membera-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - gateway
+
 volumes:
   membera-postgres-data:
   membera-minio-data:
