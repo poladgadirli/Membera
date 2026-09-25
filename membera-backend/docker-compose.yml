@@ -59,6 +59,7 @@ services:
       - JWT_ISSUER=${JWT_ISSUER}
       - JWT_AUDIENCE=${JWT_AUDIENCE}
       - ConnectionStrings__AuthDb=Host=postgres;Port=5432;Database=membera_auth;Username=postgres;Password=${POSTGRES_PASSWORD}
+      - POSTGRES_HOST=postgres
       - RABBITMQ_HOST=rabbitmq
     depends_on:
       - postgres
@@ -78,6 +79,7 @@ services:
       - JWT_ISSUER=${JWT_ISSUER}
       - JWT_AUDIENCE=${JWT_AUDIENCE}
       - ConnectionStrings__MerchantDb=Host=postgres;Port=5432;Database=membera_merchant;Username=postgres;Password=${POSTGRES_PASSWORD}
+      - POSTGRES_HOST=postgres
       - RABBITMQ_HOST=rabbitmq
       - REDIS_HOST=redis:6379
       - MINIO_HOST=minio:9000

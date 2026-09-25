@@ -30,8 +30,9 @@ builder.Host.UseSerilog();
 
 // DbContext qeydiyyatı
 var postgresPassword = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD");
+var postgresHost = Environment.GetEnvironmentVariable("POSTGRES_HOST") ?? "localhost";
 var connectionString = postgresPassword is not null
-    ? $"Host=localhost;Port=5432;Database=membera_auth;Username=postgres;Password={postgresPassword}"
+    ? $"Host={postgresHost};Port=5432;Database=membera_auth;Username=postgres;Password={postgresPassword}"
     : builder.Configuration.GetConnectionString("AuthDb");
 
 builder.Services.AddDbContext<AuthDbContext>(options =>
